@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Custom Title Bar -->
+        <div class="title-bar">
+            <div class="title-bar-drag-region">
+                <div class="title-bar-title">
+                    <span class="title-icon">⏱️</span>
+                    <span>Time Tracker</span>
+                </div>
+            </div>
+            <div class="title-bar-controls">
+                <button class="title-bar-button minimize-button" id="minimize-btn">
+                    <svg width="10" height="10" viewBox="0 0 10 10">
+                        <path d="M0,5 L10,5" stroke="currentColor" stroke-width="1"/>
+                    </svg>
+                </button>
+                <button class="title-bar-button maximize-button" id="maximize-btn">
+                    <svg width="10" height="10" viewBox="0 0 10 10">
+                        <path d="M0,0 L10,0 L10,10 L0,10 Z" fill="none" stroke="currentColor" stroke-width="1"/>
+                    </svg>
+                </button>
+                <button class="title-bar-button close-button" id="close-btn">
+                    <svg width="10" height="10" viewBox="0 0 10 10">
+                        <path d="M0,0 L10,10 M0,10 L10,0" stroke="currentColor" stroke-width="1"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="app-content">
+            <!-- Left Sidebar -->
+            <div class="sidebar">
+                <div class="home_button" id="home">
+                    🏠 Home
+                </div>
+
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search your applications...">
+                </div>
+
+                <!-- Navigation will be dynamically populated here -->
+                <nav class="library-nav">
+                    <!-- Categories and apps will be inserted here by JavaScript -->
+                </nav>
+            </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">            
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Recently Used Section -->
+                <div class="recent-section">
+                    <h3 class="section-header">Recently Used</h3>
+                    <div class="recent-games">
+                        <!-- Recent apps will be populated here -->
+                    </div>
+                </div>
+                
+                <!-- All Applications Section -->
+                <div class="all-apps-section">
+                    <h3 class="section-header">All Applications</h3>
+                    <div class="apps-grid">
+                        <!-- Apps grid will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    
+    <script src="renderer.js"></script>
+</body>
+</html>

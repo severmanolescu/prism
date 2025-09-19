@@ -1,0 +1,28 @@
+{
+  "name": "steam-time-tracker",
+  "version": "1.0.0",
+  "description": "Steam-like application time tracker",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "nodemon --exec electron .",
+    "build": "electron-builder",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "electron",
+    "time-tracker",
+    "steam",
+    "productivity"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "nodemon": "^3.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "active-win": "^8.0.0"
+  }
+}
