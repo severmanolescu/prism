@@ -1,6 +1,6 @@
 {
-  "name": "steam-time-tracker",
-  "version": "1.0.0",
+  "name": "app-time-tracker",
+  "version": "0.1.0",
   "description": "Steam-like application time tracker",
   "main": "main.js",
   "scripts": {
@@ -15,14 +15,14 @@
     "steam",
     "productivity"
   ],
-  "author": "Your Name",
+  "author": "Sever Manolescu",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^27.0.0",
-    "nodemon": "^3.0.0",
+    "electron": "^38.1.2",
+    "nodemon": "^3.1.10",
     "electron-builder": "^24.0.0"
   },
   "dependencies": {
-    "active-win": "^8.0.0"
+    "active-win": "^8.2.1"
   }
 }

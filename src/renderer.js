@@ -2,6 +2,7 @@
 
 let currentCategory = 'All Apps';
 let allAppsCache = []; // Cache all apps for filtering
+let currentSearchTerm = ''; // Track current search term
 
 document.addEventListener('DOMContentLoaded', () => {
     // Window control handlers
@@ -44,8 +45,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle category section clicks
     document.addEventListener('click', (e) => {
+        // Handle category toggle button clicks
+        if (e.target.closest('.category-toggle')) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const toggleButton = e.target.closest('.category-toggle');
+            const categoryName = toggleButton.dataset.category;
+            const navSection = toggleButton.closest('.nav-section');
+            const subitemsContainer = navSection.querySelector('.nav-subitems');
+            
+            // Toggle the collapsed state
+            const isCollapsed = navSection.classList.contains('collapsed');
+            
+            if (isCollapsed) {
+                // Expand
+                navSection.classList.remove('collapsed');
+                subitemsContainer.style.maxHeight = subitemsContainer.scrollHeight + 'px';
+                toggleButton.classList.remove('collapsed');
+            } else {
+                // Collapse
+                navSection.classList.add('collapsed');
+                subitemsContainer.style.maxHeight = '0';
+                toggleButton.classList.add('collapsed');
+            }
+            
+            return;
+        }
+        
+        // Handle category header clicks (but not the toggle button)
         const categoryItem = e.target.closest('.nav-item.category');
-        if (categoryItem) {
+        if (categoryItem && !e.target.closest('.category-toggle')) {
             e.preventDefault();
             e.stopPropagation();
             
@@ -78,7 +108,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
     })
     
-    // Handle app card clicks and hover effects
+    // Handle search input
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.trim().toLowerCase();
+            filterNavigation(searchTerm);
+        });
+        
+        // Handle search clear (Escape key)
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                e.target.value = '';
+                filterNavigation('');
+            }
+        });
+    }
     document.addEventListener('click', (e) => {
         const appCard = e.target.closest('.app-item, .recent-item');
         if (appCard && !e.target.closest('.nav-item')) { // Avoid conflicts with nav items
@@ -171,18 +216,26 @@ function createNavSection(categoryName, apps) {
     // Get category icon
     const categoryIcon = getCategoryIcon(categoryName);
     
-    // Create category header
+    // Create category header with expand/collapse button
     const categoryHeader = document.createElement('div');
     categoryHeader.className = 'nav-item category';
     categoryHeader.innerHTML = `
-        <span class="icon">${categoryIcon}</span>
-        <span>${categoryName}</span>
-        <span class="category-count">(${apps.length})</span>
+        <div class="category-main">
+            <span class="icon">${categoryIcon}</span>
+            <span>${categoryName}</span>
+            <span class="category-count">(${apps.length})</span>
+        </div>
+        <button class="category-toggle" data-category="${categoryName}">
+            <svg width="12" height="12" viewBox="0 0 12 12">
+                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
     `;
     
     // Create subitems container
     const subitemsContainer = document.createElement('div');
     subitemsContainer.className = 'nav-subitems';
+    subitemsContainer.dataset.category = categoryName;
     
     // Add each app as a nav item
     apps.forEach(app => {
@@ -612,7 +665,63 @@ function updateMaximizeButton(isMaximized) {
     }
 }
 
-// Filter apps by library (placeholder)
-function filterAppsByLibrary(libraryName) {
-    console.log(`Filtering by library: ${libraryName}`);
+// Filter navigation based on search term
+function filterNavigation(searchTerm) {
+    const navSections = document.querySelectorAll('.nav-section');
+    
+    if (searchTerm === '') {
+        // Show all items when search is empty and restore original collapsed states
+        navSections.forEach(section => {
+            section.style.display = 'block';
+            const navItems = section.querySelectorAll('.nav-subitems .nav-item');
+            navItems.forEach(item => {
+                item.style.display = 'flex';
+            });
+            
+            // Don't auto-expand when clearing search - keep original collapsed state
+            // Just ensure subitems container is properly sized
+            const subitems = section.querySelector('.nav-subitems');
+            const toggleButton = section.querySelector('.category-toggle');
+            
+            if (section.classList.contains('collapsed')) {
+                // Keep it collapsed
+                subitems.style.maxHeight = '0';
+            } else {
+                // Keep it expanded
+                subitems.style.maxHeight = subitems.scrollHeight + 'px';
+            }
+        });
+        return;
+    }
+    
+    navSections.forEach(section => {
+        const subitems = section.querySelector('.nav-subitems');
+        const navItems = section.querySelectorAll('.nav-subitems .nav-item');
+        let hasMatchingApps = false;
+        
+        // Check each app in this category
+        navItems.forEach(navItem => {
+            const appName = navItem.querySelector('span:last-child').textContent.toLowerCase();
+            const matches = appName.includes(searchTerm);
+            
+            if (matches) {
+                hasMatchingApps = true;
+                navItem.style.display = 'flex';
+            } else {
+                navItem.style.display = 'none';
+            }
+        });
+        
+        // Show/hide entire category based on whether it has matches
+        if (hasMatchingApps) {
+            section.style.display = 'block';
+            // Auto-expand categories with matches during search
+            section.classList.remove('collapsed');
+            subitems.style.maxHeight = subitems.scrollHeight + 'px';
+            const toggleButton = section.querySelector('.category-toggle');
+            if (toggleButton) toggleButton.classList.remove('collapsed');
+        } else {
+            section.style.display = 'none';
+        }
+    });
 }
