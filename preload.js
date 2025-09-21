@@ -22,5 +22,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onAppIconUpdated: (callback) => ipcRenderer.on('app-icon-updated', callback),
   
   // Debug function
-  testIconExtraction: (execPath, appName) => ipcRenderer.invoke('test-icon-extraction', execPath, appName)
+  testIconExtraction: (execPath, appName) => ipcRenderer.invoke('test-icon-extraction', execPath, appName),
+
+  addToFavorites: (appId) => ipcRenderer.invoke('add-to-favorites', appId),
+  removeFromFavorites: (appId) => ipcRenderer.invoke('remove-from-favorites', appId),
+  getFavorites: () => ipcRenderer.invoke('get-favorites'),
+
+  launchApp: (appId) => ipcRenderer.invoke('launch-app', appId)
 });
+
