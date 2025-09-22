@@ -38,9 +38,23 @@
       <div class="app-content">
         <!-- Left Sidebar -->
         <div class="sidebar">
-          <div class="home_button" id="home">
-            🏠 Home
+          <div class="sidebar-top">
+              <div class="home_button" id="home">
+                  Home
+              </div>
+              
+              <div class="view-controls">
+                  <button class="view-toggle-btn active" data-view="categories" title="Categories View">
+                      <svg width="16" height="16" viewBox="0 0 16 16">
+                          <rect x="1" y="1" width="6" height="6" fill="currentColor"/>
+                          <rect x="9" y="1" width="6" height="6" fill="currentColor"/>
+                          <rect x="1" y="9" width="6" height="6" fill="currentColor"/>
+                          <rect x="9" y="9" width="6" height="6" fill="currentColor"/>
+                      </svg>
+                  </button>
+              </div>
           </div>
+        
 
           <div class="search-container">
             <input type="text" class="search-input" placeholder="Search your applications...">
@@ -106,7 +120,16 @@
         </div>
     </div>
 
-    <script src="renderer.js">
-    </script>
+    <script src="renderer.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/data-manager.js"></script>
+    <script src="../js/ui-components.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/display.js"></script>
+    <script src="../js/context-menu.js"></script>
+    <script src="../js/collections-view.js"></script>
+    <script src="../js/window-controls.js"></script>
+    <script src="../js/real-time-updates.js"></script>
+     <script src="../js/details.js"></script>
   </body>
 </html>
