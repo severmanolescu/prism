@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, createCollection } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   // Window controls
@@ -28,6 +28,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   removeFromFavorites: (appId) => ipcRenderer.invoke('remove-from-favorites', appId),
   getFavorites: () => ipcRenderer.invoke('get-favorites'),
 
-  launchApp: (appId) => ipcRenderer.invoke('launch-app', appId)
+  launchApp: (appId) => ipcRenderer.invoke('launch-app', appId),
+
+  createCollection: (collectionData) => ipcRenderer.invoke('create-collection', collectionData),
+  getCategories: () => ipcRenderer.invoke('get-categories'),
 });
 
