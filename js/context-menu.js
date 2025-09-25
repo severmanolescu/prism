@@ -62,7 +62,10 @@ class ContextMenu {
                 <span class="context-menu-icon">📊</span>
                 <span>View Details</span>
             </div>
-            <div class="context-menu-separator"></div>
+            <div class="context-menu-item" data-action="favorite">
+                <span class="context-menu-icon">⭐</span>
+                <span>Add to Favorites</span>
+            </div>
             <div class="context-menu-item submenu-item" data-action="add-to">
                 <span class="context-menu-icon">➕</span>
                 <span>Add to</span>
