@@ -234,33 +234,69 @@ ipcMain.handle('get-favorites', async (event) => {
     }
 });
 
-// Create new collection
-ipcMain.handle('create-collection', (event, collectionData) => {
-  const result = dataStorage.addCategory(collectionData.name, collectionData.color);
-  return result;
-});
 
-ipcMain.handle('delete-collection', (event, categoryId) => {
+// Edit collection
+ipcMain.handle('edit-collection', (event, categoryId, newData) => {
   const category = dataStorage.categoriesData.find(cat => cat.id === categoryId);
   
-  if (!category || category.isDefault) {
-    return { success: false, error: 'Cannot delete default category' };
+  if (!category) {
+    return { success: false, error: 'Category not found' };
   }
   
-  // Move all apps in this category to Uncategorized
+  const oldName = category.name;
+  
+  // Update category data
+  category.name = newData.name;
+  category.color = newData.color;
+  
+  // Update all apps that use the old category name
   Object.keys(dataStorage.appData).forEach(appId => {
-    if (dataStorage.appData[appId].category === category.name) {
-      dataStorage.appData[appId].category = 'Uncategorized';
+    if (dataStorage.appData[appId].category === oldName) {
+      dataStorage.appData[appId].category = newData.name;
     }
   });
-  
-  // Remove category
-  dataStorage.categoriesData = dataStorage.categoriesData.filter(cat => cat.id !== categoryId);
   
   dataStorage.saveAppData();
   dataStorage.saveCategoriesData();
   
   return { success: true };
+});
+
+// Delete collection
+ipcMain.handle('delete-collection', (event, categoryName) => {
+  const categoryIndex = dataStorage.categoriesData.findIndex(cat => cat.name === categoryName);
+  
+  if (categoryIndex === -1) {
+    return { success: false, error: 'Category not found' };
+  }
+  
+  const category = dataStorage.categoriesData[categoryIndex];
+  
+  if (category.isDefault) {
+    return { success: false, error: 'Cannot delete default category' };
+  }
+  
+  // Move all apps in this category to Uncategorized
+  Object.keys(dataStorage.appData).forEach(appId => {
+    if (dataStorage.appData[appId].category === categoryName) {
+      dataStorage.appData[appId].category = 'Uncategorized';
+    }
+  });
+  
+  // Remove category
+  dataStorage.categoriesData.splice(categoryIndex, 1);
+  
+  dataStorage.saveAppData();
+  dataStorage.saveCategoriesData();
+  
+  return { success: true };
+});
+
+// Create new collection
+ipcMain.handle('create-collection', (event, collectionData) => {
+  console.log(collectionData.color)
+  const result = dataStorage.addCategory(collectionData.name, collectionData.color);
+  return result;
 });
 
 ipcMain.handle('move-app-to-collection', (event, appId, newCategory) => {

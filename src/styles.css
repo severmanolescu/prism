@@ -270,6 +270,7 @@ body {
   flex: 1;
   overflow-y: auto;
   background: #1b2838;
+  scroll-behavior: smooth;
   padding: 0;
 }
 
@@ -385,6 +386,7 @@ body {
 .apps-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  min-height: 200px;
   gap: 10px;
 }
 
@@ -1345,4 +1347,65 @@ v-item.category {
     opacity: 0.8;
     font-weight: 500;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.submenu-item {
+    position: relative;
+}
+
+.submenu-arrow {
+    margin-left: auto;
+    font-size: 10px;
+    opacity: 0.6;
+}
+
+.submenu {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    background: linear-gradient(to bottom, #3c4043 0%, #2f3336 100%);
+    border: 1px solid #0e1116;
+    border-radius: 3px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    min-width: 180px;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none;
+    z-index: 10002;
+}
+
+.submenu.show {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: all;
+}
+
+.submenu-item-option {
+    padding: 8px 16px;
+    color: #acb2b8;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.submenu-item-option:hover {
+    background: linear-gradient(90deg, rgba(103, 193, 245, 0.15) 0%, rgba(103, 193, 245, 0.05) 100%);
+    color: #66c0f4;
+}
+
+.category-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.submenu-disabled {
+    padding: 8px 16px;
+    color: #5a5a5a;
+    font-style: italic;
+    font-size: 11px;
 }

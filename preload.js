@@ -32,5 +32,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   createCollection: (collectionData) => ipcRenderer.invoke('create-collection', collectionData),
   getCategories: () => ipcRenderer.invoke('get-categories'),
+  
+  editCollection: (categoryId, newData) => ipcRenderer.invoke('edit-collection', categoryId, newData),
+  deleteCollection: (categoryName) => ipcRenderer.invoke('delete-collection', categoryName),
+
+  moveAppToCollection: (appId, category) => ipcRenderer.invoke('move-app-to-collection', appId, category),
 });
 

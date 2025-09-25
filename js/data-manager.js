@@ -30,7 +30,14 @@ async function loadAppData() {
 }
 
 // Load apps by category
-async function loadAppsByCategory(category) {
+async function loadAppsByCategory(category, preserveScroll = false) {
+    let scrollTop = 0;
+    
+    if (preserveScroll) {
+        const contentArea = document.querySelector('.content-area');
+        scrollTop = contentArea ? contentArea.scrollTop : 0;
+    }
+
     try {
         console.log('Loading apps by category:', category);
         
@@ -57,6 +64,15 @@ async function loadAppsByCategory(category) {
         console.log('Apps in this category:', filteredApps.map(app => app.name));
         
         await displayAllApps(filteredApps);
+
+        if (preserveScroll) {
+            setTimeout(() => {
+                const contentArea = document.querySelector('.content-area');
+                if (contentArea) {
+                    contentArea.scrollTop = scrollTop;
+                }
+            }, 50);
+        }
         
     } catch (error) {
         console.error('Error loading apps by category:', error);

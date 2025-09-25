@@ -8,6 +8,9 @@ class ContextMenu {
 
     init() {
         // Prevent default context menu on app items AND nav items
+        this.updateContextMenuHTML();
+        this.setupSubmenuHandlers();
+
         document.addEventListener('contextmenu', (e) => {
             const appItem = e.target.closest('.app-item, .recent-item');
             const navItem = e.target.closest('.nav-subitems .nav-item');
@@ -43,6 +46,205 @@ class ContextMenu {
                 this.hide();
             }
         });
+    }
+
+    updateContextMenuHTML() {
+        // Update your existing context menu HTML to include submenus
+        const existingMenu = document.getElementById('contextMenu');
+        if (!existingMenu) return;
+        
+        existingMenu.innerHTML = `
+            <div class="context-menu-item" data-action="open">
+                <span class="context-menu-icon">🚀</span>
+                <span>Launch Application</span>
+            </div>
+            <div class="context-menu-item" data-action="details">
+                <span class="context-menu-icon">📊</span>
+                <span>View Details</span>
+            </div>
+            <div class="context-menu-separator"></div>
+            <div class="context-menu-item submenu-item" data-action="add-to">
+                <span class="context-menu-icon">➕</span>
+                <span>Add to</span>
+                <span class="submenu-arrow">▶</span>
+                <div class="submenu" id="addToSubmenu"></div>
+            </div>
+            <div class="context-menu-item submenu-item" data-action="remove-from">
+                <span class="context-menu-icon">➖</span>
+                <span>Remove from</span>
+                <span class="submenu-arrow">▶</span>
+                <div class="submenu" id="removeFromSubmenu"></div>
+            </div>
+            <div class="context-menu-separator"></div>
+            <div class="context-menu-item" data-action="properties">
+                <span class="context-menu-icon">⚙️</span>
+                <span>Properties</span>
+            </div>
+            <div class="context-menu-item" data-action="hide">
+                <span class="context-menu-icon">👁️</span>
+                <span>Hide from Library</span>
+            </div>
+        `;
+    }
+
+    setupSubmenuHandlers() {
+        const submenuItems = this.menu.querySelectorAll('.submenu-item');
+        
+        submenuItems.forEach(item => {
+            const submenu = item.querySelector('.submenu');
+            
+            item.addEventListener('mouseenter', () => {
+                this.showSubmenu(item, submenu);
+            });
+            
+            item.addEventListener('mouseleave', (e) => {
+                // Hide submenu if mouse is not moving to submenu
+                setTimeout(() => {
+                    if (!submenu.matches(':hover') && !item.matches(':hover')) {
+                        this.hideSubmenu(submenu);
+                    }
+                }, 100);
+            });
+            
+            submenu.addEventListener('mouseleave', () => {
+                this.hideSubmenu(submenu);
+            });
+        });
+    }
+
+
+    async showSubmenu(parentItem, submenu) {
+        const action = parentItem.dataset.action;
+        
+        if (action === 'add-to') {
+            await this.populateAddToSubmenu(submenu);
+        } else if (action === 'remove-from') {
+            await this.populateRemoveFromSubmenu(submenu);
+        }
+        
+        submenu.classList.add('show');
+        
+        // Position submenu
+        const parentRect = parentItem.getBoundingClientRect();
+        const submenuRect = submenu.getBoundingClientRect();
+        const windowWidth = window.innerWidth;
+        
+        // Position to the right of parent item
+        let left = parentRect.width - 5;
+        
+        // If submenu would go off screen, position to the left
+        if (parentRect.right + submenuRect.width > windowWidth) {
+            left = -submenuRect.width + 5;
+        }
+        
+        submenu.style.left = left + 'px';
+        submenu.style.top = '0px';
+    }
+
+    hideSubmenu(submenu) {
+        submenu.classList.remove('show');
+    }
+
+    async populateAddToSubmenu(submenu) {
+        const categories = await window.electronAPI.getCategories();
+        const currentAppCategory = this.getCurrentAppCategory();
+        
+        submenu.innerHTML = categories
+            .filter(cat => cat.name !== currentAppCategory) // Don't show current category
+            .map(category => `
+                <div class="submenu-item-option" data-category="${category.name}">
+                    <span class="category-color" style="background-color: ${category.color || '#4a90e2'}"></span>
+                    <span>${category.name}</span>
+                </div>
+            `).join('');
+        
+        // Add click handlers
+        submenu.querySelectorAll('.submenu-item-option').forEach(option => {
+            option.addEventListener('click', () => {
+                this.moveAppToCategory(option.dataset.category);
+                this.hide();
+            });
+        });
+    }
+
+    async populateRemoveFromSubmenu(submenu) {
+        const currentAppCategory = this.getCurrentAppCategory();
+        
+        if (currentAppCategory === 'Uncategorized') {
+            submenu.innerHTML = '<div class="submenu-disabled">Already in Uncategorized</div>';
+            return;
+        }
+        
+        submenu.innerHTML = `
+            <div class="submenu-item-option" data-category="Uncategorized">
+                <span class="category-color" style="background-color: #4a90e2"></span>
+                <span>Remove from ${currentAppCategory}</span>
+            </div>
+        `;
+        
+        submenu.querySelector('.submenu-item-option').addEventListener('click', () => {
+            this.moveAppToCategory('Uncategorized');
+            this.hide();
+        });
+    }
+
+    getCurrentAppCategory() {
+        if (!this.currentApp || !this.currentApp.id) return 'Uncategorized';
+        
+        // Find the app in the cache to get its current category
+        const app = allAppsCache.find(app => app.id === this.currentApp.id);
+        return app ? app.category : 'Uncategorized';
+    }
+
+    async moveAppToCategory(newCategory) {
+        if (!this.currentApp) return;
+        
+        try {
+            // Use the correct property name - it should be this.currentApp.id, but let's add debugging
+            console.log('Current app object:', this.currentApp);
+            
+            const appId = this.currentApp.id;
+            if (!appId) {
+                console.error('App ID is missing from currentApp object');
+                return;
+            }
+            
+            const result = await window.electronAPI.moveAppToCollection(appId, newCategory);
+            if (result.success) {
+                // Update the app in the cache
+                const app = allAppsCache.find(app => app.id === appId);
+                if (app) {
+                    app.category = newCategory;
+                }
+                
+                // Update favorites cache as well
+                favoritesCache = await window.electronAPI.getFavorites();
+                
+                // Refresh navigation
+                createCategoryNavigation(allAppsCache);
+                
+                // Refresh the current view based on what's currently displayed
+                if (currentCategory !== 'All Apps') {
+                    // If we're viewing a specific category, reload that category
+                    if (currentCategory === 'Favorites') {
+                        await loadFavoriteApps();
+                    } else {
+                        await loadAppsByCategory(currentCategory);
+                    }
+                } else {
+                    // If we're viewing all apps, refresh the entire display
+                    displayAllApps(allAppsCache);
+                }
+                
+                // If we're in collections view, refresh that too
+                const categoryOverview = document.getElementById('categoryOverview');
+                if (categoryOverview) {
+                    showCategoryOverview();
+                }
+            }
+        } catch (error) {
+            console.error('Error moving app to category:', error);
+        }
     }
 
     show(event, element) {

@@ -166,4 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(displayCurrentTime, 1000);
 
     window.contextMenu = new ContextMenu();
+
+    window.collectionContextMenu = new CollectionContextMenu();
 });

@@ -12,7 +12,7 @@ function setupRealTimeUpdates() {
     
     // Refresh data periodically
     setInterval(() => {
-        loadAppsByCategory(currentCategory);
+        loadAppsByCategory(currentCategory, true);
         loadRecentApps();
     }, 30000); // Every 30 seconds
 }
