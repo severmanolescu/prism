@@ -1,6 +1,6 @@
 
 // Display all apps
-function displayAllApps(apps) {
+async function displayAllApps(apps) {
     console.log('Displaying all apps:', apps);
     const appsContainer = document.querySelector('.apps-grid');
     const sectionHeader = document.querySelector('.all-apps-section .section-header');
@@ -28,40 +28,44 @@ function displayAllApps(apps) {
         // Change the apps-grid to not use CSS grid when showing categories
         appsContainer.classList.add('categorized-view');
         
-        const appsByCategory = groupAppsByCategory(apps);
+        const appsByCategory = await groupAppsByCategory(apps);
+
+        console.log("Apps by category: ", appsByCategory);
         
         // Display each category with its apps
         Object.keys(appsByCategory).sort().forEach(categoryName => {
             const categoryApps = appsByCategory[categoryName];
-            
-            // Create category section wrapper
-            const categorySection = document.createElement('div');
-            categorySection.className = 'category-section';
-            
-            // Create category header
-            const categoryHeader = document.createElement('div');
-            categoryHeader.className = 'category-header';
-            categoryHeader.innerHTML = `
-                <div class="category-title">
-                    <span class="category-icon">${getCategoryIcon(categoryName)}</span>
-                    <h3>${categoryName}</h3>
-                    <span class="category-app-count">${categoryApps.length} apps</span>
-                </div>
-            `;
-            categorySection.appendChild(categoryHeader);
-            
-            // Create grid for this category's apps
-            const categoryGrid = document.createElement('div');
-            categoryGrid.className = 'category-apps-grid';
-            
-            categoryApps.forEach((app, index) => {
-                console.log(`Creating app element ${index + 1} for ${categoryName}:`, app.name);
-                const appItem = createAppElement(app);
-                categoryGrid.appendChild(appItem);
-            });
-            
-            categorySection.appendChild(categoryGrid);
-            appsContainer.appendChild(categorySection);
+
+            if(categoryApps.apps.length != 0){
+                // Create category section wrapper
+                const categorySection = document.createElement('div');
+                categorySection.className = 'category-section';
+                
+                // Create category header
+                const categoryHeader = document.createElement('div');
+                categoryHeader.className = 'category-header';
+                categoryHeader.innerHTML = `
+                    <div class="category-title">
+                        <span class="category-icon">${getCategoryIcon(categoryName)}</span>
+                        <h3>${categoryName}</h3>
+                        <span class="category-app-count">${categoryApps.apps.length} apps</span>
+                    </div>
+                `;
+                categorySection.appendChild(categoryHeader);
+                
+                // Create grid for this category's apps
+                const categoryGrid = document.createElement('div');
+                categoryGrid.className = 'category-apps-grid';
+                
+                categoryApps.apps.forEach((app, index) => {
+                    console.log(`Creating app element ${index + 1} for ${categoryName}:`, app.name);
+                    const appItem = createAppElement(app);
+                    categoryGrid.appendChild(appItem);
+                });
+                
+                categorySection.appendChild(categoryGrid);
+                appsContainer.appendChild(categorySection);
+            }            
         });
     } else {
         // For specific categories, remove categorized view class

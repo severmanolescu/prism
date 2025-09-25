@@ -55,16 +55,6 @@ function getCategoryIcon(categoryName) {
 
 function getCategoryColor(category) {
     switch (category) {
-        case 'Development':
-            return 'linear-gradient(135deg, #4a90e2 0%, #357abd 80%)';
-        case 'Browsers':
-            return 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 80%)';
-        case 'Games':
-            return 'linear-gradient(135deg, #a55eea 0%, #8b46ff 80%)';
-        case 'Creative':
-            return 'linear-gradient(135deg, #26de81 0%, #20bf6b 80%)';
-        case 'Communication':
-            return 'linear-gradient(135deg, #fd79a8 0%, #e84393 80%)';
         default:
             return 'linear-gradient(135deg, #092442 0%, #07417a 80%)';
     }
@@ -81,4 +71,16 @@ function displayCurrentTime() {
     const now = new Date();
     const timeString = now.toLocaleTimeString();
     document.title = `Steam Time Tracker - ${timeString}`;
+}
+
+// Helper function to adjust color brightness
+function adjustBrightness(hex, percent) {
+    const num = parseInt(hex.replace("#", ""), 16),
+          amt = Math.round(2.55 * percent),
+          R = (num >> 16) + amt,
+          G = (num >> 8 & 0x00FF) + amt,
+          B = (num & 0x0000FF) + amt;
+    return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+        (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+        (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
 }

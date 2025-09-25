@@ -24,35 +24,33 @@ function toggleView(viewType) {
 }
 
 
-function showCategoryOverview() {
-    // Remove existing category overview if it exists
+async function showCategoryOverview() {
     hideCategoryOverview();
     
-    // Create category overview container
     const categoryOverview = document.createElement('div');
     categoryOverview.className = 'category-overview';
     categoryOverview.id = 'categoryOverview';
     
-    // Add header
     const header = document.createElement('div');
     header.className = 'collections-header';
-    header.innerHTML = `
-        <h2>YOUR COLLECTIONS</h2>
-    `;
+    header.innerHTML = `<h2>YOUR COLLECTIONS</h2>`;
     categoryOverview.appendChild(header);
     
-    // Group apps by category
-    const appsByCategory = groupAppsByCategory(allAppsCache);
+    // Group apps by categories from categories.json
+    const appsByCategory = await groupAppsByCategory(allAppsCache);
     
     // Add favorites if they exist
     if (favoritesCache.length > 0) {
         const favoriteApps = allAppsCache.filter(app => favoritesCache.includes(app.id));
         if (favoriteApps.length > 0) {
-            appsByCategory['Favorites'] = favoriteApps;
+            appsByCategory['Favorites'] = {
+                apps: favoriteApps,
+                color: '#ffd700', // Gold color for favorites
+                isDefault: false
+            };
         }
     }
     
-    // Create category grid
     const categoryGrid = document.createElement('div');
     categoryGrid.className = 'collections-grid';
     
@@ -65,22 +63,29 @@ function showCategoryOverview() {
             <div class="create-text">CREATE A NEW<br>COLLECTION</div>
         </div>
     `;
+    createCard.addEventListener('click', () => {
+        showCreateCollectionModal();
+    });
     categoryGrid.appendChild(createCard);
     
-    // Create a category card for each category
-    Object.keys(appsByCategory).sort((a, b) => {
+    // Sort categories: Favorites first, then Uncategorized, then others alphabetically
+    const sortedCategories = Object.keys(appsByCategory).sort((a, b) => {
         if (a === 'Favorites') return -1;
         if (b === 'Favorites') return 1;
+        if (a === 'Uncategorized') return -1;
+        if (b === 'Uncategorized') return 1;
         return a.localeCompare(b);
-    }).forEach(categoryName => {
-        const apps = appsByCategory[categoryName];
-        const categoryCard = createCategoryCard(categoryName, apps);
+    });
+    
+    // Create cards for all categories (including empty ones)
+    sortedCategories.forEach(categoryName => {
+        const categoryData = appsByCategory[categoryName];
+        const categoryCard = createCategoryCard(categoryName, categoryData.apps, categoryData.color);
         categoryGrid.appendChild(categoryCard);
     });
     
     categoryOverview.appendChild(categoryGrid);
     
-    // Insert after main content
     const mainContent = document.querySelector('.main-content');
     mainContent.appendChild(categoryOverview);
 }

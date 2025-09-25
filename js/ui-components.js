@@ -81,6 +81,8 @@ function createNavSection(categoryName, apps, isFavorites = false) {
     subitemsContainer.className = 'nav-subitems';
     subitemsContainer.dataset.category = categoryName;
     
+    console.log("Creating nav section: ", apps)
+
     // Add each app as a nav item
     apps.forEach(app => {
         const navItem = document.createElement('div');
@@ -108,17 +110,23 @@ function createNavSection(categoryName, apps, isFavorites = false) {
 }
 
 
-function createCategoryCard(categoryName, apps) {
+function createCategoryCard(categoryName, apps, color = '#4a90e2') {
     const card = document.createElement('div');
     card.className = 'collection-card';
     card.dataset.category = categoryName;
     
-    const bgColor = getCategoryColor(categoryName);
+    // Use the category's custom color as background gradient
+    const bgColor = `linear-gradient(135deg, ${color} 0%, ${adjustBrightness(color, -20)} 80%)`;
     
     // Determine grid layout based on number of apps
     let gridClass, maxApps, totalSlots;
     
-    if (apps.length === 1) {
+    if (apps.length === 0) {
+        // Handle empty categories
+        gridClass = 'grid-empty';
+        maxApps = 0;
+        totalSlots = 1;
+    } else if (apps.length === 1) {
         gridClass = 'grid-1x1';
         maxApps = 1;
         totalSlots = 1;
@@ -140,21 +148,25 @@ function createCategoryCard(categoryName, apps) {
         totalSlots = 9;
     }
     
-    // Get sample apps
-    const sampleApps = apps.slice(0, maxApps);
+    let backgroundIcons = [];
     
-    // Fill remaining slots with empty divs if needed
-    const backgroundIcons = [];
-    for (let i = 0; i < totalSlots; i++) {
-        if (i < sampleApps.length) {
-            const app = sampleApps[i];
-            if (app.iconPath) {
-                backgroundIcons.push(`<img src="app-icon://${app.iconPath.replace('icons/', '')}" alt="${app.name}">`);
+    if (apps.length === 0) {
+        // Show empty state
+        backgroundIcons.push('<div class="empty-category">Empty Collection</div>');
+    } else {
+        const sampleApps = apps.slice(0, maxApps);
+        
+        for (let i = 0; i < totalSlots; i++) {
+            if (i < sampleApps.length) {
+                const app = sampleApps[i];
+                if (app.iconPath) {
+                    backgroundIcons.push(`<img src="app-icon://${app.iconPath.replace('icons/', '')}" alt="${app.name}">`);
+                } else {
+                    backgroundIcons.push(`<span class="bg-icon">${getAppIcon(app.name, app.category)}</span>`);
+                }
             } else {
-                backgroundIcons.push(`<span class="bg-icon">${getAppIcon(app.name, app.category)}</span>`);
+                backgroundIcons.push(`<div class="bg-empty"></div>`);
             }
-        } else {
-            backgroundIcons.push(`<div class="bg-empty"></div>`);
         }
     }
     
@@ -168,7 +180,7 @@ function createCategoryCard(categoryName, apps) {
         </div>
     `;
     
-    // Add click handler (same as before)
+    // Add click handler
     card.addEventListener('click', () => {
         currentCategory = categoryName;
         if (categoryName === 'Favorites') {

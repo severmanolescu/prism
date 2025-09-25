@@ -38,6 +38,11 @@ ipcMain.handle('window-is-maximized', () => {
   return mainWindow ? mainWindow.isMaximized() : false;
 });
 
+ipcMain.handle('get-categories', () => {
+  const categories = dataStorage.categoriesData;
+  return categories || []; // Return empty array if undefined
+});
+
 // Add a simple test IPC handler to debug icon extraction
 ipcMain.handle('test-icon-extraction', async (event, execPath, appName) => {
   const result = await extractAppIcon(execPath, appName);
@@ -227,6 +232,44 @@ ipcMain.handle('get-favorites', async (event) => {
         console.error('Error getting favorites:', error);
         return [];
     }
+});
+
+// Create new collection
+ipcMain.handle('create-collection', (event, collectionData) => {
+  const result = dataStorage.addCategory(collectionData.name, collectionData.icon);
+  return result;
+});
+
+ipcMain.handle('delete-collection', (event, categoryId) => {
+  const category = dataStorage.categoriesData.find(cat => cat.id === categoryId);
+  
+  if (!category || category.isDefault) {
+    return { success: false, error: 'Cannot delete default category' };
+  }
+  
+  // Move all apps in this category to Uncategorized
+  Object.keys(dataStorage.appData).forEach(appId => {
+    if (dataStorage.appData[appId].category === category.name) {
+      dataStorage.appData[appId].category = 'Uncategorized';
+    }
+  });
+  
+  // Remove category
+  dataStorage.categoriesData = dataStorage.categoriesData.filter(cat => cat.id !== categoryId);
+  
+  dataStorage.saveAppData();
+  dataStorage.saveCategoriesData();
+  
+  return { success: true };
+});
+
+ipcMain.handle('move-app-to-collection', (event, appId, newCategory) => {
+  if (dataStorage.appData[appId]) {
+    dataStorage.appData[appId].category = dataStorage.validateCategory(newCategory);
+    dataStorage.saveAppData();
+    return { success: true };
+  }
+  return { success: false, error: 'App not found' };
 });
 
 module.exports = { initializeIpcHandlers };

@@ -134,7 +134,7 @@ class ContextMenu {
             }
             
             // Refresh navigation to show/hide favorites section
-            createCategoryNavigation(allAppsCache);
+            await createCategoryNavigation(allAppsCache);
             
         } catch (error) {
             console.error('Error toggling favorite:', error);

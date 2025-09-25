@@ -18,10 +18,10 @@ async function loadAppData() {
         // Cache all apps for filtering
         allAppsCache = allApps;
         
-        displayAllApps(allApps);
+        await displayAllApps(allApps);
         
         // Create navigation based on categories
-        createCategoryNavigation(allApps);
+        await createCategoryNavigation(allApps);
         
         console.log('App data loaded successfully');
     } catch (error) {
@@ -37,7 +37,7 @@ async function loadAppsByCategory(category) {
         // If "All Apps" is selected, show all cached apps
         if (category === 'All Apps') {
             console.log('Showing all apps from cache:', allAppsCache.length);
-            displayAllApps(allAppsCache);
+            await displayAllApps(allAppsCache);
             return;
         }
         
@@ -56,7 +56,7 @@ async function loadAppsByCategory(category) {
         console.log('Filtered apps for category "' + category + '":', filteredApps.length);
         console.log('Apps in this category:', filteredApps.map(app => app.name));
         
-        displayAllApps(filteredApps);
+        await displayAllApps(filteredApps);
         
     } catch (error) {
         console.error('Error loading apps by category:', error);
@@ -77,7 +77,7 @@ async function loadFavoriteApps() {
         console.log('Filtered favorite apps:', favoriteApps.length);
         console.log('Favorite apps:', favoriteApps.map(app => app.name));
         
-        displayAllApps(favoriteApps);
+        await displayAllApps(favoriteApps);
         
     } catch (error) {
         console.error('Error loading favorite apps:', error);
@@ -95,14 +95,51 @@ async function loadRecentApps() {
 }
 
 // Group apps by category helper function
-function groupAppsByCategory(apps) {
-    const appsByCategory = {};
-    apps.forEach(app => {
-        const category = app.category || 'Uncategorized';
-        if (!appsByCategory[category]) {
-            appsByCategory[category] = [];
+async function groupAppsByCategory(apps) {
+    try {
+        const categories = await window.electronAPI.getCategories();
+        console.log('Categories received in renderer:', categories);
+        
+        if (!categories || !Array.isArray(categories)) {
+            console.error('Categories data is invalid:', categories);
+            return { 'Uncategorized': { apps: apps, color: '#4a90e2', isDefault: true } };
         }
-        appsByCategory[category].push(app);
-    });
-    return appsByCategory;
+        
+        const appsByCategory = {};
+        
+        // Initialize all categories from categories.json (including empty ones)
+        categories.forEach(category => {
+            appsByCategory[category.name] = {
+                apps: [],
+                color: category.color || '#4a90e2',
+                isDefault: category.isDefault || false
+            };
+        });
+
+        // Ensure Uncategorized always exists
+        if (!appsByCategory['Uncategorized']) {
+            appsByCategory['Uncategorized'] = {
+                apps: [],
+                color: '#4a90e2',
+                isDefault: true
+            };
+        }
+        
+        // Distribute apps into categories
+        apps.forEach(app => {
+            const categoryName = app.category || 'Uncategorized';
+            
+            // If app's category doesn't exist in categories.json, put it in Uncategorized
+            if (appsByCategory[categoryName]) {
+                appsByCategory[categoryName].apps.push(app);
+            } else {
+                appsByCategory['Uncategorized'].apps.push(app);
+            }
+        });
+        
+        return appsByCategory;
+    } catch (error) {
+        console.error('Error in groupAppsByCategory:', error);
+        return { 'Uncategorized': { apps: apps, color: '#4a90e2', isDefault: true } };
+    }
 }

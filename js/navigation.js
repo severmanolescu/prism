@@ -1,6 +1,6 @@
 
 // Create navigation sections based on app categories
-function createCategoryNavigation(apps) {
+async function createCategoryNavigation(apps) {
     console.log('Creating category navigation for apps:', apps);
     
     const libraryNav = document.querySelector('.library-nav');
@@ -22,14 +22,16 @@ function createCategoryNavigation(apps) {
     }
     
     // Group apps by category using helper function
-    const appsByCategory = groupAppsByCategory(apps);
+    const appsByCategory = await groupAppsByCategory(apps);
     console.log('Apps grouped by category:', appsByCategory);
     
     // Create nav sections for each category
     Object.keys(appsByCategory).sort().forEach(categoryName => {
         const categoryApps = appsByCategory[categoryName];
-        const navSection = createNavSection(categoryName, categoryApps);
-        libraryNav.appendChild(navSection);
+        if(categoryApps.apps.length != 0){
+            const navSection = createNavSection(categoryName, categoryApps.apps);
+            libraryNav.appendChild(navSection);
+        }
     });
 }
 
