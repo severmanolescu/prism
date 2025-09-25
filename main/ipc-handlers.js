@@ -236,7 +236,7 @@ ipcMain.handle('get-favorites', async (event) => {
 
 // Create new collection
 ipcMain.handle('create-collection', (event, collectionData) => {
-  const result = dataStorage.addCategory(collectionData.name, collectionData.icon);
+  const result = dataStorage.addCategory(collectionData.name, collectionData.color);
   return result;
 });
 

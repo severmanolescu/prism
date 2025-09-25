@@ -56,10 +56,9 @@ async function displayAllApps(apps) {
                 // Create grid for this category's apps
                 const categoryGrid = document.createElement('div');
                 categoryGrid.className = 'category-apps-grid';
-                
+
                 categoryApps.apps.forEach((app, index) => {
-                    console.log(`Creating app element ${index + 1} for ${categoryName}:`, app.name);
-                    const appItem = createAppElement(app);
+                    const appItem = createAppElement(app, appsByCategory[categoryName].color);
                     categoryGrid.appendChild(appItem);
                 });
                 
@@ -68,9 +67,12 @@ async function displayAllApps(apps) {
             }            
         });
     } else {
+        console.log("What?", apps)
         // For specific categories, remove categorized view class
         appsContainer.classList.remove('categorized-view');
         
+        bgColor = await getCategoryColor(currentCategory);
+
         // Show the category name as section header
         if (sectionHeader) {
             const categoryIcon = getCategoryIcon(currentCategory);
@@ -80,15 +82,14 @@ async function displayAllApps(apps) {
         // Show apps in a regular grid without individual category headers
         apps.forEach((app, index) => {
             console.log(`Creating app element ${index + 1}:`, app.name);
-            const appItem = createAppElement(app);
+            const appItem = createAppElement(app, bgColor);
             appsContainer.appendChild(appItem);
         });
     }
 }
 
-
 // Display recent apps
-function displayRecentApps(apps) {
+async function displayRecentApps(apps) {
     console.log('Displaying recent apps:', apps);
     const recentContainer = document.querySelector('.recent-games');
     if (!recentContainer) {
@@ -98,15 +99,15 @@ function displayRecentApps(apps) {
     
     recentContainer.innerHTML = '';
     
-    if (apps.length === 0) {
+    if (!apps || apps.length === 0) {
         console.log('No recent apps to display');
         recentContainer.innerHTML = '<p style="color: #8f98a0; padding: 20px; text-align: center;">No recent apps found</p>';
         return;
     }
-    
-    apps.forEach((app, index) => {
-        console.log(`Creating recent app element ${index + 1}:`, app.name);
-        const recentItem = createRecentAppElement(app);
-        recentContainer.appendChild(recentItem);
-    });
+
+    for (const app of apps) {
+        const color = await getCategoryColor(app.category || 'Uncategorized');
+        const appItem = createRecentAppElement(app, color);
+        recentContainer.appendChild(appItem);
+    }
 }

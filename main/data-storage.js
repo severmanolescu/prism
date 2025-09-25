@@ -105,7 +105,7 @@ function validateCategory(categoryName) {
 }
 
 // Add new category/collection
-function addCategory(name, color = '#4a90e2') {
+function addCategory(name, color = '#092442') {
   const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
   
   if (categoriesData.find(cat => cat.id === id || cat.name === name)) {

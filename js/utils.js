@@ -53,11 +53,10 @@ function getCategoryIcon(categoryName) {
     }
 }
 
-function getCategoryColor(category) {
-    switch (category) {
-        default:
-            return 'linear-gradient(135deg, #092442 0%, #07417a 80%)';
-    }
+async function getCategoryColor(categoryName) {
+    const categories = await window.electronAPI.getCategories();
+    const category = categories.find(c => c.name === categoryName);
+    return category ? (category.color || '#092442') : '#092442';
 }
 
 function formatTime(seconds) {

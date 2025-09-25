@@ -9,7 +9,7 @@ async function loadAppData() {
         // Load recent apps
         const recentApps = await window.electronAPI.getRecentApps();
         console.log('Recent apps loaded:', recentApps.length, 'apps');
-        displayRecentApps(recentApps);
+        await displayRecentApps(recentApps);
         
         // Load all apps
         const allApps = await window.electronAPI.getAllApps();
@@ -88,7 +88,7 @@ async function loadFavoriteApps() {
 async function loadRecentApps() {
     try {
         const recentApps = await window.electronAPI.getRecentApps();
-        displayRecentApps(recentApps);
+        await displayRecentApps(recentApps);
     } catch (error) {
         console.error('Error loading recent apps:', error);
     }
@@ -102,7 +102,7 @@ async function groupAppsByCategory(apps) {
         
         if (!categories || !Array.isArray(categories)) {
             console.error('Categories data is invalid:', categories);
-            return { 'Uncategorized': { apps: apps, color: '#4a90e2', isDefault: true } };
+            return { 'Uncategorized': { apps: apps, color: '#092442', isDefault: true } };
         }
         
         const appsByCategory = {};
@@ -111,7 +111,7 @@ async function groupAppsByCategory(apps) {
         categories.forEach(category => {
             appsByCategory[category.name] = {
                 apps: [],
-                color: category.color || '#4a90e2',
+                color: category.color || '#092442 ',
                 isDefault: category.isDefault || false
             };
         });
@@ -120,7 +120,7 @@ async function groupAppsByCategory(apps) {
         if (!appsByCategory['Uncategorized']) {
             appsByCategory['Uncategorized'] = {
                 apps: [],
-                color: '#4a90e2',
+                background: 'linear-gradient(135deg, #092442 0%, #07417a 80%)',
                 isDefault: true
             };
         }

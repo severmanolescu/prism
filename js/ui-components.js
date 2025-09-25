@@ -1,15 +1,13 @@
 // Create app element  
-function createAppElement(app) {
+function createAppElement(app, bgColor) {
     const item = document.createElement('div');
     item.className = 'app-item';
     item.dataset.appId = app.id;
     item.dataset.category = app.category;
-    
+
     const iconHtml = app.iconPath 
         ? `<img src="app-icon://${app.iconPath.replace('icons/', '')}" alt="${app.name}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 4px;" onerror="this.style.display='none';">` 
         : `<div class="app-icon-small">${getAppIcon(app.name, app.category)}</div>`;
-    
-    const bgColor = getCategoryColor(app.category);
     
     item.innerHTML = `
         <div class="app-item-bg" style="background: ${bgColor};">
@@ -28,7 +26,7 @@ function createAppElement(app) {
 }
 
 // Create recent app element
-function createRecentAppElement(app) {
+function createRecentAppElement(app, bgColor) {
     const item = document.createElement('div');
     item.className = 'recent-item';
     item.dataset.appId = app.id;
@@ -36,11 +34,9 @@ function createRecentAppElement(app) {
     const iconHtml = app.iconPath 
         ? `<img src="app-icon://${app.iconPath.replace('icons/', '')}" alt="${app.name}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 4px;" onerror="this.style.display='none';">` 
         : `<div class="app-icon-small">${getAppIcon(app.name, app.category)}</div>`;
-    
-    const bgColor = getCategoryColor(app.category);
-    
+
     item.innerHTML = `
-        <div class="recent-item-bg" style="background: ${bgColor};">
+        <div class="recent-item-bg" style="background: ${bgColor || getCategoryColor(app.category)};">
             ${iconHtml}
         </div>
         <div class="recent-item-info">
