@@ -85,6 +85,7 @@ function createNavSection(categoryName, apps, isFavorites = false) {
         navItem.className = 'nav-item';
         navItem.dataset.appId = app.id;  // Make sure this line exists
         navItem.dataset.appName = app.name;  // Add this line too
+        navItem.draggable = true; 
         
         const iconHtml = app.iconPath
             ? `<img src="app-icon://${app.iconPath.replace('icons/', '')}" alt="${app.name}" 
@@ -95,6 +96,10 @@ function createNavSection(categoryName, apps, isFavorites = false) {
             ${iconHtml}
             <span>${app.name}</span>
         `;
+        
+        // Add drag event handlers
+        navItem.addEventListener('dragstart', handleDragStart);
+        navItem.addEventListener('dragend', handleDragEnd);
         
         subitemsContainer.appendChild(navItem);
     });

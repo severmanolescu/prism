@@ -76,7 +76,7 @@ function showCreateCollectionModal() {
     const name = modal.querySelector('#collectionName').value.trim();
     
     if (!name) {
-      alert('Please enter a collection name');
+      showDragFeedback('Please input a name!', false);
       return;
     }
     
@@ -89,8 +89,9 @@ function showCreateCollectionModal() {
       if (result.success) {
         modal.remove();
         showCategoryOverview();
+        showDragFeedback("Collection created successfully!", true)
       } else {
-        alert(result.error || 'Failed to create collection');
+        showDragFeedback(result.error || 'Failed to create collection, please try again', false);
       }
     } catch (error) {
       console.error('Error creating collection:', error);
@@ -246,12 +247,13 @@ class CollectionContextMenu {
                 const result = await window.electronAPI.deleteCollection(collectionName);
                 if (result.success) {
                     showCategoryOverview(); // Refresh view
+                    showDragFeedback("Callection deleted successfully!", true);
                 } else {
-                    alert(result.error || 'Failed to delete collection');
+                    showDragFeedback(result.error || 'Failed to delete collection', false);
                 }
             } catch (error) {
                 console.error('Error deleting collection:', error);
-                alert('Failed to delete collection');
+                showDragFeedback('Failed to delete collection');
             }
         }
     }
