@@ -201,3 +201,67 @@ function createCategoryCard(categoryName, apps, color = '#4a90e2') {
     
     return card;
 }
+
+function showHomeView() {
+    // Show the main home content (recent + all apps sections)
+    const recentSection = document.querySelector('.recent-section');
+    const allAppsSection = document.querySelector('.all-apps-section');
+    
+    if (recentSection) recentSection.style.display = 'block';
+    if (allAppsSection) allAppsSection.style.display = 'block';
+    
+    // Hide collections view if it's showing
+    const categoryOverview = document.querySelector('.category-overview');
+    if (categoryOverview) {
+        categoryOverview.style.display = 'none';
+    }
+    
+    // Reset to grid view (not categories view)
+    toggleView('grid');
+    
+    // Update view toggle button state - NO view button should be active for home
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
+    
+    // Load all apps data
+    currentCategory = 'All Apps';
+    loadAppData();
+    updateLibraryTitle('All Apps');
+    
+    // Clear navigation selection
+    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+    
+    // Update submenu state - set Home as active
+    document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
+    const homeSubmenu = document.querySelector('.library-submenu-item[data-submenu="home"]');
+    if (homeSubmenu) {
+        homeSubmenu.classList.add('active');
+    }
+}
+
+function showCollectionsView() {
+    // Hide current content
+    const recentSection = document.querySelector('.recent-section');
+    const allAppsSection = document.querySelector('.all-apps-section');
+    if (recentSection) recentSection.style.display = 'none';
+    if (allAppsSection) allAppsSection.style.display = 'none';
+    
+    // Show collections view (categories view)
+    toggleView('categories');
+    
+    // Update the view toggle button state - categories button should be active
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
+    const categoriesBtn = document.querySelector('.view-toggle-btn[data-view="categories"]');
+    if (categoriesBtn) {
+        categoriesBtn.classList.add('active');
+    }
+    
+    // Update library title
+    updateLibraryTitle('Collections');
+    
+    // Update submenu state - set Collections as active
+    document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
+    const collectionsSubmenu = document.querySelector('.library-submenu-item[data-submenu="collections"]');
+    if (collectionsSubmenu) {
+        collectionsSubmenu.classList.add('active');
+    }
+}

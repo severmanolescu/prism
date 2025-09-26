@@ -5,9 +5,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "nodemon --exec electron .",
     "build": "electron-builder",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dist": "electron-builder --publish=never"
   },
   "keywords": [
     "electron",
@@ -19,10 +18,33 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "^38.1.2",
-    "nodemon": "^3.1.10",
-    "electron-builder": "^24.0.0"
+    "electron-builder": "^24.13.3",
+    "nodemon": "^3.1.10"
   },
   "dependencies": {
-    "active-win": "^8.2.1"
+    "active-win": "^8.2.1",
+    "auto-launch": "^5.0.6"
+  },
+  "build": {
+    "appId": "time-tracker",
+    "productName": "Time Tracker",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "!**/*",
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "main/**/*",
+      "assets/icon.ico",
+      "assets/tray-icon.png",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    }
   }
 }

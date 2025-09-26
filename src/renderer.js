@@ -113,6 +113,46 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update active state
             document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
             viewBtn.classList.add('active');
+            
+            // Update submenu state based on view
+            document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
+            
+            if (view === 'categories') {
+                // If switching to categories view, activate Collections in submenu
+                const collectionsSubmenu = document.querySelector('.library-submenu-item[data-submenu="collections"]');
+                if (collectionsSubmenu) {
+                    collectionsSubmenu.classList.add('active');
+                }
+            } else {
+                // If switching to grid/list view, activate Home in submenu
+                const homeSubmenu = document.querySelector('.library-submenu-item[data-submenu="home"]');
+                if (homeSubmenu) {
+                    homeSubmenu.classList.add('active');
+                }
+            }
+        }
+
+        // Handle library submenu clicks
+        const submenuItem = e.target.closest('.library-submenu-item');
+        if (submenuItem) {
+            const submenuType = submenuItem.dataset.submenu;
+            
+            // Update active state in submenu
+            document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
+            submenuItem.classList.add('active');
+            
+            // Handle navigation
+            switch(submenuType) {
+                case 'home':
+                    showHomeView();
+                    break;
+                case 'collections':
+                    showCollectionsView();
+                    break;
+                case 'hidden':
+                    loadAppsByCategory("Hidden", true);
+                    break;
+            }
         }
     });
 
@@ -130,6 +170,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLibraryTitle('All Apps');
         
         document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        
+        // Update submenu state when home button is clicked
+        document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
+        const homeSubmenu = document.querySelector('.library-submenu-item[data-submenu="home"]');
+        if (homeSubmenu) {
+            homeSubmenu.classList.add('active');
+        }
     })
     
     // Handle search input

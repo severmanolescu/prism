@@ -1,6 +1,9 @@
-const { app, BrowserWindow, ipcMain, protocol, net } = require('electron');
+const { app, BrowserWindow, protocol, net, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const AutoLaunch = require('auto-launch');
+
+fs.appendFileSync('log.txt', 'App started\n');
 
 const utils = require('./main/utils');
 const dataStorage = require('./main/data-storage');
@@ -8,6 +11,17 @@ const appManagement = require('./main/app-management');
 const appTracking = require('./main/app-tracking');
 const { initializeIpcHandlers } = require('./main/ipc-handlers');
 
+const autoLauncher = new AutoLaunch({
+  name: 'Time Tracker',
+  path: app.getPath('exe'),
+  options: ['--hidden']
+});
+
+autoLauncher.enable();
+
+let isAutoLaunchEnabled = false;
+
+let tray = null;
 
 let trackingInterval = null;
 let mainWindow;
@@ -37,6 +51,16 @@ app.whenReady().then(() => {
 
   const appTracking = require('./main/app-tracking');
   appTracking.setMainWindow(window);
+
+  initAutoLaunch();
+
+  createTray();
+
+  const shouldStartHidden = process.argv.includes('--hidden');
+  
+  if (!shouldStartHidden) {
+    window.show();
+  }
 });
 
 app.on('window-all-closed', () => {
@@ -58,6 +82,7 @@ app.on('activate', () => {
 app.on('before-quit', (event) => {
   console.log('App is quitting, stopping tracking...');
   stopTrackingSystem();
+  app.isQuiting = true;
 });
 
 app.on('browser-window-focus', () => {
@@ -94,6 +119,17 @@ function createWindow() {
       startTrackingSystem();
     }, 1000);
   });
+
+  mainWindow.on('close', (event) => {
+    if (!app.isQuiting) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
+  });
+  
+  mainWindow.on('minimize', () => {
+    mainWindow.hide();
+  });
   
   if (process.env.NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools();
@@ -102,11 +138,100 @@ function createWindow() {
   return mainWindow;
 }
 
+async function initAutoLaunch() {
+  try {
+    isAutoLaunchEnabled = await autoLauncher.isEnabled();
+    console.log('Auto-launch enabled:', isAutoLaunchEnabled);
+  } catch (error) {
+    console.error('Error checking auto-launch status:', error);
+  }
+}
+
+function createTray() {
+  // Create tray icon (you'll need a 16x16 or 32x32 icon file)
+  const iconPath = path.join(__dirname, 'assets', 'tray-icon.png');
+  const icon = nativeImage.createFromPath(iconPath);
+  
+  tray = new Tray(icon);
+  
+  // Create context menu
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Show Time Tracker',
+      click: () => {
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.focus();
+        } else {
+          createWindow();
+        }
+      }
+    },
+    {
+      label: 'Pause Tracking',
+      type: 'checkbox',
+      checked: false,
+      click: (menuItem) => {
+        if (menuItem.checked) {
+          stopTrackingSystem();
+        } else {
+          startTrackingSystem();
+        }
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Settings',
+      click: () => {
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.focus();
+          // You could send an IPC message to open settings
+          mainWindow.webContents.send('open-settings');
+        }
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Quit',
+      click: () => {
+        app.isQuiting = true;
+        app.quit();
+      }
+    }
+  ]);
+  
+  tray.setContextMenu(contextMenu);
+  tray.setToolTip('Time Tracker - Running');
+  
+  // Double-click to show/hide window
+  tray.on('double-click', () => {
+    if (mainWindow) {
+      if (mainWindow.isVisible()) {
+        mainWindow.hide();
+      } else {
+        mainWindow.show();
+        mainWindow.focus();
+      }
+    }
+  });
+}
+
 module.exports = {
   setMainWindow(window) {
     mainWindow = window;
   },
   getMainWindow() {
     return mainWindow;
+  },
+  // Add these exports
+  getAutoLauncher() {
+    return autoLauncher;
+  },
+  getAutoLaunchStatus() {
+    return isAutoLaunchEnabled;
+  },
+  setAutoLaunchStatus(status) {
+    isAutoLaunchEnabled = status;
   }
 };

@@ -37,5 +37,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteCollection: (categoryName) => ipcRenderer.invoke('delete-collection', categoryName),
 
   moveAppToCollection: (appId, category) => ipcRenderer.invoke('move-app-to-collection', appId, category),
+
+  hideAppFromLibrary: (appId) => ipcRenderer.invoke('hide-app-from-library', appId),
+  getHiddenApps: () => ipcRenderer.invoke('get-hidden-apps'),
+  restoreHiddenApp: (appId) => ipcRenderer.invoke('restore-hidden-app', appId),
 });
 

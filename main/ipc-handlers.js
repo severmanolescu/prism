@@ -6,6 +6,8 @@ const dataStorage = require('./data-storage');
 const utils = require('./utils');
 const appManagement = require('./app-management');
 
+const main = require('../main');
+
 const { formatTime, formatLastUsed } = utils;
 const { extractAppIcon } = appManagement;
 
@@ -52,6 +54,7 @@ ipcMain.handle('test-icon-extraction', async (event, execPath, appName) => {
 // IPC Handlers - App Data
 ipcMain.handle('get-all-apps', () => {
   const apps = Object.values(dataStorage.appData)
+    .filter(app => !app.hidden) // Exclude hidden apps
     .sort((a, b) => b.totalTime - a.totalTime)
     .map(app => ({
       ...app,
@@ -64,7 +67,7 @@ ipcMain.handle('get-all-apps', () => {
 
 ipcMain.handle('get-recent-apps', () => {
   const recentApps = Object.values(dataStorage.appData)
-    .filter(app => app.lastUsed)
+    .filter(app => app.lastUsed && !app.hidden) // Exclude hidden apps
     .sort((a, b) => new Date(b.lastUsed) - new Date(a.lastUsed))
     .slice(0, 15)
     .map(app => ({
@@ -75,7 +78,6 @@ ipcMain.handle('get-recent-apps', () => {
   
   return recentApps;
 });
-
 ipcMain.handle('get-apps-by-category', (event, category) => {
   let filteredApps;
   
@@ -306,6 +308,86 @@ ipcMain.handle('move-app-to-collection', (event, appId, newCategory) => {
     return { success: true };
   }
   return { success: false, error: 'App not found' };
+});
+
+// Add to ipc-handlers.js
+ipcMain.handle('hide-app-from-library', (event, appId) => {
+  try {
+    if (!dataStorage.appData[appId]) {
+      return { success: false, error: 'App not found' };
+    }
+    
+    // Mark app as hidden instead of deleting (preserves data)
+    dataStorage.appData[appId].hidden = true;
+    dataStorage.appData[appId].hiddenAt = new Date().toISOString();
+    
+    // Alternative: completely remove the app
+    // delete dataStorage.appData[appId];
+    
+    dataStorage.saveAppData();
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error hiding app from library:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Add handler to get hidden apps (for potential restore feature)
+ipcMain.handle('get-hidden-apps', () => {
+  const hiddenApps = Object.values(dataStorage.appData)
+    .filter(app => app.hidden)
+    .map(app => ({
+      ...app,
+      totalTimeFormatted: formatTime(app.totalTime),
+      lastUsedFormatted: formatLastUsed(app.lastUsed)
+    }));
+  
+  return hiddenApps;
+});
+
+// Add handler to restore hidden app
+ipcMain.handle('restore-hidden-app', (event, appId) => {
+  try {
+    if (dataStorage.appData[appId] && dataStorage.appData[appId].hidden) {
+      delete dataStorage.appData[appId].hidden;
+      delete dataStorage.appData[appId].hiddenAt;
+      dataStorage.saveAppData();
+      return { success: true };
+    }
+    return { success: false, error: 'App not found or not hidden' };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('get-auto-launch-status', () => {
+  return isAutoLaunchEnabled;
+});
+
+ipcMain.handle('set-auto-launch', async (event, enabled) => {
+  try {
+    console.log('Setting auto-launch to:', enabled);
+    console.log('App path:', app.getPath('exe'));
+    
+    if (enabled) {
+      await autoLauncher.enable();
+      console.log('Auto-launch enabled successfully');
+    } else {
+      await autoLauncher.disable();
+      console.log('Auto-launch disabled successfully');
+    }
+    
+    // Verify the change
+    const newStatus = await autoLauncher.isEnabled();
+    console.log('New auto-launch status:', newStatus);
+    
+    isAutoLaunchEnabled = newStatus;
+    return { success: true, status: newStatus };
+  } catch (error) {
+    console.error('Error setting auto-launch:', error);
+    return { success: false, error: error.message };
+  }
 });
 
 module.exports = { initializeIpcHandlers };

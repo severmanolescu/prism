@@ -53,6 +53,11 @@ async function loadAppsByCategory(category, preserveScroll = false) {
             await loadFavoriteApps();
             return;
         }
+
+        if(category === "Hidden"){
+            await loadHiddenApps();
+            return;
+        }
         
         // Filter from cached apps
         const filteredApps = allAppsCache.filter(app => {
@@ -94,6 +99,27 @@ async function loadFavoriteApps() {
         console.log('Favorite apps:', favoriteApps.map(app => app.name));
         
         await displayAllApps(favoriteApps);
+        
+    } catch (error) {
+        console.error('Error loading favorite apps:', error);
+    }
+}
+
+async function loadHiddenApps(params) {
+        try {
+        console.log('Loading hidden apps');
+        
+        // Get current favorites
+        const hiddenIds = await window.electronAPI.getHiddenApps();
+        console.log('Hidden IDs:', hiddenIds);
+        
+        // Filter from cached apps to get favorite apps
+        const hiddenApps = allAppsCache.filter(app => hiddenIds.includes(app.id));
+        
+        console.log('Filtered favorite apps:', hiddenApps.length);
+        console.log('Favorite apps:', hiddenApps.map(app => app.name));
+        
+        await displayAllApps(hiddenIds);
         
     } catch (error) {
         console.error('Error loading favorite apps:', error);

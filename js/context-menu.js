@@ -364,6 +364,44 @@ class ContextMenu {
         }
     }
 
+    async hideFromLibrary(appId, appName) {
+        if (confirm(`Hide "${appName}" from your library?\n\nThis will stop tracking the app and remove it from your library. You can re-add it later if the app is launched again.`)) {
+            try {
+                const result = await window.electronAPI.hideAppFromLibrary(appId);
+                if (result.success) {
+                    // Remove app from local cache
+                    allAppsCache = allAppsCache.filter(app => app.id !== appId);
+                    
+                    // Refresh navigation and current view
+                    createCategoryNavigation(allAppsCache);
+                    
+                    // Refresh current view
+                    if (currentCategory === 'All Apps') {
+                        displayAllApps(allAppsCache);
+                    } else if (currentCategory === 'Favorites') {
+                        await loadFavoriteApps();
+                    } else {
+                        await loadAppsByCategory(currentCategory);
+                    }
+                    
+                    // Refresh collections view if open
+                    const categoryOverview = document.getElementById('categoryOverview');
+                    if (categoryOverview) {
+                        showCategoryOverview();
+                    }
+                    
+                    // Show success message
+                    showDragFeedback(`Hidden ${appName} from library`, 'success');
+                } else {
+                    alert(result.error || 'Failed to hide app');
+                }
+            } catch (error) {
+                console.error('Error hiding app:', error);
+                alert('Failed to hide app');
+            }
+        }
+    }
+
     async handleAction(action) {
         if (!this.currentApp) return;
 
@@ -397,9 +435,8 @@ class ContextMenu {
                 break;
             
             case 'hide':
-                console.log(`Hiding ${appName} from library`);
-                // Implement hide functionality
-                break;
+                await this.hideFromLibrary(appId, appName);
+            break;
         }
     }
 }
