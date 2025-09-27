@@ -55,7 +55,9 @@
               </div>
             </div>
           </button>
-          <button class="nav-tab" data-tab="community">USAGE</button>
+          <button class="nav-tab" data-tab="community">ANALYTICS</button>
+          <button class="nav-tab" data-tab="community">PRODUCTIVITY</button>
+          <button class="nav-tab" data-tab="community">SETTINGS</button>
         </div>
       </div>
 
@@ -116,45 +118,65 @@
 
         <!-- Context Menu -->
     <div class="context-menu" id="contextMenu">
-        <div class="context-menu-item" data-action="open">
-            <span class="context-menu-icon">🚀</span>
-            <span>Launch Application</span>
-        </div>
-        <div class="context-menu-item" data-action="details">
-            <span class="context-menu-icon">📊</span>
-            <span>View Details</span>
-        </div>
-        <div class="context-menu-separator"></div>
-        <div class="context-menu-item" data-action="favorite">
-            <span class="context-menu-icon">⭐</span>
-            <span>Add to Favorites</span>
-        </div>
-        <div class="context-menu-item" data-action="category">
-            <span class="context-menu-icon">📁</span>
-            <span>Change Category</span>
-        </div>
-        <div class="context-menu-separator"></div>
-        <div class="context-menu-item" data-action="properties">
-            <span class="context-menu-icon">⚙️</span>
-            <span>Properties</span>
-        </div>
-        <div class="context-menu-item" data-action="hide">
-            <span class="context-menu-icon">👁️</span>
-            <span>Hide from Library</span>
-        </div>
+          <div class="context-menu-item" data-action="open">
+                <span class="context-menu-icon">🚀</span>
+                <span>Launch Application</span>
+            </div>
+            <div class="context-menu-item" data-action="details">
+                <span class="context-menu-icon">📊</span>
+                <span>View Details</span>
+            </div>
+            <div class="context-menu-separator"></div>
+            <div class="context-menu-item" data-action="favorite">
+                <span class="context-menu-icon">⭐</span>
+                <span>Add to Favorites</span>
+            </div>
+            <div class="context-menu-item submenu-item" data-action="add-to">
+                <span class="context-menu-icon">➕</span>
+                <span>Add to</span>
+                <span class="submenu-arrow">▶</span>
+                <div class="submenu" id="addToSubmenu"></div>
+            </div>
+            <div class="context-menu-item submenu-item" data-action="remove-from">
+                <span class="context-menu-icon">➖</span>
+                <span>Remove from</span>
+                <span class="submenu-arrow">▶</span>
+                <div class="submenu" id="removeFromSubmenu"></div>
+            </div>
+            <div class="context-menu-separator"></div>
+            <div class="context-menu-item submenu-item" data-action="more-options">
+                <span class="context-menu-icon">⋯</span>
+                <span>More</span>
+                <span class="submenu-arrow">▶</span>
+                <div class="submenu" id="moreOptionsSubmenu">
+                    <div class="submenu-item-option hide-restore-item" data-action="hide">
+                        <span class="context-menu-icon">👁️</span>
+                        <span>Hide from Library</span>
+                    </div>
+                    <div class="submenu-item-option" data-action="remove">
+                        <span class="context-menu-icon">❌</span>
+                        <span>Remove from Tracker</span>
+                    </div>
+                    <div class="submenu-item-option" data-action="remove-permanently">
+                        <span class="context-menu-icon">🗑️</span>
+                        <span>Remove Permanently</span>
+                    </div>
+                </div>
+            </div>
     </div>
 
     <script src="renderer.js"></script>
-    <script src="../js/utils.js"></script>
-    <script src="../js/data-manager.js"></script>
-    <script src="../js/ui-components.js"></script>
-    <script src="../js/navigation.js"></script>
-    <script src="../js/display.js"></script>
-    <script src="../js/context-menu.js"></script>
-    <script src="../js/collections-view.js"></script>
-    <script src="../js/window-controls.js"></script>
-    <script src="../js/real-time-updates.js"></script>
-    <script src="../js/details.js"></script>
-    <script src="../js/collections.js"></script>
+    <script src="./js/utils.js"></script>
+    <script src="./js/data-manager.js"></script>
+    <script src="./js/ui-components.js"></script>
+    <script src="./js/navigation.js"></script>
+    <script src="./js/display.js"></script>
+    <script src="./js/context-menu.js"></script>
+    <script src="./js/collections-view.js"></script>
+    <script src="./js/window-controls.js"></script>
+    <script src="./js/real-time-updates.js"></script>
+    <script src="./js/details.js"></script>
+    <script src="./js/collections.js"></script>
+    <script src="./js/confirmation-dialog.js"></script>
   </body>
 </html>

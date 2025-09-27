@@ -5,11 +5,11 @@ const AutoLaunch = require('auto-launch');
 
 fs.appendFileSync('log.txt', 'App started\n');
 
-const utils = require('./main/utils');
-const dataStorage = require('./main/data-storage');
-const appManagement = require('./main/app-management');
-const appTracking = require('./main/app-tracking');
-const { initializeIpcHandlers } = require('./main/ipc-handlers');
+const utils = require('./src/main/utils');
+const dataStorage = require('./src/main/data-storage');
+const appManagement = require('./src/main/app-management');
+const appTracking = require('./src/main/app-tracking');
+const { initializeIpcHandlers } = require('./src/main/ipc-handlers');
 
 const autoLauncher = new AutoLaunch({
   name: 'Time Tracker',
@@ -26,10 +26,8 @@ let tray = null;
 let trackingInterval = null;
 let mainWindow;
 
-const { formatTime, formatLastUsed } = utils;
-const { initDataStorage, loadAppData, saveAppData, loadSessionsData, saveSessionsData } = dataStorage;
-const { generateAppId, getCleanAppName, extractAppIcon, saveApp } = appManagement;
-const { getCurrentApp, startTracking, stopTracking, trackingLoop, startTrackingSystem, stopTrackingSystem } = appTracking;
+const { initDataStorage } = dataStorage;
+const { startTrackingSystem, stopTrackingSystem } = appTracking;
 
 // App lifecycle
 app.whenReady().then(() => {
@@ -49,7 +47,7 @@ app.whenReady().then(() => {
   const window = createWindow();
   initializeIpcHandlers(window);
 
-  const appTracking = require('./main/app-tracking');
+  const appTracking = require('./src/main/app-tracking');
   appTracking.setMainWindow(window);
 
   initAutoLaunch();

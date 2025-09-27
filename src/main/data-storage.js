@@ -4,7 +4,7 @@ const path = require('path');
 let appData = {};
 let sessionsData = [];
 
-const dataDir = path.join(__dirname, '../data');
+const dataDir = path.join(__dirname, './../../data');
 const appsFile = path.join(dataDir, 'apps.json');
 const sessionsFile = path.join(dataDir, 'sessions.json');
 
@@ -125,6 +125,44 @@ function addCategory(name, color = '#092442') {
   return { success: true, category: newCategory };
 }
 
+
+function saveBlacklistedApps() {
+    try {
+        const blacklistPath = path.join(dataDir, 'blacklist.json');
+        fs.writeFileSync(blacklistPath, JSON.stringify(blacklistedApps || [], null, 2));
+        console.log('Blacklisted apps saved successfully');
+    } catch (error) {
+        console.error('Error saving blacklisted apps:', error);
+    }
+}
+
+function loadBlacklistedApps() {
+    try {
+        const blacklistPath = path.join(dataDir, 'blacklist.json');
+        if (fs.existsSync(blacklistPath)) {
+            const data = fs.readFileSync(blacklistPath, 'utf8');
+            blacklistedApps = JSON.parse(data);
+        } else {
+            blacklistedApps = [];
+        }
+    } catch (error) {
+        console.error('Error loading blacklisted apps:', error);
+        blacklistedApps = [];
+    }
+}
+
+function removeAppSessions(appId) {
+    if (sessionsData && Array.isArray(sessionsData)) {
+        const beforeCount = sessionsData.length;
+        sessionsData = sessionsData.filter(session => session.appId !== appId);
+        const afterCount = sessionsData.length;
+        
+        console.log(`Removed ${beforeCount - afterCount} sessions for app ${appId} from memory`);
+        return beforeCount - afterCount; // Return number of sessions removed
+    }
+    return 0;
+}
+
 module.exports = {
     initDataStorage,
     loadAppData,
@@ -135,7 +173,11 @@ module.exports = {
     validateCategory,
     addCategory,
     saveCategoriesData,
-    // Export the data objects so main.js can access them
+    saveBlacklistedApps,
+    loadBlacklistedApps,
+    removeAppSessions,
+    saveSessionsData,
+
     get appData() { return appData; },
     get sessionsData() { return sessionsData; },
     set appData(value) { appData = value; },

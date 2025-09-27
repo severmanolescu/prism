@@ -41,5 +41,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   hideAppFromLibrary: (appId) => ipcRenderer.invoke('hide-app-from-library', appId),
   getHiddenApps: () => ipcRenderer.invoke('get-hidden-apps'),
   restoreHiddenApp: (appId) => ipcRenderer.invoke('restore-hidden-app', appId),
+
+  removeAppFromTracker: (appId) => ipcRenderer.invoke('remove-app-from-tracker', appId),
+  removeAppPermanently: (appId) => ipcRenderer.invoke('remove-app-permanently', appId),
 });
 

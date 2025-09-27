@@ -6,7 +6,7 @@ const dataStorage = require('./data-storage');
 const utils = require('./utils');
 const appManagement = require('./app-management');
 
-const main = require('../main');
+const main = require('./../../main');
 
 const { formatTime, formatLastUsed } = utils;
 const { extractAppIcon } = appManagement;
@@ -124,7 +124,7 @@ ipcMain.handle('launch-app', async (event, appId) => {
         const path = require('path');
         
         // Read the apps.json file
-        const appsFilePath = path.join(__dirname, '../data/apps.json');
+        const appsFilePath = path.join(__dirname, './../../data/apps.json');
         const appsData = await fsPromises.readFile(appsFilePath, 'utf8');
         const apps = JSON.parse(appsData);
         
@@ -171,7 +171,7 @@ ipcMain.handle('launch-app', async (event, appId) => {
 // Add these IPC handlers
 ipcMain.handle('add-to-favorites', async (event, appId) => {
     try {
-        const favoritesPath = path.join(__dirname, '../data', 'favorites.json');
+        const favoritesPath = path.join(__dirname, './../../data/', 'favorites.json');
         
         // Ensure data directory exists
         await fsPromises.mkdir(path.dirname(favoritesPath), { recursive: true });
@@ -199,7 +199,7 @@ ipcMain.handle('add-to-favorites', async (event, appId) => {
 
 ipcMain.handle('remove-from-favorites', async (event, appId) => {
     try {
-        const favoritesPath = path.join(__dirname, '../data', 'favorites.json');
+        const favoritesPath = path.join(__dirname, './../../data/', 'favorites.json');
         
         let favorites = [];
         try {
@@ -222,7 +222,7 @@ ipcMain.handle('remove-from-favorites', async (event, appId) => {
 
 ipcMain.handle('get-favorites', async (event) => {
     try {
-        const favoritesPath = path.join(__dirname, '../data', 'favorites.json');
+        const favoritesPath = path.join(__dirname, './../../data/', 'favorites.json');
         
         try {
             const favoritesData = await fsPromises.readFile(favoritesPath, 'utf8');
@@ -388,6 +388,128 @@ ipcMain.handle('set-auto-launch', async (event, enabled) => {
     console.error('Error setting auto-launch:', error);
     return { success: false, error: error.message };
   }
+});
+
+ipcMain.handle('remove-app-from-tracker', async (event, appId) => {
+    try {
+        if (!dataStorage.appData[appId]) {
+            return { success: false, error: 'App not found' };
+        }
+        
+        console.log(`Starting removal of app: ${appId}`);
+        
+        // CRITICAL: Stop the tracking system to prevent overwrites
+        const { stopTrackingSystem, startTrackingSystem } = require('./app-tracking');
+        stopTrackingSystem();
+        
+        // Wait a moment for any pending writes to complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Remove app data
+        delete dataStorage.appData[appId];
+        
+        // Remove sessions from MEMORY first
+        if (dataStorage.sessionsData && Array.isArray(dataStorage.sessionsData)) {
+            const beforeCount = dataStorage.sessionsData.length;
+            dataStorage.sessionsData = dataStorage.sessionsData.filter(session => session.appId !== appId);
+            console.log(`Removed ${beforeCount - dataStorage.sessionsData.length} sessions from memory`);
+        }
+        
+        // Now save the cleaned data to file
+        dataStorage.saveSessionsData();
+        
+        // Remove from favorites
+        const favoritesPath = path.join(__dirname, './../../data/', 'favorites.json');
+        try {
+            if (fs.existsSync(favoritesPath)) {
+                const favoritesData = await fsPromises.readFile(favoritesPath, 'utf8');
+                let favorites = JSON.parse(favoritesData);
+                favorites = favorites.filter(id => id !== appId);
+                await fsPromises.writeFile(favoritesPath, JSON.stringify(favorites, null, 2));
+            }
+        } catch (favError) {
+            console.log('Favorites file error:', favError.message);
+        }
+        
+        dataStorage.saveAppData();
+        
+        // Restart the tracking system
+        startTrackingSystem();
+        
+        console.log(`Successfully removed app ${appId} from tracker`);
+        return { success: true };
+    } catch (error) {
+        console.error('Error removing app from tracker:', error);
+        // Make sure to restart tracking even if there's an error
+        try {
+            const { startTrackingSystem } = require('./app-tracking');
+            startTrackingSystem();
+        } catch (restartError) {
+            console.error('Failed to restart tracking system:', restartError);
+        }
+        return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle('remove-app-permanently', async (event, appId) => {
+    try {
+        if (!dataStorage.appData[appId]) {
+            return { success: false, error: 'App not found' };
+        }
+        
+        const app = dataStorage.appData[appId];
+        
+        // Add to blacklist to prevent future tracking
+        if (!dataStorage.blacklistedApps) {
+            dataStorage.blacklistedApps = [];
+        }
+        
+        dataStorage.blacklistedApps.push({
+            name: app.name,
+            path: app.path,
+            executable: app.executable,
+            blacklistedAt: new Date().toISOString(),
+            reason: 'user_removed_permanently'
+        });
+        
+        // Remove app data
+        delete dataStorage.appData[appId];
+        
+        // Remove all sessions for this app
+        const sessionsPath = path.join(__dirname, './../../data/', 'sessions.json');
+        try {
+            const sessionsData = await fsPromises.readFile(sessionsPath, 'utf8');
+            let sessions = JSON.parse(sessionsData);
+            
+            // Filter out sessions for this app
+            sessions = sessions.filter(session => session.appId !== appId);
+            
+            await fsPromises.writeFile(sessionsPath, JSON.stringify(sessions, null, 2));
+        } catch (error) {
+            console.log('No sessions file found or error reading sessions:', error.message);
+        }
+        
+        // Remove from favorites
+        const favoritesPath = path.join(__dirname, './../../data/', 'favorites.json');
+        try {
+            const favoritesData = await fsPromises.readFile(favoritesPath, 'utf8');
+            let favorites = JSON.parse(favoritesData);
+            favorites = favorites.filter(id => id !== appId);
+            await fsPromises.writeFile(favoritesPath, JSON.stringify(favorites, null, 2));
+        } catch (error) {
+            console.log('No favorites file found or error reading favorites:', error.message);
+        }
+        
+        // Save blacklist and app data
+        dataStorage.saveAppData();
+        dataStorage.saveBlacklistedApps(); // You'll need to implement this method
+        
+        console.log(`Permanently removed app ${appId} and added to blacklist`);
+        return { success: true };
+    } catch (error) {
+        console.error('Error removing app permanently:', error);
+        return { success: false, error: error.message };
+    }
 });
 
 module.exports = { initializeIpcHandlers };

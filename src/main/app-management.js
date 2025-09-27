@@ -97,7 +97,7 @@ async function extractAppIcon(executablePath, appName) {
   }
   
   try {
-    const iconDir = path.join(__dirname, '../icons');
+    const iconDir = path.join(__dirname, './../../icons');
     if (!fs.existsSync(iconDir)) {
       fs.mkdirSync(iconDir);
     }
@@ -106,7 +106,7 @@ async function extractAppIcon(executablePath, appName) {
     const iconPath = path.join(iconDir, iconFileName);
     
     if (fs.existsSync(iconPath)) {
-      return `icons/${iconFileName}`;
+      return `./../../icons/${iconFileName}`;
     }
     
     // PowerShell command to extract icon
@@ -115,7 +115,7 @@ async function extractAppIcon(executablePath, appName) {
     const { stdout } = await execAsync(`powershell -Command "${psCommand}"`);
     
     if (stdout.includes('SUCCESS') && fs.existsSync(iconPath)) {
-      return `icons/${iconFileName}`;
+      return `./../../icons/${iconFileName}`;
     } else {
       return null;
     }

@@ -242,7 +242,18 @@ class CollectionContextMenu {
   }
 
     async deleteCollection(collectionName) {
-        if (confirm(`Delete "${collectionName}" collection? All apps will be moved to Uncategorized.`)) {
+
+        const confirmed = await window.confirmationDialog.show({
+          title: 'Delete Collection',
+          message: `Are you sure you want to delete "${collectionName}"? All apps will be moved to Uncategorized.`,
+          icon: '🗑️',
+          iconColor: '#e74c3c',
+          confirmText: 'Delete',
+          cancelText: 'Cancel',
+          dangerMode: true
+      });
+
+      if (confirmed) {
             try {
                 const result = await window.electronAPI.deleteCollection(collectionName);
                 if (result.success) {
