@@ -149,6 +149,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'collections':
                     showCollectionsView();
                     break;
+                case 'hidden':
+                    showHiddenView();
+                    break;
             }
         }
     });
@@ -156,24 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const homeButton = document.getElementById("home")
 
     homeButton.addEventListener('click', (e) => {
-        const categoryOverview = document.getElementById('categoryOverview');
-        if (categoryOverview) {
-            toggleView('grid');
-            document.querySelector('.view-toggle-btn[data-view="categories"]').classList.remove('active');
-        }
-        
-        currentCategory = 'All Apps';
-        loadAppData();
-        updateLibraryTitle('All Apps');
-        
-        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-        
-        // Update submenu state when home button is clicked
-        document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
-        const homeSubmenu = document.querySelector('.library-submenu-item[data-submenu="home"]');
-        if (homeSubmenu) {
-            homeSubmenu.classList.add('active');
-        }
+        showHomeView();
     })
     
     // Handle search input
@@ -209,39 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Clear navigation selection
         document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
     }
-
-    document.addEventListener('click', (e) => {
-        // Handle main LIBRARY tab click
-        const libraryTab = e.target.closest('.nav-tab[data-tab="library"]');
-        if (libraryTab && !e.target.closest('.library-submenu')) {
-            // Reset to home view when clicking main LIBRARY tab
-            showHomeView();
-            return;
-        }
-
-        // Your existing submenu handler
-        const submenuItem = e.target.closest('.library-submenu-item');
-        if (submenuItem) {
-            const submenuType = submenuItem.dataset.submenu;
-            
-            // Update active state in submenu
-            document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
-            submenuItem.classList.add('active');
-            
-            // Handle navigation
-            switch(submenuType) {
-                case 'home':
-                    showHomeView();
-                    break;
-                case 'collections':
-                    showCollectionsView();
-                    break;
-                case 'hidden':
-                    showHiddenView();
-                    break;
-            }
-        }
-    });
     
     // Initialize the app
     console.log('Steam Time Tracker initialized!');
