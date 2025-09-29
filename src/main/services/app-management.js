@@ -125,7 +125,6 @@ async function extractAppIcon(executablePath, appName) {
   }
 }
 
-
 async function saveApp(appInfo) {
   const { name, executable, path: execPath } = appInfo;
   const appId = generateAppId(name, executable);

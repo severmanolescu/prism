@@ -1,0 +1,296 @@
+.category-overview {
+    padding: 40px;
+    background: #1b2838;
+    min-height: calc(100vh - 76px);
+}
+
+.collections-header {
+    margin-bottom: 30px;
+}
+
+.collections-header h2 {
+    color: #8f98a0;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+.collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1400px;
+}
+
+.collection-card {
+    aspect-ratio: 16/9;
+    background: #16202d;
+    border: 1px solid #1e2328;
+    border-radius: 8px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.collection-card:hover {
+    border-color: #66c0f4;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.collection-card-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.3;
+}
+
+.collection-bg-icons {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+.collection-bg-icons > * {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-height: 0;
+    min-width: 0;  
+}
+
+.collection-bg-icons.grid-1x1 {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    gap: 0;
+}
+
+.collection-bg-icons.grid-1x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 3px;
+}
+
+.collection-bg-icons.grid-1x3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 3px;
+}
+
+.collection-bg-icons.grid-2x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 3px;
+}
+
+.collection-bg-icons.grid-3x3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 2px;
+}
+
+.collection-bg-icons img,
+.collection-bg-icons .bg-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    box-sizing: border-box;
+    padding: 2px;
+}
+
+.collection-bg-icons .bg-icon {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.collection-bg-icons img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+.collection-card-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    padding: 20px;
+    color: white;
+}
+
+.collection-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.collection-count {
+    font-size: 14px;
+    color: #c6d4df;
+    opacity: 0.9;
+}
+
+.create-card .collection-card-content {
+    position: static;
+    background: none;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.collections-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(27, 40, 56, 0.95); /* Match your app background */
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 60px 40px 40px;
+    overflow-y: auto;
+}
+
+.collections-overlay.show {
+    opacity: 1;
+}
+
+/* Create new collection card */
+.create-card {
+    background: linear-gradient(135deg, #2a475e 0%, #1e3a52 100%);
+    border: 2px dashed #66c0f4;
+}
+
+.create-icon {
+    font-size: 48px;
+    color: #66c0f4;
+    margin-bottom: 16px;
+    font-weight: 300;
+}
+
+.create-text {
+    color: #66c0f4;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.create-card:hover {
+    background: linear-gradient(135deg, #3c5a73 0%, #2a4660 100%);
+}
+
+.overlay-header {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.overlay-header h3 {
+    color: #66c0f4;
+    font-size: 18px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+}
+.overlay-collections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    max-width: 800px;
+    padding: 0 20px;
+}
+
+.overlay-collection-card {
+    background: #2a475e;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.overlay-collection-card:hover,
+.overlay-collection-card.drag-over {
+    transform: translateY(-5px);
+    border-color: #66c0f4;
+    box-shadow: 0 8px 25px rgba(102, 192, 244, 0.3);
+}
+
+.overlay-card-bg {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.overlay-content {
+    width: 100%;
+    max-width: 1400px;
+}
+
+.overlay-card-icon {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+}
+
+.overlay-card-name {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.grid-1x1 .bg-icon {
+    font-size: 32px;
+}
+
+.grid-1x2 .bg-icon {
+    font-size: 24px;
+}
+
+.grid-1x3 .bg-icon {
+    font-size: 20px;
+}
+
+.grid-2x2 .bg-icon {
+    font-size: 18px;
+}
+
+.grid-3x3 .bg-icon {
+    font-size: 14px;
+}

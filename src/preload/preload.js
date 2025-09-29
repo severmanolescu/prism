@@ -21,9 +21,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMockDataReady: (callback) => ipcRenderer.on('mock-data-ready', callback),
   onAppIconUpdated: (callback) => ipcRenderer.on('app-icon-updated', callback),
   
-  // Debug function
-  testIconExtraction: (execPath, appName) => ipcRenderer.invoke('test-icon-extraction', execPath, appName),
-
   addToFavorites: (appId) => ipcRenderer.invoke('add-to-favorites', appId),
   removeFromFavorites: (appId) => ipcRenderer.invoke('remove-from-favorites', appId),
   getFavorites: () => ipcRenderer.invoke('get-favorites'),
@@ -44,5 +41,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   removeAppFromTracker: (appId) => ipcRenderer.invoke('remove-app-from-tracker', appId),
   removeAppPermanently: (appId) => ipcRenderer.invoke('remove-app-permanently', appId),
+
+  getTodayStats: () => ipcRenderer.invoke('get-today-stats'),
 });
 

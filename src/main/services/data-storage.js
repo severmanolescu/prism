@@ -4,7 +4,7 @@ const path = require('path');
 let appData = {};
 let sessionsData = [];
 
-const dataDir = path.join(__dirname, './../../data');
+const dataDir = path.join(__dirname, './../../../data');
 const appsFile = path.join(dataDir, 'apps.json');
 const sessionsFile = path.join(dataDir, 'sessions.json');
 

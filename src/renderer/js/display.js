@@ -67,7 +67,6 @@ async function displayAllApps(apps) {
             }            
         });
     } else {
-        console.log("What?", apps)
         // For specific categories, remove categorized view class
         appsContainer.classList.remove('categorized-view');
         

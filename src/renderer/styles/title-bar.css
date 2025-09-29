@@ -1,0 +1,72 @@
+/* Custom Title Bar */
+.title-bar {
+  height: 30px;
+  background: linear-gradient(to bottom, #3c4043 0%, #2f3336 100%);
+  border-bottom: 1px solid #0e1116;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  -webkit-app-region: drag;
+  user-select: none;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.title-bar-drag-region {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  height: 100%;
+}
+
+.title-bar-title {
+  display: flex;
+  align-items: center;
+  color: #acb2b8;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.title-icon {
+  margin-right: 6px;
+  font-size: 12px;
+}
+
+.title-bar-controls {
+  display: flex;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.title-bar-button {
+  width: 40px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: #acb2b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+}
+
+.title-bar-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.close-button:hover {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.top-bar {
+  height: 46px;
+  background: linear-gradient(to bottom, #2a475e 0%, #1e3a52 100%);
+  border-bottom: 1px solid #0e1116;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}

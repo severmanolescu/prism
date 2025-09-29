@@ -5,11 +5,11 @@ const AutoLaunch = require('auto-launch');
 
 fs.appendFileSync('log.txt', 'App started\n');
 
-const utils = require('./src/main/utils');
-const dataStorage = require('./src/main/data-storage');
-const appManagement = require('./src/main/app-management');
-const appTracking = require('./src/main/app-tracking');
-const { initializeIpcHandlers } = require('./src/main/ipc-handlers');
+const utils = require('./src/main/utils/utils');
+const dataStorage = require('./src/main/services/data-storage');
+const appManagement = require('./src/main/services/app-management');
+const appTracking = require('./src/main/services/app-tracking');
+const { initializeIpcHandlers } = require('./src/main/ipc');
 
 const autoLauncher = new AutoLaunch({
   name: 'Time Tracker',
@@ -47,7 +47,7 @@ app.whenReady().then(() => {
   const window = createWindow();
   initializeIpcHandlers(window);
 
-  const appTracking = require('./src/main/app-tracking');
+  const appTracking = require('./src/main/services/app-tracking');
   appTracking.setMainWindow(window);
 
   initAutoLaunch();
@@ -101,14 +101,14 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, './src/preload/preload.js')
     },
     backgroundColor: '#1b2838',
     show: false,
     icon: path.join(__dirname, 'assets/icon.png')
   });
 
-  mainWindow.loadFile('src/index.html');
+  mainWindow.loadFile('src/renderer/index.html');
   
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();

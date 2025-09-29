@@ -152,7 +152,6 @@ function createCategoryCard(categoryName, apps, color = '#4a90e2') {
     let backgroundIcons = [];
     
     if (apps.length === 0) {
-        // Show empty state
         backgroundIcons.push('<div class="empty-category">Empty Collection</div>');
     } else {
         const sampleApps = apps.slice(0, maxApps);

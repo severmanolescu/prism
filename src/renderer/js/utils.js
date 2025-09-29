@@ -62,8 +62,12 @@ async function getCategoryColor(categoryName) {
 function formatTime(seconds) {
     if (seconds < 60) return `${seconds}s`;
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-    const hours = (seconds / 3600).toFixed(1);
-    return `${hours}h`;
+    
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (minutes === 0) return `${hours}h`;
+    return `${hours}h ${minutes}m`;
 }
 
 function displayCurrentTime() {

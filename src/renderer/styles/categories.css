@@ -1,0 +1,130 @@
+/* Category headers in main content */
+.category-header {
+    margin: 32px 0 16px 0;
+    margin-bottom: 16px;
+
+}
+
+.category-header:first-child {
+    margin-top: 0;
+}
+
+.category-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 4px 8px 4px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+.category-title h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    flex-grow: 1;
+}
+
+.category-icon {
+    font-size: 20px;
+}
+
+.category-app-count {
+    font-size: 12px;
+    color: #8f98a0;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.category-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 32px;
+}
+
+v-item.category {
+    font-weight: 600;
+    font-size: 14px;
+    padding: 12px 16px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Category layout fixes */
+.category-section {
+    margin-bottom: 32px;
+}
+
+.category-section:last-child {
+    margin-bottom: 0;
+}
+
+.category-title h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    flex-grow: 1;
+}
+
+.category-app-count {
+    font-size: 12px;
+    color: #8f98a0;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.category-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.category-main {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.category-toggle {
+    background: none;
+    border: none;
+    color: #8f98a0;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+}
+
+.category-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #c6d4df;
+}
+
+.category-toggle svg {
+    transition: transform 0.2s ease;
+}
+
+.category-toggle.collapsed svg {
+    transform: rotate(-90deg);
+}
+
+.category-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}

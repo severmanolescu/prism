@@ -442,6 +442,7 @@ class ContextMenu {
             console.error('Error toggling favorite:', error);
         }
     }
+        
     async updateMenuItems() {
         const favoriteItem = this.menu.querySelector('[data-action="favorite"]');
         const hideItem = this.menu.querySelector('[data-action="hide"]');
@@ -482,11 +483,12 @@ class ContextMenu {
             } catch (error) {
                 console.error('Error checking hidden status:', error);
             }
-        }
-        else {
+        } else {
             this.updateContextMenuHTML();
+            this.setupSubmenuHandlers();
+            
             // Try again after regenerating
-            const newHideItem = this.menu.querySelector('[data-action="hide"]');
+            await this.updateMenuItems();
         }
     }
 
@@ -563,23 +565,7 @@ class ContextMenu {
         try {
             const result = await window.electronAPI.restoreHiddenApp(appId);
             if (result.success) {
-                // If we're viewing hidden apps, reload the hidden view
-                if (isViewingHiddenApps) {
-                    await loadAppsByCategory("Hidden", true);
-                } else {
-                    // Force refresh the allAppsCache and navigation
-                    allAppsCache = await window.electronAPI.getAllApps();
-                    createCategoryNavigation(allAppsCache);
-                    
-                    if (currentCategory === 'All Apps') {
-                        displayAllApps(allAppsCache);
-                    } else if (currentCategory === 'Favorites') {
-                        await loadFavoriteApps();
-                    } else {
-                        await loadAppsByCategory(currentCategory);
-                    }
-                }
-                
+                await loadAppsByCategory("Hidden", true);
                 showDragFeedback(`Restored ${appName} to library`, 'success');
             } else {
                 alert(result.error || 'Failed to restore app');
