@@ -1,10 +1,11 @@
 
 # Time Tracker
-A modern desktop application for tracking application usage time, built with Electron and inspired by Steam's UI design.
 
 <div align="center">
   <img src="./assets/banner.svg" alt="Time Tracker Banner" width="99%">
 </div>
+
+A modern desktop application for tracking application usage time, built with Electron and inspired by Steam's UI design.
 
 ## Features
 
