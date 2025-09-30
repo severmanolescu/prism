@@ -43,5 +43,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   removeAppPermanently: (appId) => ipcRenderer.invoke('remove-app-permanently', appId),
 
   getTodayStats: () => ipcRenderer.invoke('get-today-stats'),
-});
 
+  getAppDetails: (appId) => ipcRenderer.invoke('get-app-details', appId)
+});

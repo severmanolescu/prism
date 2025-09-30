@@ -2,71 +2,206 @@ const { ipcMain } = require('electron');
 const { exec } = require('child_process');
 const fsPromises = require('fs').promises;
 const path = require('path');
-const fs = require('fs');
 
-const dataStorage = require('../services/data-storage');
+const {
+  getAllApps,
+  getRecentApps,
+  getAppsByCategory,
+  getHiddenApps,
+  hideApp,
+  restoreApp,
+  deleteAppAndSessions,
+  addToBlacklist,
+  moveAppToCategory
+} = require('../services/data-access');
+
 const { formatTime, formatLastUsed } = require('../utils/utils');
+const { getDb } = require('../services/database');
+
+function mapAppFromDb(app) {
+  return {
+    id: app.id,
+    name: app.name,
+    path: app.path,
+    executable: app.executable,
+    category: app.category,
+    iconPath: app.icon_path,
+    hidden: app.hidden === 1,
+    firstUsed: app.first_used,
+    lastUsed: app.last_used,
+    totalTime: app.total_time,
+    launchCount: app.launch_count,
+    totalTimeFormatted: formatTime(app.total_time),
+    lastUsedFormatted: formatLastUsed(app.last_used)
+  };
+}
 
 function initializeAppHandlers() {
-  ipcMain.handle('get-all-apps', () => {
-    const apps = Object.values(dataStorage.appData)
-      .filter(app => !app.hidden)
-      .sort((a, b) => b.totalTime - a.totalTime)
-      .map(app => ({
-        ...app,
-        totalTimeFormatted: formatTime(app.totalTime),
-        lastUsedFormatted: formatLastUsed(app.lastUsed)
-      }));
-    
-    return apps;
-  });
-
-  ipcMain.handle('get-recent-apps', () => {
-    const recentApps = Object.values(dataStorage.appData)
-      .filter(app => app.lastUsed && !app.hidden)
-      .sort((a, b) => new Date(b.lastUsed) - new Date(a.lastUsed))
-      .slice(0, 20)
-      .map(app => ({
-        ...app,
-        totalTimeFormatted: formatTime(app.totalTime),
-        lastUsedFormatted: formatLastUsed(app.lastUsed)
-      }));
-    
-    return recentApps;
-  });
-
-  ipcMain.handle('get-apps-by-category', (event, category) => {
-    let filteredApps;
-    
-    if (category === 'All Apps' || category === 'Ã°Å¸"Å¡ All Apps') {
-      filteredApps = Object.values(dataStorage.appData);
-    } else {
-      const categoryName = category.replace(/^[^\s]+\s/, '');
-      filteredApps = Object.values(dataStorage.appData).filter(app => app.category === categoryName);
+  ipcMain.handle('get-all-apps', async () => {
+    try {
+      // Verify database connection
+      const db = getDb();
+      if (!db) {
+        console.error('Database not available in get-all-apps');
+        return [];
+      }
+      const apps = await getAllApps(false);
+      
+      return apps.map(mapAppFromDb);
+    } catch (error) {
+      console.error('Error in get-all-apps handler:', error);
+      console.error('Stack:', error.stack);
+      // Return empty array instead of throwing to prevent renderer crash
+      return [];
     }
-    
-    const apps = filteredApps
-      .sort((a, b) => b.totalTime - a.totalTime)
-      .map(app => ({
-        ...app,
-        totalTimeFormatted: formatTime(app.totalTime),
-        lastUsedFormatted: formatLastUsed(app.lastUsed)
-      }));
-    
-    return apps;
+  });
+
+  ipcMain.handle('get-recent-apps', async () => {
+    try {
+      const db = getDb();
+      if (!db) {
+        console.error('Database not available in get-recent-apps');
+        return [];
+      }
+      const apps = await getRecentApps(20);
+  
+      return apps.map(mapAppFromDb);
+    } catch (error) {
+      console.error('Error in get-recent-apps handler:', error);
+      console.error('Stack:', error.stack);
+      return [];
+    }
+  });
+
+  ipcMain.handle('get-apps-by-category', async (event, category) => {
+    try {
+      const db = getDb();
+      if (!db) {
+        console.error('Database not available in get-apps-by-category');
+        return [];
+      }
+      const apps = await getAppsByCategory(category);
+      
+      return apps.map(mapAppFromDb);
+    } catch (error) {
+      console.error('Error in get-apps-by-category handler:', error);
+      console.error('Stack:', error.stack);
+      return [];
+    }
+  });
+
+  ipcMain.handle('get-hidden-apps', async () => {
+    try {
+      const db = getDb();
+      if (!db) {
+        console.error('Database not available in get-hidden-apps');
+        return [];
+      }
+      const apps = await getHiddenApps();
+      console.log(`Found ${apps.length} hidden apps`);
+      
+      return apps.map(mapAppFromDb);
+    } catch (error) {
+      console.error('Error in get-hidden-apps handler:', error);
+      console.error('Stack:', error.stack);
+      return [];
+    }
+  });
+
+  ipcMain.handle('hide-app-from-library', async (event, appId) => {
+    try {
+      const db = getDb();
+      if (!db) {
+        throw new Error('Database not available');
+      }
+
+      console.log(`Hiding app: ${appId}`);
+      await hideApp(appId);
+      return { success: true };
+    } catch (error) {
+      console.error('Error hiding app:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('restore-hidden-app', async (event, appId) => {
+    try {
+      const db = getDb();
+      if (!db) {
+        throw new Error('Database not available');
+      }
+
+      console.log(`Restoring app: ${appId}`);
+      await restoreApp(appId);
+      return { success: true };
+    } catch (error) {
+      console.error('Error restoring app:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('remove-app-from-tracker', async (event, appId) => {
+    try {
+      const db = getDb();
+      if (!db) {
+        throw new Error('Database not available');
+      }
+
+      console.log(`Removing app from tracker: ${appId}`);
+      await deleteAppAndSessions(appId);
+      return { success: true };
+    } catch (error) {
+      console.error('Error removing app:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('remove-app-permanently', async (event, appId) => {
+    try {
+      const db = getDb();
+      if (!db) {
+        throw new Error('Database not available');
+      }
+
+      const { getAppById } = require('../services/data-access');
+      const app = await getAppById(appId);
+      
+      if (!app) {
+        return { success: false, error: 'App not found' };
+      }
+      
+      console.log(`Removing app permanently: ${app.name}`);
+      await addToBlacklist({
+        name: app.name,
+        path: app.path,
+        executable: app.executable,
+        reason: 'user_removed_permanently'
+      });
+      
+      await deleteAppAndSessions(appId);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error removing app permanently:', error);
+      return { success: false, error: error.message };
+    }
   });
 
   ipcMain.handle('launch-app', async (event, appId) => {
     try {
-      const appsFilePath = path.join(__dirname, './../../../../data/apps.json');
-      const appsData = await fsPromises.readFile(appsFilePath, 'utf8');
-      const apps = JSON.parse(appsData);
-      
-      const app = apps[appId];
+      const db = getDb();
+      if (!db) {
+        throw new Error('Database not available');
+      }
+
+      const { getAppById } = require('../services/data-access');
+      const app = await getAppById(appId);
       
       if (!app || !app.path) {
         throw new Error('App not found or no executable path');
       }
+      
+      console.log(`Launching app: ${app.name} from ${app.path}`);
       
       if (process.platform === 'win32') {
         exec(`start "" "${app.path}"`, (error) => {
@@ -82,7 +217,6 @@ function initializeAppHandlers() {
         });
       }
       
-      console.log(`Launched ${app.name} from ${app.path}`);
       return { success: true };
       
     } catch (error) {
@@ -91,153 +225,256 @@ function initializeAppHandlers() {
     }
   });
 
-  ipcMain.handle('hide-app-from-library', (event, appId) => {
-    try {
-      if (!dataStorage.appData[appId]) {
-        return { success: false, error: 'App not found' };
-      }
-      
-      dataStorage.appData[appId].hidden = true;
-      dataStorage.appData[appId].hiddenAt = new Date().toISOString();
-      dataStorage.saveAppData();
-      
-      return { success: true };
-    } catch (error) {
-      console.error('Error hiding app from library:', error);
-      return { success: false, error: error.message };
-    }
-  });
-
-  ipcMain.handle('get-hidden-apps', () => {
-    const hiddenApps = Object.values(dataStorage.appData)
-      .filter(app => app.hidden)
-      .map(app => ({
-        ...app,
-        totalTimeFormatted: formatTime(app.totalTime),
-        lastUsedFormatted: formatLastUsed(app.lastUsed)
-      }));
+  ipcMain.handle('get-app-details', async (event, appId) => {
+    const db = getDb();
     
-    return hiddenApps;
-  });
-
-  ipcMain.handle('restore-hidden-app', (event, appId) => {
     try {
-      if (dataStorage.appData[appId] && dataStorage.appData[appId].hidden) {
-        delete dataStorage.appData[appId].hidden;
-        delete dataStorage.appData[appId].hiddenAt;
-        dataStorage.saveAppData();
-        return { success: true };
+      // Get app info
+      const app = await db.get(`
+        SELECT * FROM apps WHERE id = ?
+      `, [appId]);
+
+      if (!app) {
+        throw new Error('App not found');
       }
-      return { success: false, error: 'App not found or not hidden' };
+
+      // Get total sessions count
+      const sessionCount = await db.get(`
+        SELECT COUNT(*) as count FROM sessions WHERE app_id = ?
+      `, [appId]);
+
+      // Get last 7 days usage
+      const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+      const weeklyUsage = await db.all(`
+        SELECT 
+          DATE(start_time / 1000, 'unixepoch') as date,
+          SUM(duration) as total_duration
+        FROM sessions
+        WHERE app_id = ? AND start_time >= ?
+        GROUP BY date
+        ORDER BY date ASC
+      `, [appId, sevenDaysAgo]);
+
+      // Get this week's total time
+      const thisWeek = await db.get(`
+        SELECT SUM(duration) as total FROM sessions 
+        WHERE app_id = ? AND start_time >= ?
+      `, [appId, sevenDaysAgo]);
+
+      // Get longest session
+      const longestSession = await db.get(`
+        SELECT MAX(duration) as longest FROM sessions WHERE app_id = ?
+      `, [appId]);
+
+      // Get average session
+      const avgSession = await db.get(`
+        SELECT AVG(duration) as average FROM sessions WHERE app_id = ?
+      `, [appId]);
+
+      // Get current streak (consecutive days)
+      const streak = await calculateStreak(db, appId);
+
+      // Get recent sessions (last 10)
+      const recentSessions = await db.all(`
+        SELECT * FROM sessions 
+        WHERE app_id = ? 
+        ORDER BY start_time DESC 
+        LIMIT 10
+      `, [appId]);
+
+      // Get today's activity by hour
+      const todayStart = new Date().setHours(0, 0, 0, 0);
+      const todayActivity = await db.all(`
+        SELECT
+          CAST(strftime('%H', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as hour,
+          SUM(duration) as total_duration
+        FROM sessions
+        WHERE app_id = ? AND start_time >= ?
+        GROUP BY hour
+        ORDER BY hour
+      `, [appId, todayStart]);
+
+      // Test: Check if sessions exist for this app
+      const testSessions = await db.get(`
+        SELECT COUNT(*) as total FROM sessions WHERE app_id = ?
+      `, [appId]);
+
+      // Get last 30 days usage for monthly view
+      const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+
+      const monthlyUsage = await db.all(`
+        SELECT
+          DATE(start_time / 1000, 'unixepoch') as date,
+          SUM(duration) as total_duration,
+          COUNT(*) as session_count
+        FROM sessions
+        WHERE app_id = ? AND start_time >= ?
+        GROUP BY date
+        ORDER BY date ASC
+      `, [appId, thirtyDaysAgo]);
+
+      // Get usage by day of week
+      const dayOfWeekUsage = await db.all(`
+        SELECT
+          CAST(strftime('%w', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as day_of_week,
+          SUM(duration) as total_duration,
+          COUNT(*) as session_count
+        FROM sessions
+        WHERE app_id = ?
+        GROUP BY day_of_week
+        ORDER BY day_of_week
+      `, [appId]);
+
+      // Get session duration distribution
+      const sessionDurations = await db.all(`
+        SELECT duration FROM sessions WHERE app_id = ?
+      `, [appId]);
+
+      // Get all sessions for heatmap (last 90 days)
+      const ninetyDaysAgo = Date.now() - (90 * 24 * 60 * 60 * 1000);
+      const heatmapData = await db.all(`
+        SELECT
+          CAST(strftime('%w', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as day_of_week,
+          CAST(strftime('%H', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as hour,
+          SUM(duration) as total_duration
+        FROM sessions
+        WHERE app_id = ? AND start_time >= ?
+        GROUP BY day_of_week, hour
+      `, [appId, ninetyDaysAgo]);
+
+      // Get category ranking
+      const categoryRanking = await db.all(`
+        SELECT id, name, total_time
+        FROM apps
+        WHERE category = ? AND hidden = 0
+        ORDER BY total_time DESC
+      `, [app.category]);
+
+      const appRankInCategory = categoryRanking.findIndex(a => a.id === appId) + 1;
+
+      // Get total time for all apps
+      const totalAllApps = await db.get(`
+        SELECT SUM(total_time) as total FROM apps WHERE hidden = 0
+      `);
+
+      const usagePercentage = totalAllApps?.total > 0
+        ? (app.total_time / totalAllApps.total) * 100
+        : 0;
+
+      // Get last week's time for comparison
+      const twoWeeksAgo = Date.now() - (14 * 24 * 60 * 60 * 1000);
+      const lastWeek = await db.get(`
+        SELECT SUM(duration) as total FROM sessions
+        WHERE app_id = ? AND start_time >= ? AND start_time < ?
+      `, [appId, twoWeeksAgo, sevenDaysAgo]);
+
+      // Get streak history (all streaks)
+      const streakHistory = await calculateStreakHistory(db, appId);
+
+      const result = {
+        app,
+        stats: {
+          totalTime: app.total_time || 0,
+          thisWeek: thisWeek?.total || 0,
+          lastWeek: lastWeek?.total || 0,
+          sessionCount: sessionCount?.count || 0,
+          streak: streak,
+          longestSession: longestSession?.longest || 0,
+          avgSession: avgSession?.average || 0,
+          firstUsed: app.first_used,
+          categoryRank: appRankInCategory,
+          totalInCategory: categoryRanking.length,
+          usagePercentage: usagePercentage
+        },
+        weeklyUsage,
+        monthlyUsage,
+        dayOfWeekUsage,
+        sessionDurations: sessionDurations ? sessionDurations.map(s => s.duration) : [],
+        heatmapData,
+        streakHistory,
+        recentSessions,
+        todayActivity
+      };
+
+      return result;
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Error fetching app details:', error);
+      throw error;
     }
   });
 
-  ipcMain.handle('remove-app-from-tracker', async (event, appId) => {
-    try {
-      if (!dataStorage.appData[appId]) {
-        return { success: false, error: 'App not found' };
-      }
-      
-      console.log(`Starting removal of app: ${appId}`);
-      
-      const { stopTrackingSystem, startTrackingSystem } = require('../services/app-tracking');
-      stopTrackingSystem();
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      delete dataStorage.appData[appId];
-      
-      if (dataStorage.sessionsData && Array.isArray(dataStorage.sessionsData)) {
-        const beforeCount = dataStorage.sessionsData.length;
-        dataStorage.sessionsData = dataStorage.sessionsData.filter(session => session.appId !== appId);
-        console.log(`Removed ${beforeCount - dataStorage.sessionsData.length} sessions from memory`);
-      }
-      
-      dataStorage.saveSessionsData();
-      
-      const favoritesPath = path.join(__dirname, './../../../../data/', 'favorites.json');
-      try {
-        if (fs.existsSync(favoritesPath)) {
-          const favoritesData = await fsPromises.readFile(favoritesPath, 'utf8');
-          let favorites = JSON.parse(favoritesData);
-          favorites = favorites.filter(id => id !== appId);
-          await fsPromises.writeFile(favoritesPath, JSON.stringify(favorites, null, 2));
-        }
-      } catch (favError) {
-        console.log('Favorites file error:', favError.message);
-      }
-      
-      dataStorage.saveAppData();
-      startTrackingSystem();
-      
-      console.log(`Successfully removed app ${appId} from tracker`);
-      return { success: true };
-    } catch (error) {
-      console.error('Error removing app from tracker:', error);
-      try {
-        const { startTrackingSystem } = require('../services/app-tracking');
-        startTrackingSystem();
-      } catch (restartError) {
-        console.error('Failed to restart tracking system:', restartError);
-      }
-      return { success: false, error: error.message };
-    }
-  });
+  console.log('App IPC handlers initialized');
+}
 
-  ipcMain.handle('remove-app-permanently', async (event, appId) => {
-    try {
-      if (!dataStorage.appData[appId]) {
-        return { success: false, error: 'App not found' };
-      }
-      
-      const app = dataStorage.appData[appId];
-      
-      if (!dataStorage.blacklistedApps) {
-        dataStorage.blacklistedApps = [];
-      }
-      
-      dataStorage.blacklistedApps.push({
-        name: app.name,
-        path: app.path,
-        executable: app.executable,
-        blacklistedAt: new Date().toISOString(),
-        reason: 'user_removed_permanently'
-      });
-      
-      delete dataStorage.appData[appId];
-      
-      const sessionsPath = path.join(__dirname, './../../../../data/', 'sessions.json');
-      try {
-        const sessionsData = await fsPromises.readFile(sessionsPath, 'utf8');
-        let sessions = JSON.parse(sessionsData);
-        sessions = sessions.filter(session => session.appId !== appId);
-        await fsPromises.writeFile(sessionsPath, JSON.stringify(sessions, null, 2));
-      } catch (error) {
-        console.log('No sessions file found or error reading sessions:', error.message);
-      }
-      
-      const favoritesPath = path.join(__dirname, './../../../../data/', 'favorites.json');
-      try {
-        const favoritesData = await fsPromises.readFile(favoritesPath, 'utf8');
-        let favorites = JSON.parse(favoritesData);
-        favorites = favorites.filter(id => id !== appId);
-        await fsPromises.writeFile(favoritesPath, JSON.stringify(favorites, null, 2));
-      } catch (error) {
-        console.log('No favorites file found or error reading favorites:', error.message);
-      }
-      
-      dataStorage.saveAppData();
-      dataStorage.saveBlacklistedApps();
-      
-      console.log(`Permanently removed app ${appId} and added to blacklist`);
-      return { success: true };
-    } catch (error) {
-      console.error('Error removing app permanently:', error);
-      return { success: false, error: error.message };
+async function calculateStreak(db, appId) {
+  const sessions = await db.all(`
+    SELECT DISTINCT DATE(start_time / 1000, 'unixepoch') as date
+    FROM sessions
+    WHERE app_id = ?
+    ORDER BY date DESC
+  `, [appId]);
+
+  if (sessions.length === 0) return 0;
+
+  let streak = 0;
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+  // Check if there's activity today or yesterday
+  if (sessions[0].date !== today && sessions[0].date !== yesterday) {
+    return 0;
+  }
+
+  let currentDate = new Date(sessions[0].date);
+
+  for (let i = 0; i < sessions.length; i++) {
+    const sessionDate = new Date(sessions[i].date);
+    const diffDays = Math.floor((currentDate - sessionDate) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      streak++;
+    } else if (diffDays === 1) {
+      streak++;
+      currentDate = sessionDate;
+    } else {
+      break;
     }
-  });
+  }
+
+  return streak;
+}
+
+async function calculateStreakHistory(db, appId) {
+  const sessions = await db.all(`
+    SELECT DISTINCT DATE(start_time / 1000, 'unixepoch') as date
+    FROM sessions
+    WHERE app_id = ?
+    ORDER BY date DESC
+  `, [appId]);
+
+  if (sessions.length === 0) return [];
+
+  const streaks = [];
+  let currentStreak = { start: sessions[0].date, end: sessions[0].date, length: 1 };
+
+  for (let i = 1; i < sessions.length; i++) {
+    const currentDate = new Date(sessions[i - 1].date);
+    const prevDate = new Date(sessions[i].date);
+    const diffDays = Math.floor((currentDate - prevDate) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+      currentStreak.start = sessions[i].date;
+      currentStreak.length++;
+    } else {
+      streaks.push({ ...currentStreak });
+      currentStreak = { start: sessions[i].date, end: sessions[i].date, length: 1 };
+    }
+  }
+
+  streaks.push(currentStreak);
+
+  // Return top 5 longest streaks
+  return streaks.sort((a, b) => b.length - a.length).slice(0, 5);
 }
 
 module.exports = { initializeAppHandlers };

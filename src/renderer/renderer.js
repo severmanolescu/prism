@@ -195,6 +195,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Clear navigation selection
         document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
     }
+
+    const analyticsButton = document.getElementById("analytics");
+
+    if (analyticsButton) {
+        analyticsButton.addEventListener('click', (e) => {
+            showAnalyticsView();
+        });
+    }
     
     // Initialize the app
     console.log('Steam Time Tracker initialized!');

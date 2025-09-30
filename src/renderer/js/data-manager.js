@@ -179,6 +179,10 @@ async function groupAppsByCategory(apps) {
             }
         });
         
+        Object.keys(appsByCategory).forEach(categoryName => {
+            appsByCategory[categoryName].apps.sort((a, b) => b.totalTime - a.totalTime);
+        });
+
         return appsByCategory;
     } catch (error) {
         console.error('Error in groupAppsByCategory:', error);

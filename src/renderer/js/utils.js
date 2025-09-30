@@ -59,15 +59,28 @@ async function getCategoryColor(categoryName) {
     return category ? (category.color || '#092442') : '#092442';
 }
 
-function formatTime(seconds) {
-    if (seconds < 60) return `${seconds}s`;
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-    
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    
-    if (minutes === 0) return `${hours}h`;
-    return `${hours}h ${minutes}m`;
+function formatTime(milliseconds) {
+  if (!milliseconds || milliseconds === 0) {
+    return '0s';
+  }
+
+  // Convert milliseconds to seconds
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  
+  if (totalSeconds < 60) {
+    return `${totalSeconds}s`;
+  }
+  
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  
+  if (totalMinutes < 60) {
+    return `${totalMinutes}m`;
+  }
+  
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  
+  return `${hours}h ${minutes}m`;
 }
 
 function displayCurrentTime() {

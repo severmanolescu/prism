@@ -5,9 +5,7 @@ const AutoLaunch = require('auto-launch');
 
 fs.appendFileSync('log.txt', 'App started\n');
 
-const utils = require('./src/main/utils/utils');
 const dataStorage = require('./src/main/services/data-storage');
-const appManagement = require('./src/main/services/app-management');
 const appTracking = require('./src/main/services/app-tracking');
 const { initializeIpcHandlers } = require('./src/main/ipc');
 
@@ -28,36 +26,77 @@ let mainWindow;
 
 const { initDataStorage } = dataStorage;
 const { startTrackingSystem, stopTrackingSystem } = appTracking;
+const { initDatabase, checkMigration, getDb } = require('./src/main/services/database');
 
 // App lifecycle
-app.whenReady().then(() => {
-  // Register a custom protocol to serve icon files
-  protocol.handle('app-icon', (request) => {
-    const iconName = request.url.replace('app-icon://', '');
-    const iconPath = path.join(__dirname, 'icons', iconName);
+app.whenReady().then(async () => {
+  try {
+    // Register a custom protocol to serve icon files
+    protocol.handle('app-icon', (request) => {
+      const iconName = request.url.replace('app-icon://', '');
+      const iconPath = path.join(__dirname, 'icons', iconName);
+      
+      if (fs.existsSync(iconPath)) {
+        return net.fetch(`file://${iconPath}`);
+      } else {
+        return new Response('Icon not found', { status: 404 });
+      }
+    });
+
+    // Initialize database FIRST and wait for it
+    console.log('Initializing database...');
+    await initDatabase();
+    console.log('Database initialized');
     
-    if (fs.existsSync(iconPath)) {
-      return net.fetch(`file://${iconPath}`);
-    } else {
-      return new Response('Icon not found', { status: 404 });
+    await checkMigration();
+    console.log('Migration checked');
+
+    // Verify database is accessible
+    const db = getDb();
+    if (!db) {
+      console.error('ERROR: Database not initialized properly!');
+      fs.appendFileSync('log.txt', 'ERROR: Database is null\n');
+      throw new Error('Database initialization failed');
     }
-  });
+    
+    // Test database connection
+    try {
+      await db.get('SELECT 1');
+      console.log('Database connection verified');
+    } catch (dbError) {
+      console.error('Database connection test failed:', dbError);
+      fs.appendFileSync('log.txt', `Database test failed: ${dbError.message}\n`);
+      throw dbError;
+    }
 
-  initDataStorage();
-  const window = createWindow();
-  initializeIpcHandlers(window);
+    initDataStorage();
+    const window = createWindow();
+    
+    // Initialize IPC handlers AFTER database is ready
+    initializeIpcHandlers(window);
+    console.log('IPC handlers initialized');
 
-  const appTracking = require('./src/main/services/app-tracking');
-  appTracking.setMainWindow(window);
+    const appTracking = require('./src/main/services/app-tracking');
+    appTracking.setMainWindow(window);
 
-  initAutoLaunch();
+    initAutoLaunch();
 
-  createTray();
+    createTray();
 
-  const shouldStartHidden = process.argv.includes('--hidden');
-  
-  if (!shouldStartHidden) {
-    window.show();
+    const shouldStartHidden = process.argv.includes('--hidden');
+    
+    if (!shouldStartHidden) {
+      window.show();
+    }
+    
+  } catch (error) {
+    console.error('Error during app initialization:', error);
+    fs.appendFileSync('log.txt', `Initialization error: ${error.message}\n${error.stack}\n`);
+    // Show error dialog to user
+    const { dialog } = require('electron');
+    dialog.showErrorBox('Initialization Error', 
+      `Failed to initialize the application: ${error.message}\n\nPlease check the log.txt file for details.`);
+    app.quit();
   }
 });
 

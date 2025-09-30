@@ -1,0 +1,1158 @@
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Motiva Sans", Arial, Helvetica, sans-serif;
+    background: #1b2838;
+    color: #acb2b8;
+    padding: 20px;
+    font-size: 12px;
+  }
+
+  .analytics-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .analytics-header {
+    margin-bottom: 20px;
+  }
+
+  .analytics-header h1 {
+    color: #66c0f4;
+    font-size: 14px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+
+  .date-range-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .time-range-selector {
+    display: flex;
+    gap: 4px;
+  }
+
+  .time-range-btn {
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #8f98a0;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  .time-range-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #c6d4df;
+  }
+
+  .time-range-btn.active {
+    background: linear-gradient(135deg, #092442 0%, #07417a 80%);
+    color: #ffffff;
+    border-color: rgba(102, 192, 244, 0.3);
+  }
+
+  .custom-date-picker {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+
+  .custom-date-picker input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #acb2b8;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-family: inherit;
+  }
+
+  .custom-date-picker input:focus {
+    outline: none;
+    border-color: #66c0f4;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .custom-date-picker span {
+    color: #8f98a0;
+    font-size: 11px;
+  }
+
+  .date-info {
+    padding: 6px 12px;
+    background: rgba(102, 192, 244, 0.1);
+    border: 1px solid rgba(102, 192, 244, 0.2);
+    border-radius: 3px;
+    color: #66c0f4;
+    font-size: 11px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: #16202d;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 16px;
+    transition: all 0.2s ease;
+  }
+
+  .stat-card:hover {
+    border-color: #66c0f4;
+    transform: translateY(-2px);
+  }
+
+  .stat-label {
+    color: #8f98a0;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    color: #66c0f4;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .stat-subtitle {
+    color: #8f98a0;
+    font-size: 10px;
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .chart-card {
+    background: #16202d;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 20px;
+  }
+
+  .chart-header {
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 8px;
+  }
+
+  .chart-title {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .chart-subtitle {
+    color: #8f98a0;
+    font-size: 10px;
+  }
+
+  .daily-usage-chart {
+    height: 250px;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    padding: 20px 0;
+  }
+
+  .bar {
+    flex: 1;
+    background: linear-gradient(to top, #66c0f4, #417a9b);
+    border-radius: 3px 3px 0 0;
+    position: relative;
+    transition: all 0.2s ease;
+    opacity: 0.8;
+  }
+
+  .bar:hover {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+
+  .bar-label {
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: #8f98a0;
+    white-space: nowrap;
+  }
+
+  .bar-value {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #66c0f4;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .top-apps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .app-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 3px;
+    transition: all 0.2s ease;
+  }
+
+  .app-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(2px);
+  }
+
+  .app-rank {
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(135deg, #66c0f4, #417a9b);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1b2838;
+    font-weight: 700;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  .app-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .app-name {
+    color: #c6d4df;
+    font-size: 12px;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .app-time {
+    color: #66c0f4;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .full-width-section {
+    margin-bottom: 20px;
+  }
+
+  .section-header {
+    font-size: 14px;
+    color: #66c0f4;
+    font-weight: 400;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+  }
+
+  .section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, #66c0f4, transparent);
+    margin-left: 12px;
+  }
+
+  .apps-used-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+
+  .app-used-card {
+    width: 150px;
+    height: 200px;
+    background: #16202d;
+    border: 1px solid #1e2328;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+
+  .app-used-card:hover {
+    border-color: #66c0f4;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  .app-used-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #d95d5d 0%, #c44b4b 80%);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .app-used-bg > * {
+    margin-top: 35%;
+  }
+
+  .app-used-icon {
+    font-size: 40px;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .app-used-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.85) 70%);
+    padding: 8px 10px;
+  }
+
+  .app-used-name {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .app-used-time {
+    color: #66c0f4;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+  }
+
+  .category-item {
+    background: #16202d;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 3px solid;
+    padding: 14px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .category-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+    transform: translateX(2px);
+  }
+
+  .category-name {
+    color: #c6d4df;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .category-time {
+    color: #66c0f4;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .category-percentage {
+    color: #8f98a0;
+    font-size: 10px;
+  }
+
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 10px;
+  }
+
+  .insight-card {
+    background: rgba(102, 192, 244, 0.05);
+    border: 1px solid rgba(102, 192, 244, 0.2);
+    border-radius: 4px;
+    padding: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .insight-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #66c0f4, #417a9b);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .insight-content {
+    flex: 1;
+  }
+
+  .insight-title {
+    color: #66c0f4;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .insight-text {
+    color: #acb2b8;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  /* Session Timeline */
+  .timeline-container {
+    background: #16202d;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .timeline-hours {
+    display: grid;
+    grid-template-columns: repeat(24, 1fr);
+    gap: 2px;
+    margin-top: 12px;
+    position: relative;
+  }
+
+  .timeline-hour-label {
+    font-size: 9px;
+    color: #8f98a0;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .timeline-bar-container {
+    height: 30px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .timeline-segment {
+    position: absolute;
+    height: 100%;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .timeline-segment:hover {
+    filter: brightness(1.2);
+    z-index: 10;
+  }
+
+  /* Hourly Heatmap */
+  .heatmap-grid {
+    display: grid;
+    grid-template-columns: auto repeat(24, 1fr);
+    gap: 2px;
+    margin-top: 12px;
+  }
+
+  .heatmap-label {
+    font-size: 10px;
+    color: #8f98a0;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+  }
+
+  .heatmap-hour {
+    font-size: 9px;
+    color: #8f98a0;
+    text-align: center;
+    padding: 2px;
+  }
+
+  .heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .heatmap-cell:hover {
+    transform: scale(1.1);
+    z-index: 10;
+  }
+
+  /* App Detail Modal */
+  .app-detail-section {
+    background: #16202d;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .detail-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .detail-stat {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 12px;
+  }
+
+  .detail-stat-label {
+    color: #8f98a0;
+    font-size: 10px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .detail-stat-value {
+    color: #66c0f4;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  /* Sessions List */
+  .sessions-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 12px;
+  }
+
+  .session-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+  }
+
+  .session-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #66c0f4;
+  }
+
+  .session-time {
+    color: #acb2b8;
+    font-size: 11px;
+  }
+
+  .session-duration {
+    color: #66c0f4;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .sessions-list::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sessions-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .sessions-list::-webkit-scrollbar-thumb {
+    background: rgba(102, 192, 244, 0.3);
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+<div class="analytics-container">
+  <div class="analytics-header">
+    <h1>Analytics</h1>
+    
+    <div class="date-range-controls">
+      <div class="time-range-selector">
+        <button class="time-range-btn">Today</button>
+        <button class="time-range-btn active">Week</button>
+        <button class="time-range-btn">Month</button>
+        <button class="time-range-btn">Year</button>
+        <button class="time-range-btn">All Time</button>
+      </div>
+      
+      <div class="custom-date-picker">
+        <span>Custom:</span>
+        <input type="date" value="2025-09-24">
+        <span>to</span>
+        <input type="date" value="2025-09-30">
+      </div>
+      
+      <div class="date-info">
+        7 days of data available
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Time</div>
+      <div class="stat-value">52h 18m</div>
+      <div class="stat-subtitle">↑ 12% from last week</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Daily Average</div>
+      <div class="stat-value">7h 28m</div>
+      <div class="stat-subtitle">Across 7 days</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Unique Apps</div>
+      <div class="stat-value">31</div>
+      <div class="stat-subtitle">8 new this week</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Sessions</div>
+      <div class="stat-value">247</div>
+      <div class="stat-subtitle">Avg. 12.7 min</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Most Active</div>
+      <div class="stat-value">9h 21m</div>
+      <div class="stat-subtitle">Friday, Sep 27</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Least Active</div>
+      <div class="stat-value">5h 41m</div>
+      <div class="stat-subtitle">Thursday, Sep 26</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">Daily Usage</div>
+        <div class="chart-subtitle">Sep 24 - Sep 30, 2025</div>
+      </div>
+      <div class="daily-usage-chart">
+        <div class="bar" style="height: 60%;">
+          <span class="bar-value">6h 12m</span>
+          <span class="bar-label">Mon 24</span>
+        </div>
+        <div class="bar" style="height: 75%;">
+          <span class="bar-value">7h 45m</span>
+          <span class="bar-label">Tue 25</span>
+        </div>
+        <div class="bar" style="height: 85%;">
+          <span class="bar-value">8h 52m</span>
+          <span class="bar-label">Wed 26</span>
+        </div>
+        <div class="bar" style="height: 55%;">
+          <span class="bar-value">5h 41m</span>
+          <span class="bar-label">Thu 27</span>
+        </div>
+        <div class="bar" style="height: 90%;">
+          <span class="bar-value">9h 21m</span>
+          <span class="bar-label">Fri 28</span>
+        </div>
+        <div class="bar" style="height: 70%;">
+          <span class="bar-value">7h 18m</span>
+          <span class="bar-label">Sat 29</span>
+        </div>
+        <div class="bar" style="height: 68%;">
+          <span class="bar-value">7h 9m</span>
+          <span class="bar-label">Sun 30</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">Top Applications</div>
+        <div class="chart-subtitle">By time used</div>
+      </div>
+      <div class="top-apps-list">
+        <div class="app-row">
+          <div class="app-rank">1</div>
+          <div class="app-info">
+            <div class="app-name">Visual Studio Code</div>
+          </div>
+          <div class="app-time">18h 42m</div>
+        </div>
+        <div class="app-row">
+          <div class="app-rank">2</div>
+          <div class="app-info">
+            <div class="app-name">Google Chrome</div>
+          </div>
+          <div class="app-time">12h 15m</div>
+        </div>
+        <div class="app-row">
+          <div class="app-rank">3</div>
+          <div class="app-info">
+            <div class="app-name">Spotify</div>
+          </div>
+          <div class="app-time">8h 34m</div>
+        </div>
+        <div class="app-row">
+          <div class="app-rank">4</div>
+          <div class="app-info">
+            <div class="app-name">Slack</div>
+          </div>
+          <div class="app-time">5h 22m</div>
+        </div>
+        <div class="app-row">
+          <div class="app-rank">5</div>
+          <div class="app-info">
+            <div class="app-name">Discord</div>
+          </div>
+          <div class="app-time">4h 51m</div>
+        </div>
+        <div class="app-row">
+          <div class="app-rank">6</div>
+          <div class="app-info">
+            <div class="app-name">Outlook</div>
+          </div>
+          <div class="app-time">3h 12m</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- All Apps Used -->
+  <div class="full-width-section">
+    <h3 class="section-header">All Applications (31)</h3>
+    <div class="apps-used-grid">
+      <div class="app-used-card">
+        <div class="app-used-bg" style="background: linear-gradient(135deg, #d95d5d 0%, #c44b4b 80%);">
+          <div class="app-used-icon">💻</div>
+        </div>
+        <div class="app-used-overlay">
+          <div class="app-used-name">VS Code</div>
+          <div class="app-used-time">18h 42m</div>
+        </div>
+      </div>
+      <div class="app-used-card">
+        <div class="app-used-bg" style="background: linear-gradient(135deg, #7d8c9a 0%, #6a7785 80%);">
+          <div class="app-used-icon">🌐</div>
+        </div>
+        <div class="app-used-overlay">
+          <div class="app-used-name">Chrome</div>
+          <div class="app-used-time">12h 15m</div>
+        </div>
+      </div>
+      <div class="app-used-card">
+        <div class="app-used-bg" style="background: linear-gradient(135deg, #9b7dd9 0%, #8566c4 80%);">
+          <div class="app-used-icon">🎵</div>
+        </div>
+        <div class="app-used-overlay">
+          <div class="app-used-name">Spotify</div>
+          <div class="app-used-time">8h 34m</div>
+        </div>
+      </div>
+      <div class="app-used-card">
+        <div class="app-used-bg" style="background: linear-gradient(135deg, #d9a05d 0%, #c48b4b 80%);">
+          <div class="app-used-icon">💬</div>
+        </div>
+        <div class="app-used-overlay">
+          <div class="app-used-name">Slack</div>
+          <div class="app-used-time">5h 22m</div>
+        </div>
+      </div>
+      <div class="app-used-card">
+        <div class="app-used-bg" style="background: linear-gradient(135deg, #5d9bd9 0%, #4b86c4 80%);">
+          <div class="app-used-icon">🎮</div>
+        </div>
+        <div class="app-used-overlay">
+          <div class="app-used-name">Discord</div>
+          <div class="app-used-time">4h 51m</div>
+        </div>
+      </div>
+      <div class="app-used-card">
+        <div class="app-used-bg" style="background: linear-gradient(135deg, #5dd9a0 0%, #4bc48b 80%);">
+          <div class="app-used-icon">📧</div>
+        </div>
+        <div class="app-used-overlay">
+          <div class="app-used-name">Outlook</div>
+          <div class="app-used-time">3h 12m</div>
+        </div>
+      </div>
+      <div class="app-used-card">
+        <div class="app-used-bg" style="background: linear-gradient(135deg, #d95da0 0%, #c44b8b 80%);">
+          <div class="app-used-icon">🖼️</div>
+        </div>
+        <div class="app-used-overlay">
+          <div class="app-used-name">Photoshop</div>
+          <div class="app-used-time">2h 45m</div>
+        </div>
+      </div>
+      <div class="app-used-card">
+        <div class="app-used-bg" style="background: linear-gradient(135deg, #a05dd9 0%, #8b4bc4 80%);">
+          <div class="app-used-icon">📝</div>
+        </div>
+        <div class="app-used-overlay">
+          <div class="app-used-name">Notion</div>
+          <div class="app-used-time">2h 18m</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Breakdown -->
+  <div class="full-width-section">
+    <h3 class="section-header">Category Breakdown</h3>
+    <div class="category-grid">
+      <div class="category-item" style="border-left-color: #66c0f4;">
+        <div class="category-name">💻 Development</div>
+        <div class="category-time">22h 15m</div>
+        <div class="category-percentage">42.5% of total time</div>
+      </div>
+      <div class="category-item" style="border-left-color: #f39c12;">
+        <div class="category-name">🌐 Browsing</div>
+        <div class="category-time">14h 30m</div>
+        <div class="category-percentage">27.7% of total time</div>
+      </div>
+      <div class="category-item" style="border-left-color: #e74c3c;">
+        <div class="category-name">💬 Communication</div>
+        <div class="category-time">8h 45m</div>
+        <div class="category-percentage">16.7% of total time</div>
+      </div>
+      <div class="category-item" style="border-left-color: #9b59b6;">
+        <div class="category-name">🎵 Entertainment</div>
+        <div class="category-time">4h 22m</div>
+        <div class="category-percentage">8.4% of total time</div>
+      </div>
+      <div class="category-item" style="border-left-color: #2ecc71;">
+        <div class="category-name">📝 Productivity</div>
+        <div class="category-time">2h 26m</div>
+        <div class="category-percentage">4.7% of total time</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Insights -->
+  <div class="full-width-section">
+    <h3 class="section-header">Insights</h3>
+    <div class="insights-grid">
+      <div class="insight-card">
+        <div class="insight-icon">📅</div>
+        <div class="insight-content">
+          <div class="insight-title">Period Summary</div>
+          <div class="insight-text">Data from Sep 24 to Sep 30. Total of 247 sessions tracked.</div>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📈</div>
+        <div class="insight-content">
+          <div class="insight-title">Productivity Increased</div>
+          <div class="insight-text">Development time up 18% compared to previous period.</div>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">⏰</div>
+        <div class="insight-content">
+          <div class="insight-title">Peak Activity Hours</div>
+          <div class="insight-text">Most active between 2 PM - 6 PM (22h total).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Timeline -->
+  <div class="full-width-section">
+    <div class="timeline-container">
+      <div class="chart-header">
+        <div class="chart-title">Today's Session Timeline</div>
+        <div class="chart-subtitle">Visual representation of your activity throughout the day</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; margin-top: 12px;">
+        <div style="grid-column: span 24; display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px;">
+          <div class="timeline-hour-label">0</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">2</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">4</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">6</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">8</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">10</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">12</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">14</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">16</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">18</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">20</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">22</div>
+          <div class="timeline-hour-label"></div>
+        </div>
+        <div style="grid-column: span 24; position: relative; height: 30px; background: rgba(255, 255, 255, 0.02); border-radius: 2px;">
+          <!-- VS Code 8:30-11:00 -->
+          <div style="position: absolute; left: 35.4%; width: 10.4%; height: 100%; background: linear-gradient(135deg, #d95d5d, #c44b4b); border-radius: 2px;" title="VS Code: 8:30-11:00"></div>
+          <!-- Chrome 11:00-13:30 -->
+          <div style="position: absolute; left: 45.8%; width: 10.4%; height: 100%; background: linear-gradient(135deg, #7d8c9a, #6a7785); border-radius: 2px;" title="Chrome: 11:00-13:30"></div>
+          <!-- Slack 13:30-14:00 -->
+          <div style="position: absolute; left: 56.2%; width: 2.1%; height: 100%; background: linear-gradient(135deg, #d9a05d, #c48b4b); border-radius: 2px;" title="Slack: 13:30-14:00"></div>
+          <!-- VS Code 14:00-18:00 -->
+          <div style="position: absolute; left: 58.3%; width: 16.7%; height: 100%; background: linear-gradient(135deg, #d95d5d, #c44b4b); border-radius: 2px;" title="VS Code: 14:00-18:00"></div>
+          <!-- Spotify 18:00-20:30 -->
+          <div style="position: absolute; left: 75%; width: 10.4%; height: 100%; background: linear-gradient(135deg, #9b7dd9, #8566c4); border-radius: 2px;" title="Spotify: 18:00-20:30"></div>
+          <!-- Discord 20:30-22:00 -->
+          <div style="position: absolute; left: 85.4%; width: 6.25%; height: 100%; background: linear-gradient(135deg, #5d9bd9, #4b86c4); border-radius: 2px;" title="Discord: 20:30-22:00"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hourly Heatmap -->
+  <div class="full-width-section">
+    <div class="timeline-container">
+      <div class="chart-header">
+        <div class="chart-title">Hourly Activity Heatmap</div>
+        <div class="chart-subtitle">Usage intensity by hour for top apps</div>
+      </div>
+      <div class="heatmap-grid">
+        <div></div>
+        <div class="heatmap-hour">0</div>
+        <div class="heatmap-hour">1</div>
+        <div class="heatmap-hour">2</div>
+        <div class="heatmap-hour">3</div>
+        <div class="heatmap-hour">4</div>
+        <div class="heatmap-hour">5</div>
+        <div class="heatmap-hour">6</div>
+        <div class="heatmap-hour">7</div>
+        <div class="heatmap-hour">8</div>
+        <div class="heatmap-hour">9</div>
+        <div class="heatmap-hour">10</div>
+        <div class="heatmap-hour">11</div>
+        <div class="heatmap-hour">12</div>
+        <div class="heatmap-hour">13</div>
+        <div class="heatmap-hour">14</div>
+        <div class="heatmap-hour">15</div>
+        <div class="heatmap-hour">16</div>
+        <div class="heatmap-hour">17</div>
+        <div class="heatmap-hour">18</div>
+        <div class="heatmap-hour">19</div>
+        <div class="heatmap-hour">20</div>
+        <div class="heatmap-hour">21</div>
+        <div class="heatmap-hour">22</div>
+        <div class="heatmap-hour">23</div>
+        
+        <div class="heatmap-label">VS Code</div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.5);" title="8:00 - 2.5h"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.8);" title="9:00 - 3.2h"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.6);" title="10:00 - 2.8h"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.3);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.2);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.2);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.9);" title="14:00 - 3.5h"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 1);" title="15:00 - 4h"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.95);" title="16:00 - 3.8h"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.7);" title="17:00 - 3h"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.2);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
+        
+        <div class="heatmap-label">Chrome</div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.2);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.3);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.4);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.8);" title="11:00 - 2h"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.9);" title="12:00 - 2.5h"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.6);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.4);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.3);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.2);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.2);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
+        
+        <div class="heatmap-label">Spotify</div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.3);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.5);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.4);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.3);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.2);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.2);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.4);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.5);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.6);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.7);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.95);" title="18:00 - 1.5h"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 1);" title="19:00 - 2h"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.8);" title="20:00 - 1.2h"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.4);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.2);"></div>
+        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Detail Breakdown -->
+  <div class="full-width-section">
+    <div class="app-detail-section">
+      <div class="chart-header">
+        <div class="chart-title">Detailed Breakdown: Visual Studio Code</div>
+        <div class="chart-subtitle">Complete session analysis for Sep 30, 2025</div>
+      </div>
+      
+      <div class="detail-stats-grid">
+        <div class="detail-stat">
+          <div class="detail-stat-label">Total Time</div>
+          <div class="detail-stat-value">18h 42m</div>
+        </div>
+        <div class="detail-stat">
+          <div class="detail-stat-label">Sessions</div>
+          <div class="detail-stat-value">8</div>
+        </div>
+        <div class="detail-stat">
+          <div class="detail-stat-label">First Session</div>
+          <div class="detail-stat-value">08:30</div>
+        </div>
+        <div class="detail-stat">
+          <div class="detail-stat-label">Last Session</div>
+          <div class="detail-stat-value">22:15</div>
+        </div>
+        <div class="detail-stat">
+          <div class="detail-stat-label">Longest Session</div>
+          <div class="detail-stat-value">4h 12m</div>
+        </div>
+        <div class="detail-stat">
+          <div class="detail-stat-label">Avg Session</div>
+          <div class="detail-stat-value">2h 20m</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <div style="font-size: 13px; color: #c6d4df; margin-bottom: 8px; font-weight: 500;">All Sessions</div>
+        <div class="sessions-list">
+          <div class="session-item">
+            <div class="session-time">08:30 - 11:02</div>
+            <div class="session-duration">2h 32m</div>
+          </div>
+          <div class="session-item">
+            <div class="session-time">11:15 - 12:45</div>
+            <div class="session-duration">1h 30m</div>
+          </div>
+          <div class="session-item">
+            <div class="session-time">13:10 - 14:00</div>
+            <div class="session-duration">50m</div>
+          </div>
+          <div class="session-item">
+            <div class="session-time">14:05 - 18:17</div>
+            <div class="session-duration">4h 12m</div>
+          </div>
+          <div class="session-item">
+            <div class="session-time">18:30 - 19:15</div>
+            <div class="session-duration">45m</div>
+          </div>
+          <div class="session-item">
+            <div class="session-time">19:45 - 21:20</div>
+            <div class="session-duration">1h 35m</div>
+          </div>
+          <div class="session-item">
+            <div class="session-time">21:30 - 22:15</div>
+            <div class="session-duration">45m</div>
+          </div>
+          <div class="session-item">
+            <div class="session-time">22:25 - 23:18</div>
+            <div class="session-duration">53m</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

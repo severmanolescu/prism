@@ -202,39 +202,46 @@ function createCategoryCard(categoryName, apps, color = '#4a90e2') {
 }
 
 function showHomeView() {
-    // Show the main home content (recent + all apps sections)
+    // Sidebar stays visible - no need to change it
+    
+    // Reset main-content (it should already have proper margin with sidebar)
+    const mainContent = document.querySelector('.main-content');
+    
+    // Show home content
     const recentSection = document.querySelector('.recent-section');
     const allAppsSection = document.querySelector('.all-apps-section');
-    
     if (recentSection) recentSection.style.display = 'block';
     if (allAppsSection) allAppsSection.style.display = 'block';
     
-    // Hide collections view if it's showing
+    // Hide other views
     const categoryOverview = document.querySelector('.category-overview');
-    if (categoryOverview) {
-        categoryOverview.style.display = 'none';
-    }
+    const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
+    const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
     
-    // Reset to grid view (not categories view)
+    if (categoryOverview) categoryOverview.style.display = 'none';
+    if (analyticsContainer) analyticsContainer.style.display = 'none';
+    if (detailsContainer) detailsContainer.style.display = 'none';
+    
+    // Reset view state
     toggleView('grid');
-    
-    // Update view toggle button state - NO view button should be active for home
     document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
     
-    // Load all apps data
+    // Load data
     currentCategory = 'All Apps';
     loadAppData();
-    updateLibraryTitle('All Apps');
     
-    // Clear navigation selection
+    // Clear selections
     document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-    
-    // Update submenu state - set Home as active
     document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
+    
+    // Activate home submenu
     const homeSubmenu = document.querySelector('.library-submenu-item[data-submenu="home"]');
-    if (homeSubmenu) {
-        homeSubmenu.classList.add('active');
-    }
+    if (homeSubmenu) homeSubmenu.classList.add('active');
+    
+    // Update nav tab
+    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+    const libraryTab = document.querySelector('.nav-tab[data-tab="library"]');
+    if (libraryTab) libraryTab.classList.add('active');
 }
 
 function showCollectionsView() {
@@ -263,4 +270,60 @@ function showCollectionsView() {
     if (collectionsSubmenu) {
         collectionsSubmenu.classList.add('active');
     }
+}
+
+function showAnalyticsView() {
+    // Hide current content
+    const recentSection = document.querySelector('.recent-section');
+    const allAppsSection = document.querySelector('.all-apps-section');
+    const categoryOverview = document.querySelector('.category-overview');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (recentSection) recentSection.style.display = 'none';
+    if (allAppsSection) allAppsSection.style.display = 'none';
+    if (categoryOverview) categoryOverview.style.display = 'none';
+    if (sidebar) sidebar.style.display = 'none';
+    
+    // Adjust main-content
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        mainContent.style.marginLeft = '0';
+        mainContent.style.width = '100%';
+    }
+    
+    // Create iframe to completely isolate analytics
+    let analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
+    
+    if (!analyticsContainer) {
+        analyticsContainer = document.createElement('div');
+        analyticsContainer.className = 'analytics-iframe-wrapper';
+        analyticsContainer.style.width = '100%';
+        analyticsContainer.style.height = '100%';
+        analyticsContainer.style.overflow = 'hidden';
+        
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.display = 'block';
+        iframe.src = 'analytics.html';
+        
+        analyticsContainer.appendChild(iframe);
+        
+        if (mainContent) {
+            mainContent.appendChild(analyticsContainer);
+        }
+    } else {
+        analyticsContainer.style.display = 'block';
+    }
+    
+    // Clear selections
+    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+    document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
+    
+    // Update nav tab
+    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+    const analyticsTab = document.querySelector('.nav-tab[data-tab="analytics"]');
+    if (analyticsTab) analyticsTab.classList.add('active');
 }

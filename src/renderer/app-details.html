@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Details - Time Tracker</title>
+  <link rel="stylesheet" href="styles/app-details.css">
+</head>
+<body>
+  <div class="details-container">
+    <!-- Hero Section -->
+    <div class="app-hero">
+      <div class="app-hero-bg">
+        <div class="app-hero-icon">💻</div>
+      </div>
+      <div class="app-hero-content">
+        <div class="app-title">App Name</div>
+        <div class="app-category">Category</div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="btn-primary" id="launch-btn">
+        <span class="btn-icon">▶</span>
+        <span>Start</span>
+      </button>
+      <div class="spacer"></div>
+      <button class="btn-secondary" id="favorite-btn">
+        <span class="btn-icon">⭐</span>
+        <span>Add to Favorites</span>
+      </button>
+      <button class="btn-secondary" id="properties-btn">
+        <span class="btn-icon">📋</span>
+        <span>Properties</span>
+      </button>
+    </div>
+
+    <!-- Properties Modal -->
+    <div id="properties-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Application Properties</h3>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="property-item">
+            <div class="property-label">Name:</div>
+            <div class="property-value" id="prop-name">-</div>
+          </div>
+          <div class="property-item">
+            <div class="property-label">Category:</div>
+            <div class="property-value" id="prop-category">-</div>
+          </div>
+          <div class="property-item">
+            <div class="property-label">Executable:</div>
+            <div class="property-value" id="prop-executable">-</div>
+          </div>
+          <div class="property-item">
+            <div class="property-label">Path:</div>
+            <div class="property-value" id="prop-path">-</div>
+          </div>
+          <div class="property-item">
+            <div class="property-label">First Added:</div>
+            <div class="property-value" id="prop-first-added">-</div>
+          </div>
+          <div class="property-item">
+            <div class="property-label">Last Used:</div>
+            <div class="property-value" id="prop-last-used">-</div>
+          </div>
+          <div class="property-item">
+            <div class="property-label">Total Time:</div>
+            <div class="property-value" id="prop-total-time">-</div>
+          </div>
+          <div class="property-item">
+            <div class="property-label">Launch Count:</div>
+            <div class="property-value" id="prop-launch-count">-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+      <div class="quick-stat-card">
+        <div class="quick-stat-icon">⏱️</div>
+        <div class="quick-stat-content">
+          <div class="quick-stat-label">Total Time</div>
+          <div class="quick-stat-value">0h</div>
+        </div>
+      </div>
+      <div class="quick-stat-card">
+        <div class="quick-stat-icon">📊</div>
+        <div class="quick-stat-content">
+          <div class="quick-stat-label">This Week</div>
+          <div class="quick-stat-value">0h</div>
+        </div>
+      </div>
+      <div class="quick-stat-card">
+        <div class="quick-stat-icon">🔥</div>
+        <div class="quick-stat-content">
+          <div class="quick-stat-label">Current Streak</div>
+          <div class="quick-stat-value">0 days</div>
+        </div>
+      </div>
+      <div class="quick-stat-card">
+        <div class="quick-stat-icon">📅</div>
+        <div class="quick-stat-content">
+          <div class="quick-stat-label">Total Sessions</div>
+          <div class="quick-stat-value">0</div>
+        </div>
+      </div>
+      <div class="quick-stat-card">
+        <div class="quick-stat-icon">📆</div>
+        <div class="quick-stat-content">
+          <div class="quick-stat-label">First Used</div>
+          <div class="quick-stat-value">-</div>
+        </div>
+      </div>
+      <div class="quick-stat-card">
+        <div class="quick-stat-icon">📈</div>
+        <div class="quick-stat-content">
+          <div class="quick-stat-label">Peak Day</div>
+          <div class="quick-stat-value">0h</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Over Time & Milestones -->
+    <div class="content-grid">
+      <div class="content-section">
+        <div class="section-title">Usage Over Time (Last 7 Days)</div>
+        <div class="usage-chart"></div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-title">Milestones</div>
+        <div class="milestones-grid"></div>
+      </div>
+    </div>
+
+    <!-- Activity Timeline -->
+    <div class="full-width-section">
+      <div class="section-title">Today's Activity Timeline</div>
+      <div class="activity-timeline">
+        <div style="display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px;">
+          <div class="timeline-hour-label">0</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">2</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">4</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">6</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">8</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">10</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">12</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">14</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">16</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">18</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">20</div>
+          <div class="timeline-hour-label"></div>
+          <div class="timeline-hour-label">22</div>
+          <div class="timeline-hour-label"></div>
+        </div>
+        <div class="timeline-grid"></div>
+      </div>
+    </div>
+
+    <!-- Recent Sessions -->
+    <div class="full-width-section">
+      <div class="section-title">Recent Sessions</div>
+      <div class="sessions-list"></div>
+    </div>
+
+    <!-- Usage Trends & Session Duration -->
+    <div class="content-grid">
+      <div class="content-section">
+        <div class="section-title">Usage Trends</div>
+        <div class="trends-container">
+          <div class="monthly-calendar"></div>
+          <div class="trend-stats">
+            <div class="trend-stat">
+              <div class="trend-label">This Week</div>
+              <div class="trend-value">0h</div>
+              <div class="trend-change positive">+0%</div>
+            </div>
+            <div class="trend-stat">
+              <div class="trend-label">Last Week</div>
+              <div class="trend-value">0h</div>
+              <div class="trend-change">previous</div>
+            </div>
+            <div class="trend-stat">
+              <div class="trend-label">Category Rank</div>
+              <div class="trend-value">#1</div>
+              <div class="trend-change">of 1</div>
+            </div>
+            <div class="trend-stat">
+              <div class="trend-label">Total Usage %</div>
+              <div class="trend-value">0%</div>
+              <div class="trend-change">of all apps</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-title">Session Duration Distribution</div>
+        <div class="session-duration-chart"></div>
+      </div>
+    </div>
+
+    <!-- Time Patterns -->
+    <div class="content-grid">
+      <div class="content-section">
+        <div class="section-title">Usage by Day of Week</div>
+        <div class="day-of-week-chart"></div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-title">Time of Day Heatmap</div>
+        <div class="heatmap-container"></div>
+      </div>
+    </div>
+
+  </div>
+  <script src="js/app-details.js"></script>
+</body>
+</html>

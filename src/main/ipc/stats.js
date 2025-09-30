@@ -1,30 +1,13 @@
 const { ipcMain } = require('electron');
-const dataStorage = require('../services/data-storage');
+const { getTodayStats } = require('../services/data-access');
 
 function initializeStatsHandlers() {
   ipcMain.handle('get-today-stats', async () => {
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todayTimestamp = today.getTime();
-      
-      let totalTimeSeconds = 0;
-      const appsUsedToday = new Set();
-      
-      if (dataStorage.sessionsData && Array.isArray(dataStorage.sessionsData)) {
-        dataStorage.sessionsData.forEach(session => {
-          const sessionStart = new Date(session.startTime).getTime();
-          
-          if (sessionStart >= todayTimestamp && session.endTime && session.duration) {
-            totalTimeSeconds += session.duration;
-            appsUsedToday.add(session.appId);
-          }
-        });
-      }
-      
+      const stats = await getTodayStats();
       return {
-        appCount: appsUsedToday.size,
-        totalTime: totalTimeSeconds
+        appCount: stats.appCount,
+        totalTime: stats.totalTime
       };
     } catch (error) {
       console.error('Error getting today stats:', error);

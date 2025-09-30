@@ -20,13 +20,31 @@ function setupRealTimeUpdates() {
 // Refresh data without rebuilding the DOM for main apps
 async function refreshAppDataInBackground() {
     try {
-        // Update main app cards in-place (preserves scroll)
-        const updatedApps = await window.electronAPI.getAppsByCategory(currentCategory);
+        let updatedApps;
+        
+        // Get apps based on current view
+        if (currentCategory === 'All Apps') {
+            updatedApps = await window.electronAPI.getAllApps();
+        } else if (currentCategory === 'Favorites') {
+            const favoriteIds = await window.electronAPI.getFavorites();
+            updatedApps = allAppsCache.filter(app => favoriteIds.includes(app.id));
+        } else if (currentCategory === 'Hidden') {
+            updatedApps = await window.electronAPI.getHiddenApps();
+        } else {
+            updatedApps = await window.electronAPI.getAppsByCategory(currentCategory);
+        }
+        
+        // Update cache
+        if (currentCategory === 'All Apps') {
+            allAppsCache = updatedApps;
+        }
+        
+        // Update each app card in place
         updatedApps.forEach(app => {
             updateAppCardData(app);
         });
         
-        // Refresh recent apps section (rebuild is fine here since it's small)
+        // Refresh recent apps section
         loadRecentApps();
         
         console.log('Background refresh completed');

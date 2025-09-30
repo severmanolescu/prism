@@ -1,17 +1,26 @@
-
 // Display all apps
 async function displayAllApps(apps) {
     console.log('Displaying all apps:', apps);
     const appsContainer = document.querySelector('.apps-grid');
     const sectionHeader = document.querySelector('.all-apps-section .section-header');
-    
+    const allAppsSection = document.querySelector('.all-apps-section');
+    const recentSection = document.querySelector('.recent-section');
+    const categoryOverview = document.querySelector('.category-overview');
+    const detailsIframe = document.querySelector('.app-details-iframe-wrapper');
+
+    // Show all apps section and recent section, hide others
+    if (allAppsSection) allAppsSection.style.display = 'block';
+    if (recentSection) recentSection.style.display = 'block';
+    if (categoryOverview) categoryOverview.style.display = 'none';
+    if (detailsIframe) detailsIframe.style.display = 'none';
+
     if (!appsContainer) {
         console.error('Apps container not found!');
         return;
     }
-    
+
     appsContainer.innerHTML = '';
-    
+
     if (apps.length === 0) {
         console.log('No apps to display');
         appsContainer.innerHTML = '<p style="color: #8f98a0; padding: 20px; text-align: center;">No applications found</p>';
@@ -33,7 +42,7 @@ async function displayAllApps(apps) {
         console.log("Apps by category: ", appsByCategory);
         
         // Display each category with its apps
-        Object.keys(appsByCategory).sort().forEach(categoryName => {
+        Object.keys(appsByCategory).forEach(categoryName => {
             const categoryApps = appsByCategory[categoryName];
 
             if(categoryApps.apps.length != 0){

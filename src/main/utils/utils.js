@@ -1,9 +1,26 @@
 // Helper functions
-function formatTime(seconds) {
-  if (seconds < 60) return `${seconds}s`;
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-  const hours = (seconds / 3600).toFixed(1);
-  return `${hours}h`;
+function formatTime(milliseconds) {
+  if (!milliseconds || milliseconds === 0) {
+    return '0s';
+  }
+
+  // Convert milliseconds to seconds
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  
+  if (totalSeconds < 60) {
+    return `${totalSeconds}s`;
+  }
+  
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  
+  if (totalMinutes < 60) {
+    return `${totalMinutes}m`;
+  }
+  
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  
+  return `${hours}h ${minutes}m`;
 }
 
 function formatLastUsed(timestamp) {
@@ -25,6 +42,6 @@ function formatLastUsed(timestamp) {
 }
 
 module.exports = {
-    formatTime,
-    formatLastUsed
-}
+  formatTime,
+  formatLastUsed
+};
