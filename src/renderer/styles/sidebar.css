@@ -3,9 +3,11 @@
   width: 240px;
   background: linear-gradient(to bottom, #171a21 0%, #1e2328 100%);
   border-right: 1px solid #0e1116;
-  display: flex;
+  display: flex ;
   flex-direction: column;
   box-shadow: 1px 0 0 rgba(255, 255, 255, 0.03);
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .sidebar-top {

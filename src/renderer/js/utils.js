@@ -54,9 +54,15 @@ function getCategoryIcon(categoryName) {
 }
 
 async function getCategoryColor(categoryName) {
+  try {
     const categories = await window.electronAPI.getCategories();
     const category = categories.find(c => c.name === categoryName);
-    return category ? (category.color || '#092442') : '#092442';
+    const color = category ? (category.color || '#092442') : '#092442';
+    return color;
+  } catch (error) {
+    console.error('Error getting category color:', error);
+    return '#092442';
+  }
 }
 
 function formatTime(milliseconds) {
@@ -83,6 +89,55 @@ function formatTime(milliseconds) {
   return `${hours}h ${minutes}m`;
 }
 
+function formatDate(timestamp) {
+  if (!timestamp) return 'Unknown';
+
+  const date = new Date(timestamp);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) {
+    return 'Today';
+  } else if (date.toDateString() === yesterday.toDateString()) {
+    return 'Yesterday';
+  } else {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+}
+
+function formatTimeRange(start, end) {
+  const startTime = new Date(start).toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+  const endTime = end ? new Date(end).toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }) : 'ongoing';
+  return `${startTime} - ${endTime}`;
+}
+
+function getRelativeTime(timestamp) {
+  if (!timestamp) return 'Unknown';
+
+  const now = Date.now();
+  const diff = now - timestamp;
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+
+  if (hours < 1) {
+    const minutes = Math.floor(diff / (1000 * 60));
+    return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+  } else if (hours < 24) {
+    return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+  } else {
+    const days = Math.floor(hours / 24);
+    return `${days} day${days !== 1 ? 's' : ''} ago`;
+  }
+}
+
 function displayCurrentTime() {
     const now = new Date();
     const timeString = now.toLocaleTimeString();
@@ -99,4 +154,13 @@ function adjustBrightness(hex, percent) {
     return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
         (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
         (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+}
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
 }

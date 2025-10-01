@@ -202,42 +202,43 @@ function createCategoryCard(categoryName, apps, color = '#4a90e2') {
 }
 
 function showHomeView() {
-    // Sidebar stays visible - no need to change it
-    
-    // Reset main-content (it should already have proper margin with sidebar)
+    // Reset main-content
     const mainContent = document.querySelector('.main-content');
-    
+
     // Show home content
     const recentSection = document.querySelector('.recent-section');
     const allAppsSection = document.querySelector('.all-apps-section');
+    const sidebar = document.querySelector('.sidebar');
+
     if (recentSection) recentSection.style.display = 'block';
     if (allAppsSection) allAppsSection.style.display = 'block';
-    
+    if (sidebar) sidebar.style.display = 'flex';
+
     // Hide other views
     const categoryOverview = document.querySelector('.category-overview');
     const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
     const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
-    
+
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (analyticsContainer) analyticsContainer.style.display = 'none';
     if (detailsContainer) detailsContainer.style.display = 'none';
-    
+
     // Reset view state
     toggleView('grid');
     document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
-    
+
     // Load data
     currentCategory = 'All Apps';
     loadAppData();
-    
+
     // Clear selections
     document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
     document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
-    
+
     // Activate home submenu
     const homeSubmenu = document.querySelector('.library-submenu-item[data-submenu="home"]');
     if (homeSubmenu) homeSubmenu.classList.add('active');
-    
+
     // Update nav tab
     document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
     const libraryTab = document.querySelector('.nav-tab[data-tab="library"]');
@@ -248,9 +249,12 @@ function showCollectionsView() {
     // Hide current content
     const recentSection = document.querySelector('.recent-section');
     const allAppsSection = document.querySelector('.all-apps-section');
+    const sidebar = document.querySelector('.sidebar');
+
     if (recentSection) recentSection.style.display = 'none';
     if (allAppsSection) allAppsSection.style.display = 'none';
-    
+    if (sidebar) sidebar.style.display = 'flex';
+
     // Show collections view (categories view)
     toggleView('categories');
     
@@ -270,6 +274,11 @@ function showCollectionsView() {
     if (collectionsSubmenu) {
         collectionsSubmenu.classList.add('active');
     }
+
+    // Update nav tab
+    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+    const libraryTab = document.querySelector('.nav-tab[data-tab="library"]');
+    if (libraryTab) libraryTab.classList.add('active');
 }
 
 function showAnalyticsView() {
@@ -277,12 +286,15 @@ function showAnalyticsView() {
     const recentSection = document.querySelector('.recent-section');
     const allAppsSection = document.querySelector('.all-apps-section');
     const categoryOverview = document.querySelector('.category-overview');
+    const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
     const sidebar = document.querySelector('.sidebar');
     
     if (recentSection) recentSection.style.display = 'none';
     if (allAppsSection) allAppsSection.style.display = 'none';
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (sidebar) sidebar.style.display = 'none';
+    if (detailsContainer) detailsContainer.style.display = 'none';
+
     
     // Adjust main-content
     const mainContent = document.querySelector('.main-content');

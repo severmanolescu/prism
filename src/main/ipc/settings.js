@@ -11,9 +11,6 @@ function initializeSettingsHandlers() {
     try {
       console.log('Setting auto-launch to:', enabled);
       
-      // Auto-launch logic would go here
-      // await autoLauncher.enable() or disable()
-      
       isAutoLaunchEnabled = enabled;
       return { success: true, status: enabled };
     } catch (error) {

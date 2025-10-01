@@ -129,5 +129,32 @@ window.addEventListener('message', async (event) => {
                 isFavorite: isFavorite
             }, '*');
         }
+    } else if (event.data.type === 'BACK_TO_LIBRARY') {
+        // Show sidebar again
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) {
+            sidebar.style.display = 'flex';
+        }
+
+        // Restore main content margin
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.style.marginLeft = '240px';
+        }
+
+        // Hide app details iframe
+        const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
+        if (detailsContainer) {
+            detailsContainer.style.display = 'none';
+        }
+
+        // Show library content again
+        const recentSection = document.querySelector('.recent-section');
+        const allAppsSection = document.querySelector('.all-apps-section');
+        const categoryOverview = document.querySelector('.category-overview');
+
+        if (recentSection) recentSection.style.display = 'block';
+        if (allAppsSection) allAppsSection.style.display = 'block';
+        if (categoryOverview) categoryOverview.style.display = 'grid';
     }
 });

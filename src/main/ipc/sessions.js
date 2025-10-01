@@ -3,7 +3,6 @@ const { getDb } = require('../services/database');
 
 function initializeSessionHandlers() {
   ipcMain.handle('cleanup-orphaned-sessions', async () => {
-    // Could implement cleanup logic here if needed
     return { success: true };
   });
 

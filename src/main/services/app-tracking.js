@@ -210,7 +210,6 @@ async function endSession(session) {
     const now = Date.now();
     const duration = now - session.startTime;
     
-    
     // Update session
     await db.run(`
       UPDATE sessions 
@@ -308,10 +307,7 @@ async function startTracking(appInfo) {
 async function stopTracking() {
   if (!currentApp || !startTime || !currentSessionId) {
     return;
-  }
-  
-  const duration = Date.now() - startTime;
-  
+  }  
   await endSession({
     id: currentSessionId,
     appId: currentApp.id,
@@ -343,7 +339,6 @@ function startTrackingSystem() {
   if (trackingInterval) {
     return;
   }
-    
   const db = getDb();
   if (!db) {
     log('ERROR: Database not available, cannot start tracking');

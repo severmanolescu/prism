@@ -126,16 +126,49 @@
       </div>
     </div>
 
-    <!-- Usage Over Time & Milestones -->
+    <!-- Usage Over Time & Usage Trends -->
     <div class="content-grid">
       <div class="content-section">
-        <div class="section-title">Usage Over Time (Last 7 Days)</div>
-        <div class="usage-chart"></div>
+        <div class="section-header-with-tabs">
+          <div class="section-title">Usage Over Time</div>
+          <div class="chart-tabs">
+            <button class="chart-tab active" data-period="daily">Daily</button>
+            <button class="chart-tab" data-period="weekly">Weekly</button>
+            <button class="chart-tab" data-period="monthly">Monthly</button>
+          </div>
+        </div>
+        <div class="usage-chart-container">
+          <canvas id="usage-line-chart" width="1000" height="500"></canvas>
+        </div>
       </div>
 
       <div class="content-section">
-        <div class="section-title">Milestones</div>
-        <div class="milestones-grid"></div>
+        <div class="section-title">Usage Trends</div>
+        <div class="trends-container">
+          <div class="monthly-calendar"></div>
+          <div class="trend-stats">
+            <div class="trend-stat">
+              <div class="trend-label">This Week</div>
+              <div class="trend-value">0h</div>
+              <div class="trend-change positive">+0%</div>
+            </div>
+            <div class="trend-stat">
+              <div class="trend-label">Last Week</div>
+              <div class="trend-value">0h</div>
+              <div class="trend-change">previous</div>
+            </div>
+            <div class="trend-stat">
+              <div class="trend-label">Category Rank</div>
+              <div class="trend-value">#1</div>
+              <div class="trend-change">of 1</div>
+            </div>
+            <div class="trend-stat">
+              <div class="trend-label">Total Usage %</div>
+              <div class="trend-value">0%</div>
+              <div class="trend-change">of all apps</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -172,47 +205,86 @@
         <div class="timeline-grid"></div>
       </div>
     </div>
-
-    <!-- Recent Sessions -->
-    <div class="full-width-section">
-      <div class="section-title">Recent Sessions</div>
-      <div class="sessions-list"></div>
-    </div>
-
-    <!-- Usage Trends & Session Duration -->
+    
     <div class="content-grid">
       <div class="content-section">
-        <div class="section-title">Usage Trends</div>
-        <div class="trends-container">
-          <div class="monthly-calendar"></div>
-          <div class="trend-stats">
-            <div class="trend-stat">
-              <div class="trend-label">This Week</div>
-              <div class="trend-value">0h</div>
-              <div class="trend-change positive">+0%</div>
-            </div>
-            <div class="trend-stat">
-              <div class="trend-label">Last Week</div>
-              <div class="trend-value">0h</div>
-              <div class="trend-change">previous</div>
-            </div>
-            <div class="trend-stat">
-              <div class="trend-label">Category Rank</div>
-              <div class="trend-value">#1</div>
-              <div class="trend-change">of 1</div>
-            </div>
-            <div class="trend-stat">
-              <div class="trend-label">Total Usage %</div>
-              <div class="trend-value">0%</div>
-              <div class="trend-change">of all apps</div>
-            </div>
-          </div>
-        </div>
+        <div class="section-title">Recent Sessions</div>
+        <div class="sessions-list"></div>
       </div>
 
       <div class="content-section">
         <div class="section-title">Session Duration Distribution</div>
         <div class="session-duration-chart"></div>
+      </div>
+    </div>
+
+    <!-- Usage Insights & Milestones -->
+    <div class="content-grid">
+      <div class="content-section">
+        <div class="section-title">Usage Insights</div>
+        <div class="usage-insights-grid">
+          <!-- Best Days -->
+          <div class="insight-box">
+            <div class="insight-header">
+              <span class="insight-icon">🏆</span>
+              <span class="insight-title">Best Days</span>
+            </div>
+            <div class="best-days-list"></div>
+          </div>
+
+          <!-- Worst Days -->
+          <div class="insight-box">
+            <div class="insight-header">
+              <span class="insight-icon">📉</span>
+              <span class="insight-title">Least Active Days</span>
+            </div>
+            <div class="worst-days-list"></div>
+          </div>
+
+          <!-- Streak History -->
+          <div class="insight-box">
+            <div class="insight-header">
+              <span class="insight-icon">🔥</span>
+              <span class="insight-title">Streak History</span>
+            </div>
+            <div class="streak-history-container"></div>
+          </div>
+
+          <!-- Average Session -->
+          <div class="insight-box">
+            <div class="insight-header">
+              <span class="insight-icon">⏱️</span>
+              <span class="insight-title">Average Session</span>
+            </div>
+            <div class="avg-session-info">
+              <div class="avg-session-value">0h</div>
+              <div class="avg-session-subtitle">across all sessions</div>
+            </div>
+          </div>
+
+          <!-- Peak Usage Times -->
+          <div class="insight-box">
+            <div class="insight-header">
+              <span class="insight-icon">🌟</span>
+              <span class="insight-title">Peak Usage Times</span>
+            </div>
+            <div class="peak-times-list"></div>
+          </div>
+
+          <!-- Time of Day Preference -->
+          <div class="insight-box">
+            <div class="insight-header">
+              <span class="insight-icon">🕐</span>
+              <span class="insight-title">Time of Day</span>
+            </div>
+            <div class="time-of-day-breakdown"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-title">Milestones</div>
+        <div class="milestones-grid"></div>
       </div>
     </div>
 
@@ -230,6 +302,14 @@
     </div>
 
   </div>
-  <script src="js/app-details.js"></script>
+  <script src="./js/utils.js"></script>
+  <script src="./js/app-details/app-details.js"></script>
+  <script src="./js/app-details/day-of-week-chart.js"></script>
+  <script src="./js/app-details/heatmap.js"></script>
+  <script src="./js/app-details/listeners.js"></script>
+  <script src="./js/app-details/milestones.js"></script>
+  <script src="./js/app-details/session-duration-chart.js"></script>
+  <script src="./js/app-details/usage-over-time-chart.js"></script>
+  <script src="./js/app-details/usage-insights.js"></script>
 </body>
 </html>
