@@ -174,6 +174,8 @@ function updateAnalyticsUI(data) {
   updateAllApplications(data.topApps);
   // Update category breakdown
   updateCategoryBreakdown(data.categoryBreakdown);
+  // Update insights
+  updateInsights(data);
   // Update date info
   updateDateInfo(data.dateRange);
 }
@@ -247,17 +249,23 @@ function updateAllApplications(allApps){
     const top_apps_list = document.querySelector('.apps-used-grid');
     if (!top_apps_list) return;
 
+    // Update section header with app count
+    const sectionHeader = document.querySelector('.full-width-section .section-header');
+    if (sectionHeader && allApps) {
+        sectionHeader.textContent = `All Applications (${allApps.length})`;
+    }
+
     // Clear the list
     top_apps_list.innerHTML = '';
 
     // Check if we have apps
     if (!allApps || allApps.length === 0) {
         top_apps_list.innerHTML = '<div class="app-row">No apps found for this period</div>';
+        if (sectionHeader) {
+            sectionHeader.textContent = 'All Applications (0)';
+        }
         return;
     }
-
-    // Only show up to 6 apps or however many we have
-    const appsToShow = Math.min(allApps.length, topAppsListCount);
 
     for (let i = 0; i < allApps.length; i++) {
         const app = allApps[i];
@@ -282,8 +290,198 @@ function updateAllApplications(allApps){
 }
 
 function updateCategoryBreakdown(categoryBreakdown) {
-  // TODO: Update category breakdown with real data
-  console.log('Category breakdown:', categoryBreakdown);
+    console.log('Category breakdown:', categoryBreakdown);
+
+    const category_grid = document.querySelector('.category-grid');
+    if (!category_grid) return;
+
+    // Update section header with category count
+    const categoryHeader = document.querySelectorAll('.section-header')[1]; // Second section header
+    if (categoryHeader && categoryBreakdown) {
+        categoryHeader.textContent = `Category Breakdown (${categoryBreakdown.length || 0})`;
+    }
+
+    // Clear the list
+    category_grid.innerHTML = '';
+
+    // Check if we have categories
+    if (!categoryBreakdown || categoryBreakdown.length === 0) {
+        category_grid.innerHTML = `
+        <div class="category-item" style="border-left-color: #66c0f4;">
+            <div class="category-name">No Categories found</div>
+            <div class="category-time">0h</div>
+            <div class="category-percentage">0% of total time</div>
+        </div>
+        `;
+        if (categoryHeader) {
+            categoryHeader.textContent = 'Category Breakdown (0)';
+        }
+        return;
+    }
+
+    // Calculate total time
+    let totalTime = 0;
+    for (let i = 0; i < categoryBreakdown.length; i++) {
+        totalTime += categoryBreakdown[i].total_time;
+    }
+
+    // Render category items
+    for (let i = 0; i < categoryBreakdown.length; i++) {
+        const category = categoryBreakdown[i];
+        const percentage = Math.round((category.total_time / totalTime) * 100);
+
+        category_grid.innerHTML += `
+        <div class="category-item" style="border-left-color: ${categoriesCache[category.category] || '#66c0f4'}">
+            <div class="category-name">${category.category}</div>
+            <div class="category-time">${formatTime(category.total_time)}</div>
+            <div class="category-percentage">${percentage}% of total time</div>
+        </div>
+        `;
+    }
+}
+
+function updateInsights(data) {
+  const insightsGrid = document.querySelector('.insights-grid');
+  if (!insightsGrid) return;
+
+  insightsGrid.innerHTML = '';
+
+  // 1. Focus Time (Longest Session)
+  if (data.longestSession && data.longestSession.duration) {
+    const focusTime = formatTime(data.longestSession.duration);
+    const sessionDate = new Date(data.longestSession.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    insightsGrid.innerHTML += `
+      <div class="insight-card">
+        <div class="insight-icon">🎯</div>
+        <div class="insight-content">
+          <div class="insight-title">Focus Time</div>
+          <div class="insight-text">Longest session: ${focusTime} on ${data.longestSession.app_name} (${sessionDate}).</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 3. Variety Score (App Diversity)
+  const varietyPercentage = Math.round((data.overallStats.uniqueApps / (data.topApps.length || 1)) * 100);
+  let varietyMessage = '';
+  if (data.overallStats.uniqueApps === 1) {
+    varietyMessage = 'Highly focused - using only 1 app.';
+  } else if (data.overallStats.uniqueApps <= 3) {
+    varietyMessage = `Very focused - using ${data.overallStats.uniqueApps} different apps.`;
+  } else if (data.overallStats.uniqueApps <= 7) {
+    varietyMessage = `Balanced variety - ${data.overallStats.uniqueApps} apps used regularly.`;
+  } else {
+    varietyMessage = `High variety - switching between ${data.overallStats.uniqueApps} different apps.`;
+  }
+
+  insightsGrid.innerHTML += `
+    <div class="insight-card">
+      <div class="insight-icon">🎨</div>
+      <div class="insight-content">
+        <div class="insight-title">Variety Score</div>
+        <div class="insight-text">${varietyMessage}</div>
+      </div>
+    </div>
+  `;
+
+  // 4. Time of Day Pattern (Peak Activity Hours)
+  if (data.hourlyBreakdown && data.hourlyBreakdown.length > 0) {
+    // Find peak hours
+    let maxTime = 0;
+    let peakHours = [];
+
+    data.hourlyBreakdown.forEach(hour => {
+      if (hour.total_time > maxTime) {
+        maxTime = hour.total_time;
+        peakHours = [hour.hour];
+      } else if (hour.total_time === maxTime) {
+        peakHours.push(hour.hour);
+      }
+    });
+
+    // Group consecutive hours into ranges
+    const formatHour = (h) => {
+      const period = h >= 12 ? 'PM' : 'AM';
+      const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+      return `${hour12} ${period}`;
+    };
+
+    let peakTimeText = '';
+    if (peakHours.length === 1) {
+      peakTimeText = formatHour(peakHours[0]);
+    } else if (peakHours.length === 2) {
+      peakTimeText = `${formatHour(peakHours[0])} and ${formatHour(peakHours[1])}`;
+    } else {
+      const firstHour = Math.min(...peakHours);
+      const lastHour = Math.max(...peakHours);
+      peakTimeText = `${formatHour(firstHour)} - ${formatHour(lastHour)}`;
+    }
+
+    insightsGrid.innerHTML += `
+      <div class="insight-card">
+        <div class="insight-icon">⏰</div>
+        <div class="insight-content">
+          <div class="insight-title">Peak Activity Hours</div>
+          <div class="insight-text">Most active around ${peakTimeText} (${formatTime(maxTime)} total).</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 5. App Switching Rate
+  if (data.overallStats.totalSessions > 0 && data.overallStats.totalTime > 0) {
+    const totalHours = data.overallStats.totalTime / (1000 * 60 * 60);
+    const switchesPerHour = Math.round(data.overallStats.totalSessions / totalHours);
+
+    let switchingMessage = '';
+    if (switchesPerHour <= 2) {
+      switchingMessage = `Very focused - ${switchesPerHour} app switches per hour on average.`;
+    } else if (switchesPerHour <= 5) {
+      switchingMessage = `Moderately focused - ${switchesPerHour} app switches per hour.`;
+    } else if (switchesPerHour <= 10) {
+      switchingMessage = `Active switching - ${switchesPerHour} app switches per hour.`;
+    } else {
+      switchingMessage = `Highly dynamic - ${switchesPerHour} app switches per hour.`;
+    }
+
+    insightsGrid.innerHTML += `
+      <div class="insight-card">
+        <div class="insight-icon">🔄</div>
+        <div class="insight-content">
+          <div class="insight-title">App Switching Rate</div>
+          <div class="insight-text">${switchingMessage}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 6. Multitasking Score
+  if (data.overlappingSessions && data.overlappingSessions.length > 0) {
+    const totalOverlaps = data.overlappingSessions.reduce((sum, day) => sum + day.overlapping_count, 0);
+    const avgOverlaps = Math.round(totalOverlaps / data.overlappingSessions.length);
+
+    let multitaskingMessage = '';
+    if (avgOverlaps === 0) {
+      multitaskingMessage = 'Single-tasking - you focus on one app at a time.';
+    } else if (avgOverlaps <= 5) {
+      multitaskingMessage = `Light multitasking - averaging ${avgOverlaps} concurrent apps.`;
+    } else if (avgOverlaps <= 15) {
+      multitaskingMessage = `Moderate multitasking - averaging ${avgOverlaps} concurrent apps.`;
+    } else {
+      multitaskingMessage = `Heavy multitasking - averaging ${avgOverlaps} concurrent apps.`;
+    }
+
+    insightsGrid.innerHTML += `
+      <div class="insight-card">
+        <div class="insight-icon">⚡</div>
+        <div class="insight-content">
+          <div class="insight-title">Multitasking Score</div>
+          <div class="insight-text">${multitaskingMessage}</div>
+        </div>
+      </div>
+    `;
+  }
 }
 
 function updateDateInfo(dateRange) {

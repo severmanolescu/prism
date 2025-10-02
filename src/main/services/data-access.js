@@ -330,6 +330,54 @@ async function getAnalyticsData(startDate, endDate) {
     LIMIT 1
   `, [startTime, endTime]);
 
+  // Get longest session (Focus Time)
+  const longestSession = await db.get(`
+    SELECT
+      a.name as app_name,
+      s.duration,
+      s.start_time
+    FROM sessions s
+    INNER JOIN apps a ON s.app_id = a.id
+    WHERE s.start_time >= ? AND s.start_time <= ?
+      AND s.end_time IS NOT NULL
+      AND s.duration > 0
+    ORDER BY s.duration DESC
+    LIMIT 1
+  `, [startTime, endTime]);
+
+  // Get hourly breakdown (Time of Day Pattern)
+  const hourlyBreakdown = await db.all(`
+    SELECT
+      CAST(strftime('%H', datetime(start_time/1000, 'unixepoch', 'localtime')) AS INTEGER) as hour,
+      SUM(duration) as total_time,
+      COUNT(*) as session_count
+    FROM sessions
+    WHERE start_time >= ? AND start_time <= ?
+      AND end_time IS NOT NULL
+      AND duration > 0
+    GROUP BY hour
+    ORDER BY hour ASC
+  `, [startTime, endTime]);
+
+  // Get overlapping sessions for multitasking analysis
+  const overlappingSessions = await db.all(`
+    SELECT
+      DATE(s1.start_time/1000, 'unixepoch', 'localtime') as date,
+      COUNT(DISTINCT s2.id) as overlapping_count
+    FROM sessions s1
+    INNER JOIN sessions s2 ON
+      s1.id != s2.id AND
+      s1.start_time < s2.end_time AND
+      s1.end_time > s2.start_time AND
+      DATE(s1.start_time/1000, 'unixepoch', 'localtime') = DATE(s2.start_time/1000, 'unixepoch', 'localtime')
+    WHERE s1.start_time >= ? AND s1.start_time <= ?
+      AND s1.end_time IS NOT NULL
+      AND s2.end_time IS NOT NULL
+      AND s1.duration > 0
+      AND s2.duration > 0
+    GROUP BY date
+  `, [startTime, endTime]);
+
   return {
     overallStats: {
       totalTime: overallStats.total_time || 0,
@@ -342,6 +390,9 @@ async function getAnalyticsData(startDate, endDate) {
     categoryBreakdown,
     mostActiveDay,
     leastActiveDay,
+    longestSession,
+    hourlyBreakdown,
+    overlappingSessions,
     dateRange: {
       start: startDate,
       end: endDate,

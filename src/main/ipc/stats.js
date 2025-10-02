@@ -23,6 +23,11 @@ function initializeStatsHandlers() {
   ipcMain.handle('get-analytics-data', async (event, startDate, endDate) => {
     try {
       const data = await getAnalyticsData(startDate, endDate);
+      console.log('Analytics data returned:', {
+        hasLongestSession: !!data.longestSession,
+        hasHourlyBreakdown: !!data.hourlyBreakdown,
+        hourlyBreakdownLength: data.hourlyBreakdown?.length
+      });
       return data;
     } catch (error) {
       console.error('Error getting analytics data:', error);
