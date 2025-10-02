@@ -11,8 +11,8 @@
     
     <div class="date-range-controls">
       <div class="time-range-selector">
-        <button class="time-range-btn">Today</button>
-        <button class="time-range-btn active">Week</button>
+        <button class="time-range-btn active">Today</button>
+        <button class="time-range-btn">Week</button>
         <button class="time-range-btn">Month</button>
         <button class="time-range-btn">Year</button>
         <button class="time-range-btn">All Time</button>
@@ -73,8 +73,18 @@
         <div class="chart-subtitle"></div>
       </div>
       <div class="daily-usage-chart">
+        <canvas id="daily-usage-canvas" width="800" height="350"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card" style="display: none;">
+      <div class="chart-header">
+        <div class="chart-title">Daily Usage (Old)</div>
+        <div class="chart-subtitle"></div>
+      </div>
+      <div class="daily-usage-chart-old">
         <div class="bar" style="height: 60%;">
-          <span class="bar-value">6h 12m</span>
+          <span class="bar-value">0h 0m</span>
           <span class="bar-label">Mon 24</span>
         </div>
         <div class="bar" style="height: 75%;">
@@ -110,48 +120,6 @@
         <div class="chart-subtitle">By time used</div>
       </div>
       <div class="top-apps-list">
-        <div class="app-row">
-          <div class="app-rank">1</div>
-          <div class="app-info">
-            <div class="app-name">Visual Studio Code</div>
-          </div>
-          <div class="app-time">18h 42m</div>
-        </div>
-        <div class="app-row">
-          <div class="app-rank">2</div>
-          <div class="app-info">
-            <div class="app-name">Google Chrome</div>
-          </div>
-          <div class="app-time">12h 15m</div>
-        </div>
-        <div class="app-row">
-          <div class="app-rank">3</div>
-          <div class="app-info">
-            <div class="app-name">Spotify</div>
-          </div>
-          <div class="app-time">8h 34m</div>
-        </div>
-        <div class="app-row">
-          <div class="app-rank">4</div>
-          <div class="app-info">
-            <div class="app-name">Slack</div>
-          </div>
-          <div class="app-time">5h 22m</div>
-        </div>
-        <div class="app-row">
-          <div class="app-rank">5</div>
-          <div class="app-info">
-            <div class="app-name">Discord</div>
-          </div>
-          <div class="app-time">4h 51m</div>
-        </div>
-        <div class="app-row">
-          <div class="app-rank">6</div>
-          <div class="app-info">
-            <div class="app-name">Outlook</div>
-          </div>
-          <div class="app-time">3h 12m</div>
-        </div>
       </div>
     </div>
   </div>
@@ -537,3 +505,6 @@
     </div>
   </div>
 </div>
+<script src="./js/utils.js"></script>
+<script src="./js/analytics/analytics.js"></script>
+</body>

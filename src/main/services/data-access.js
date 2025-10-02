@@ -205,33 +205,148 @@ async function getDailyStats(days = 7) {
 // Get today's stats
 async function getTodayStats() {
   const db = getDb();
-  
+
   // Get start and end of today (midnight to midnight)
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const endOfToday = startOfToday + (24 * 60 * 60 * 1000); // Add 24 hours
-  
+
   // Count apps used today
   const appsToday = await db.get(`
     SELECT COUNT(DISTINCT app_id) as count
     FROM sessions
     WHERE start_time >= ? AND start_time < ?
   `, [startOfToday, endOfToday]);
-  
+
   // Total time today - only count sessions that both started AND ended today
   const timeToday = await db.get(`
     SELECT SUM(duration) as total
     FROM sessions
-    WHERE start_time >= ? 
+    WHERE start_time >= ?
       AND start_time < ?
       AND end_time IS NOT NULL
       AND duration > 0
       AND duration < 86400000
   `, [startOfToday, endOfToday]);
-  
+
   return {
     appCount: appsToday.count || 0,
     totalTime: timeToday.total || 0
+  };
+}
+
+// Get analytics data for a given period
+async function getAnalyticsData(startDate, endDate) {
+  const db = getDb();
+  const startTime = new Date(startDate).setHours(0, 0, 0, 0);
+  const endTime = new Date(endDate).setHours(23, 59, 59, 999);
+
+  // Get overall stats
+  const overallStats = await db.get(`
+    SELECT
+      COUNT(DISTINCT app_id) as unique_apps,
+      COUNT(*) as total_sessions,
+      SUM(duration) as total_time,
+      AVG(duration) as avg_session_duration
+    FROM sessions
+    WHERE start_time >= ? AND start_time <= ?
+      AND end_time IS NOT NULL
+      AND duration > 0
+  `, [startTime, endTime]);
+
+  // Get daily breakdown
+  const dailyBreakdown = await db.all(`
+    SELECT
+      DATE(start_time/1000, 'unixepoch', 'localtime') as date,
+      SUM(duration) as total_time,
+      COUNT(*) as session_count,
+      COUNT(DISTINCT app_id) as app_count
+    FROM sessions
+    WHERE start_time >= ? AND start_time <= ?
+      AND end_time IS NOT NULL
+      AND duration > 0
+    GROUP BY date
+    ORDER BY date ASC
+  `, [startTime, endTime]);
+
+  // Get top applications
+  const topApps = await db.all(`
+    SELECT
+      a.id,
+      a.name,
+      a.category,
+      a.icon_path,
+      SUM(s.duration) as total_time,
+      COUNT(s.id) as session_count
+    FROM apps a
+    INNER JOIN sessions s ON a.id = s.app_id
+    WHERE s.start_time >= ? AND s.start_time <= ?
+      AND s.end_time IS NOT NULL
+      AND s.duration > 0
+    GROUP BY a.id
+    ORDER BY total_time DESC
+  `, [startTime, endTime]);
+
+  // Get category breakdown
+  const categoryBreakdown = await db.all(`
+    SELECT
+      a.category,
+      SUM(s.duration) as total_time,
+      COUNT(DISTINCT a.id) as app_count,
+      COUNT(s.id) as session_count
+    FROM apps a
+    INNER JOIN sessions s ON a.id = s.app_id
+    WHERE s.start_time >= ? AND s.start_time <= ?
+      AND s.end_time IS NOT NULL
+      AND s.duration > 0
+    GROUP BY a.category
+    ORDER BY total_time DESC
+  `, [startTime, endTime]);
+
+  // Get most/least active days
+  const mostActiveDay = await db.get(`
+    SELECT
+      DATE(start_time/1000, 'unixepoch', 'localtime') as date,
+      SUM(duration) as total_time
+    FROM sessions
+    WHERE start_time >= ? AND start_time <= ?
+      AND end_time IS NOT NULL
+      AND duration > 0
+    GROUP BY date
+    ORDER BY total_time DESC
+    LIMIT 1
+  `, [startTime, endTime]);
+
+  const leastActiveDay = await db.get(`
+    SELECT
+      DATE(start_time/1000, 'unixepoch', 'localtime') as date,
+      SUM(duration) as total_time
+    FROM sessions
+    WHERE start_time >= ? AND start_time <= ?
+      AND end_time IS NOT NULL
+      AND duration > 0
+    GROUP BY date
+    ORDER BY total_time ASC
+    LIMIT 1
+  `, [startTime, endTime]);
+
+  return {
+    overallStats: {
+      totalTime: overallStats.total_time || 0,
+      uniqueApps: overallStats.unique_apps || 0,
+      totalSessions: overallStats.total_sessions || 0,
+      avgSessionDuration: overallStats.avg_session_duration || 0
+    },
+    dailyBreakdown,
+    topApps,
+    categoryBreakdown,
+    mostActiveDay,
+    leastActiveDay,
+    dateRange: {
+      start: startDate,
+      end: endDate,
+      days: Math.ceil((endTime - startTime) / (1000 * 60 * 60 * 24))
+    }
   };
 }
 
@@ -256,5 +371,6 @@ module.exports = {
   removeFavorite,
   getStatsForRange,
   getDailyStats,
-  getTodayStats
+  getTodayStats,
+  getAnalyticsData
 };

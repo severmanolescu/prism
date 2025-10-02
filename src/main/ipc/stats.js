@@ -1,7 +1,9 @@
 const { ipcMain } = require('electron');
-const { getTodayStats } = require('../services/data-access');
+const { getTodayStats, getAnalyticsData } = require('../services/data-access');
 
 function initializeStatsHandlers() {
+  console.log('Initializing stats handlers...');
+
   ipcMain.handle('get-today-stats', async () => {
     try {
       const stats = await getTodayStats();
@@ -15,6 +17,16 @@ function initializeStatsHandlers() {
         appCount: 0,
         totalTime: 0
       };
+    }
+  });
+
+  ipcMain.handle('get-analytics-data', async (event, startDate, endDate) => {
+    try {
+      const data = await getAnalyticsData(startDate, endDate);
+      return data;
+    } catch (error) {
+      console.error('Error getting analytics data:', error);
+      throw error;
     }
   });
 }
