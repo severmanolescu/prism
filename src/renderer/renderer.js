@@ -235,6 +235,28 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error('Error fetching analytics data:', error);
             }
+        } else if (event.data.type === 'REQUEST_CATEGORIES') {
+            try {
+                // Fetch categories
+                const categories = await window.electronAPI.getCategories();
+
+                // Send response back to iframe
+                const analyticsIframe = document.querySelector('.analytics-iframe-wrapper iframe');
+                if (analyticsIframe && analyticsIframe.contentWindow) {
+                    analyticsIframe.contentWindow.postMessage({
+                        type: 'CATEGORIES_RESPONSE',
+                        categories: categories
+                    }, '*');
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        } else if (event.data.type === 'OPEN_APP_DETAILS') {
+            // Open app details from analytics iframe
+            const appName = event.data.appName;
+            if (appName && typeof showAppDetails === 'function') {
+                showAppDetails(appName);
+            }
         }
     });
 });

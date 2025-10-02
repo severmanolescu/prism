@@ -1,3 +1,5 @@
+let resizeTimeout;
+
 function setupChartTabs(details) {
   const tabs = document.querySelectorAll('.chart-tab');
   tabs.forEach(tab => {
@@ -10,6 +12,14 @@ function setupChartTabs(details) {
       currentChartPeriod = tab.dataset.period;
       updateUsageChart(details, currentChartPeriod);
     });
+  });
+
+  // Add resize listener to redraw chart on window resize
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      updateUsageChart(details, currentChartPeriod);
+    }, 100);
   });
 }
 
@@ -129,6 +139,12 @@ function drawChart(chartData, labelFormat) {
   if (!canvas) return;
 
   const ctx = canvas.getContext('2d');
+
+  // Set canvas size to match container
+  const container = canvas.parentElement;
+  const containerWidth = container.clientWidth;
+  canvas.width = containerWidth;
+  canvas.height = containerWidth * 0.4; // Maintain 2.5:1 aspect ratio
 
   // Prepare data points
   const dataPoints = chartData.map(item => ({

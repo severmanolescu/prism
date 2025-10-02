@@ -552,10 +552,9 @@ body {
 }
 
 #usage-line-chart {
-  width: 100%;
-  max-width: 100%;
-  height: auto;
   display: block;
+  width: 100%;
+  height: auto;
 }
 
 .chart-bar {
@@ -722,24 +721,6 @@ body {
   padding-right: 4px;
 }
 
-.milestones-grid::-webkit-scrollbar {
-  width: 14px;
-}
-
-.milestones-grid::-webkit-scrollbar-track {
-  background: #1b2838;
-  border-radius: 0;
-}
-
-.milestones-grid::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #4a5a68, #3c4043);
-  border-radius: 7px;
-  border: 2px solid #1b2838;
-}
-
-.milestones-grid::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #66c0f4, #417a9b);
-}
 
 .milestone-card {
   background: rgba(0, 0, 0, 0.2);
@@ -817,22 +798,6 @@ body {
   font-weight: 500;
 }
 
-.sessions-list::-webkit-scrollbar {
-  width: 8px;
-}
-
-.sessions-list::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.sessions-list::-webkit-scrollbar-thumb {
-  background: rgba(102, 192, 244, 0.2);
-  border-radius: 4px;
-}
-
-.sessions-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(102, 192, 244, 0.3);
-}
 
 /* Productivity Score */
 .productivity-container {
@@ -953,8 +918,8 @@ body {
 .monthly-calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  padding: 16px;
+  gap: clamp(2px, 0.5vw, 4px);
+  padding: clamp(8px, 2vw, 16px);
   background: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
   width: 100%;
@@ -967,13 +932,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: clamp(9px, 1.5vw, 11px);
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid rgba(0, 0, 0, 0.3);
   min-width: 0;
-  min-height: 36px;
-  max-height: 50px;
+  min-height: 28px;
   color: #c7d5e0;
   font-weight: 500;
 }
@@ -1276,7 +1240,7 @@ body {
   color: #ffffff;
 }
 
-/* Scrollbar Styling */
+/* Global scrollbar styles */
 ::-webkit-scrollbar {
   width: 14px;
   height: 14px;
@@ -1296,3 +1260,4 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(to bottom, #66c0f4, #417a9b);
 }
+

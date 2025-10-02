@@ -343,8 +343,77 @@
 
   .apps-used-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, 150px);
     gap: 10px;
+    justify-content: start;
+    max-height: 420px; /* 2 rows: (200px * 2) + (10px gap) */
+    overflow-y: auto;
+    padding-right: 5px;
+  }
+
+  /* Copy styles from content.css for recent-item */
+  .apps-used-grid .recent-item {
+    width: 150px;
+    height: 200px;
+    background: #16202d;
+    border: 1px solid #1e2328;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .apps-used-grid .recent-item:hover {
+    border-color: #66c0f4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(102, 192, 244, 0.3);
+  }
+
+  .apps-used-grid .recent-item-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #092442 0%, #07417a 80%);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    opacity: 0.8;
+  }
+
+  .apps-used-grid .recent-item-bg > * {
+    margin-top: 35%;
+  }
+
+  .apps-used-grid .recent-item-bg img {
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+
+  .apps-used-grid .recent-item-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+    padding: 8px 12px;
+    color: white;
+  }
+
+  .apps-used-grid .recent-item-name {
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 2px;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  }
+
+  .apps-used-grid .recent-item-time {
+    font-size: 10px;
+    color: #c6d4df;
+    opacity: 0.9;
   }
 
   .app-used-card {
@@ -648,36 +717,23 @@
     font-weight: 600;
   }
 
-  .sessions-list::-webkit-scrollbar {
-    width: 6px;
+  /* Global scrollbar styles */
+  ::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
   }
 
-  .sessions-list::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
+  ::-webkit-scrollbar-track {
+    background: #1b2838;
+    border-radius: 0;
   }
 
-  .sessions-list::-webkit-scrollbar-thumb {
-    background: rgba(102, 192, 244, 0.3);
-    border-radius: 3px;
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #4a5a68, #3c4043);
+    border-radius: 7px;
+    border: 2px solid #1b2838;
   }
 
-  /* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 14px;
-  height: 14px;
-}
-
-::-webkit-scrollbar-track {
-  background: #1b2838;
-  border-radius: 0;
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #4a5a68, #3c4043);
-  border-radius: 7px;
-  border: 2px solid #1b2838;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #66c0f4, #417a9b);
-}
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #66c0f4, #417a9b);
+  }
