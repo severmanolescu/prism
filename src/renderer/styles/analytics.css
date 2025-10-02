@@ -660,3 +660,24 @@
     background: rgba(102, 192, 244, 0.3);
     border-radius: 3px;
   }
+
+  /* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1b2838;
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #4a5a68, #3c4043);
+  border-radius: 7px;
+  border: 2px solid #1b2838;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #66c0f4, #417a9b);
+}
