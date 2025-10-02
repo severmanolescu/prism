@@ -29,6 +29,23 @@ function showCreateCollectionModal() {
             </div>
           </div>
         </div>
+        <div class="form-group">
+          <label>Productivity Level</label>
+          <div class="productivity-selector">
+            <button type="button" class="productivity-btn" data-level="productive">
+              <span class="productivity-icon">✅</span>
+              <span>Productive</span>
+            </button>
+            <button type="button" class="productivity-btn active" data-level="neutral">
+              <span class="productivity-icon">⚪</span>
+              <span>Neutral</span>
+            </button>
+            <button type="button" class="productivity-btn" data-level="unproductive">
+              <span class="productivity-icon">❌</span>
+              <span>Unproductive</span>
+            </button>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-cancel">Cancel</button>
@@ -42,25 +59,35 @@ function showCreateCollectionModal() {
   const colorPicker = modal.querySelector('#colorPicker');
   const colorPreview = modal.querySelector('#colorPreview');
   let selectedColor = '#4a90e2';
-  
+  let selectedProductivityLevel = 'neutral';
+
   // Update preview
   function updateColorPreview(color) {
     selectedColor = color;
     colorPreview.style.background = color;
     colorPicker.value = color;
   }
-  
+
   updateColorPreview(selectedColor);
-  
+
   // Handle color picker change
   colorPicker.addEventListener('input', (e) => {
     updateColorPreview(e.target.value);
   });
-  
+
   // Handle preset color clicks
   modal.querySelectorAll('.preset-color').forEach(preset => {
     preset.onclick = () => {
       updateColorPreview(preset.dataset.color);
+    };
+  });
+
+  // Handle productivity level selection
+  modal.querySelectorAll('.productivity-btn').forEach(btn => {
+    btn.onclick = () => {
+      modal.querySelectorAll('.productivity-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedProductivityLevel = btn.dataset.level;
     };
   });
   
@@ -83,9 +110,10 @@ function showCreateCollectionModal() {
     try {
       const result = await window.electronAPI.createCollection({
         name: name,
-        color: selectedColor
+        color: selectedColor,
+        productivityLevel: selectedProductivityLevel
       });
-      
+
       if (result.success) {
         modal.remove();
         showCategoryOverview();
@@ -302,6 +330,23 @@ function showEditCollectionModal(category) {
               </div>
             </div>
           </div>
+          <div class="form-group">
+            <label>Productivity Level</label>
+            <div class="productivity-selector">
+              <button type="button" class="productivity-btn ${category.productivity_level === 'productive' ? 'active' : ''}" data-level="productive">
+                <span class="productivity-icon">✅</span>
+                <span>Productive</span>
+              </button>
+              <button type="button" class="productivity-btn ${!category.productivity_level || category.productivity_level === 'neutral' ? 'active' : ''}" data-level="neutral">
+                <span class="productivity-icon">⚪</span>
+                <span>Neutral</span>
+              </button>
+              <button type="button" class="productivity-btn ${category.productivity_level === 'unproductive' ? 'active' : ''}" data-level="unproductive">
+                <span class="productivity-icon">❌</span>
+                <span>Unproductive</span>
+              </button>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-cancel">Cancel</button>
@@ -315,19 +360,29 @@ function showEditCollectionModal(category) {
     const colorPicker = modal.querySelector('#colorPicker');
     const colorPreview = modal.querySelector('#colorPreview');
     let selectedColor = category.color;
-    
+    let selectedProductivityLevel = category.productivity_level || 'neutral';
+
     function updateColorPreview(color) {
       selectedColor = color;
       colorPreview.style.background = color;
       colorPicker.value = color;
     }
-    
+
     updateColorPreview(selectedColor);
-    
+
     colorPicker.addEventListener('input', (e) => updateColorPreview(e.target.value));
-    
+
     modal.querySelectorAll('.preset-color').forEach(preset => {
       preset.onclick = () => updateColorPreview(preset.dataset.color);
+    });
+
+    // Handle productivity level selection
+    modal.querySelectorAll('.productivity-btn').forEach(btn => {
+      btn.onclick = () => {
+        modal.querySelectorAll('.productivity-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedProductivityLevel = btn.dataset.level;
+      };
     });
     
     // Close handlers
@@ -354,9 +409,10 @@ function showEditCollectionModal(category) {
       try {
         const result = await window.electronAPI.editCollection(category.id, {
           name: newName,
-          color: selectedColor
+          color: selectedColor,
+          productivityLevel: selectedProductivityLevel
         });
-        
+
         if (result.success) {
           closeModal(true);
         } else {

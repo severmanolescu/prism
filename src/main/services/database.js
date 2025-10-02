@@ -30,6 +30,7 @@ async function initDatabase() {
       last_used INTEGER,
       total_time INTEGER DEFAULT 0,
       launch_count INTEGER DEFAULT 0,
+      productivity_level_override TEXT,
       created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)
     );
 
@@ -47,6 +48,7 @@ async function initDatabase() {
       name TEXT UNIQUE NOT NULL,
       color TEXT,
       icon TEXT,
+      productivity_level TEXT DEFAULT 'neutral',
       is_default INTEGER DEFAULT 0,
       created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)
     );
@@ -73,6 +75,9 @@ async function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_apps_category ON apps(category);
     CREATE INDEX IF NOT EXISTS idx_apps_hidden ON apps(hidden);
   `);
+
+  // Run migrations for productivity levels
+  await migrateProductivityLevels();
 
   console.log('Database initialized successfully');
   return db;
@@ -230,6 +235,36 @@ async function checkMigration() {
   // If database doesn't exist but JSON files do, run migration
   if (!fs.existsSync(dbFile) && fs.existsSync(appsFile)) {
     await migrateFromJSON();
+  }
+}
+
+// Migration for adding productivity level columns
+async function migrateProductivityLevels() {
+  try {
+    // Check if columns already exist
+    const categoriesInfo = await db.all('PRAGMA table_info(categories)');
+    const appsInfo = await db.all('PRAGMA table_info(apps)');
+
+    const hasProductivityInCategories = categoriesInfo.some(col => col.name === 'productivity_level');
+    const hasProductivityInApps = appsInfo.some(col => col.name === 'productivity_level_override');
+
+    // Add productivity_level to categories if it doesn't exist
+    if (!hasProductivityInCategories) {
+      await db.exec(`
+        ALTER TABLE categories ADD COLUMN productivity_level TEXT DEFAULT 'neutral';
+      `);
+      console.log('Added productivity_level column to categories table');
+    }
+
+    // Add productivity_level_override to apps if it doesn't exist
+    if (!hasProductivityInApps) {
+      await db.exec(`
+        ALTER TABLE apps ADD COLUMN productivity_level_override TEXT;
+      `);
+      console.log('Added productivity_level_override column to apps table');
+    }
+  } catch (error) {
+    console.error('Error migrating productivity levels:', error);
   }
 }
 

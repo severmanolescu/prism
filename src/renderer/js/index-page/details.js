@@ -20,12 +20,24 @@ async function showAppDetails(appName) {
     const recentSection = document.querySelector('.recent-section');
     const allAppsSection = document.querySelector('.all-apps-section');
     const categoryOverview = document.querySelector('.category-overview');
-    
+    const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
+    const sidebar = document.querySelector('.sidebar');
+
     if (recentSection) recentSection.style.display = 'none';
     if (allAppsSection) allAppsSection.style.display = 'none';
     if (categoryOverview) categoryOverview.style.display = 'none';
-    
+    if (analyticsContainer) analyticsContainer.style.display = 'none';
+
+    // Show sidebar (in case it was hidden by analytics view)
+    if (sidebar) sidebar.style.display = 'flex';
+
     const mainContent = document.querySelector('.main-content');
+
+    // Reset main-content margin (in case it was changed by analytics view)
+    if (mainContent) {
+        mainContent.style.marginLeft = '';
+        mainContent.style.width = '';
+    }
     
     // Create or show app details iframe
     let detailsContainer = document.querySelector('.app-details-iframe-wrapper');

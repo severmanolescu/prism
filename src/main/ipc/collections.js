@@ -15,6 +15,7 @@ function initializeCollectionHandlers() {
       name: cat.name,
       color: cat.color,
       icon: cat.icon,
+      productivity_level: cat.productivity_level,
       isDefault: cat.is_default === 1,
       createdAt: cat.created_at
     }));
@@ -27,7 +28,8 @@ function initializeCollectionHandlers() {
         id,
         name: collectionData.name,
         color: collectionData.color || '#092442',
-        icon: collectionData.icon || '📁'
+        icon: collectionData.icon || '📁',
+        productivityLevel: collectionData.productivityLevel || 'neutral'
       });
       return { success: true };
     } catch (error) {
@@ -38,7 +40,10 @@ function initializeCollectionHandlers() {
 
   ipcMain.handle('edit-collection', async (event, categoryId, newData) => {
     try {
-      await updateCategory(categoryId, newData);
+      await updateCategory(categoryId, {
+        ...newData,
+        productivityLevel: newData.productivityLevel
+      });
       return { success: true };
     } catch (error) {
       console.error('Error editing collection:', error);

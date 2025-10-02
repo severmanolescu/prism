@@ -320,6 +320,12 @@ function showAnalyticsView() {
         iframe.style.display = 'block';
         iframe.src = 'analytics.html';
         
+        iframe.onload = () => {
+            iframe.contentWindow.postMessage({
+                type: 'ANALYTICS',
+            }, '*');
+        };
+
         analyticsContainer.appendChild(iframe);
         
         if (mainContent) {

@@ -44,5 +44,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   getTodayStats: () => ipcRenderer.invoke('get-today-stats'),
 
-  getAppDetails: (appId) => ipcRenderer.invoke('get-app-details', appId)
+  getAppDetails: (appId) => ipcRenderer.invoke('get-app-details', appId),
+
+  getAnalyticsData: (startDate, endDate) => ipcRenderer.invoke('get-analytics-data', startDate, endDate),
+  getHourlyAppBreakdown: (startDate, endDate) => ipcRenderer.invoke('get-hourly-app-breakdown', startDate, endDate)
 });

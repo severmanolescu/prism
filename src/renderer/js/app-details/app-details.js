@@ -284,3 +284,119 @@ function updateMonthlyCalendar(details) {
 
   calendar.innerHTML = html.join('');
 }
+
+// =====================
+// Productivity Level Handling
+// =====================
+
+let currentProductivityLevel = null;
+let currentCategoryProductivityLevel = null;
+
+async function initializeProductivitySelector() {
+  if (!appDetails) return;
+
+  const appId = appDetails.app.id;
+  const category = appDetails.app.category;
+
+  try {
+    // Get app's current productivity level (override or inherited)
+    const effectiveLevel = await window.electronAPI.invoke('get-app-productivity-level', appId);
+
+    // Get app's actual override value
+    const appData = await window.electronAPI.getAppById(appId);
+    const hasOverride = appData.productivity_level_override != null;
+    const overrideLevel = appData.productivity_level_override;
+
+    // Get category's default level
+    const categories = await window.electronAPI.getCategories();
+    const categoryData = categories.find(cat => cat.name === category);
+    currentCategoryProductivityLevel = categoryData?.productivity_level || 'neutral';
+
+    // Update UI
+    const buttons = document.querySelectorAll('.productivity-btn-inline');
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    if (!hasOverride) {
+      // Using category default
+      const inheritBtn = document.querySelector('[data-level="inherit"]');
+      if (inheritBtn) {
+        inheritBtn.classList.add('active');
+      }
+      showInheritedInfo(category, currentCategoryProductivityLevel);
+    } else {
+      // Has override
+      const activeBtn = document.querySelector(`[data-level="${overrideLevel}"]`);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+      }
+      hideInheritedInfo();
+    }
+
+    currentProductivityLevel = effectiveLevel;
+
+    // Setup click handlers
+    buttons.forEach(btn => {
+      btn.onclick = async () => {
+        const level = btn.dataset.level;
+        await setProductivityLevel(level, appId);
+      };
+    });
+  } catch (error) {
+    console.error('Error initializing productivity selector:', error);
+  }
+}
+
+async function setProductivityLevel(level, appId) {
+  try {
+    if (level === 'inherit') {
+      // Clear override (set to null)
+      await window.electronAPI.invoke('set-app-productivity-override', appId, null);
+      showInheritedInfo(appDetails.app.category, currentCategoryProductivityLevel);
+    } else {
+      // Set override
+      await window.electronAPI.invoke('set-app-productivity-override', appId, level);
+      hideInheritedInfo();
+    }
+
+    // Update active state
+    const buttons = document.querySelectorAll('.productivity-btn-inline');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.querySelector(`[data-level="${level}"]`);
+    if (activeBtn) {
+      activeBtn.classList.add('active');
+    }
+
+    currentProductivityLevel = level === 'inherit' ? currentCategoryProductivityLevel : level;
+  } catch (error) {
+    console.error('Error setting productivity level:', error);
+  }
+}
+
+function showInheritedInfo(category, level) {
+  const inheritedInfo = document.getElementById('productivity-inherited-info');
+  const inheritedText = document.getElementById('productivity-inherited-text');
+
+  const levelNames = {
+    'productive': 'Productive',
+    'neutral': 'Neutral',
+    'unproductive': 'Unproductive'
+  };
+
+  inheritedText.textContent = `Using "${category}" default: ${levelNames[level]}`;
+  inheritedInfo.style.display = 'block';
+}
+
+function hideInheritedInfo() {
+  const inheritedInfo = document.getElementById('productivity-inherited-info');
+  inheritedInfo.style.display = 'none';
+}
+
+// Call after app details are loaded
+window.addEventListener('message', (event) => {
+  if (event.data.type === 'APP_DETAILS') {
+    appDetails = event.data.details;
+    loadAppDetails().then(() => {
+      initializeProductivitySelector();
+    });
+  }
+});

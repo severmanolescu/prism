@@ -214,4 +214,67 @@ document.addEventListener('DOMContentLoaded', () => {
     window.contextMenu = new ContextMenu();
 
     window.collectionContextMenu = new CollectionContextMenu();
+
+    // Handle analytics data requests from iframe
+    window.addEventListener('message', async (event) => {
+        if (event.data.type === 'REQUEST_ANALYTICS_DATA') {
+            const { startDate, endDate } = event.data;
+
+            try {
+                // Fetch analytics data
+                const data = await window.electronAPI.getAnalyticsData(startDate, endDate);
+
+                // Send response back to iframe
+                const analyticsIframe = document.querySelector('.analytics-iframe-wrapper iframe');
+                if (analyticsIframe && analyticsIframe.contentWindow) {
+                    analyticsIframe.contentWindow.postMessage({
+                        type: 'ANALYTICS_DATA_RESPONSE',
+                        data: data
+                    }, '*');
+                }
+            } catch (error) {
+                console.error('Error fetching analytics data:', error);
+            }
+        } else if (event.data.type === 'REQUEST_HEATMAP_DATA') {
+            const { startDate, endDate } = event.data;
+
+            try {
+                // Fetch hourly app breakdown data
+                const heatmapData = await window.electronAPI.getHourlyAppBreakdown(startDate, endDate);
+
+                // Send response back to iframe
+                const analyticsIframe = document.querySelector('.analytics-iframe-wrapper iframe');
+                if (analyticsIframe && analyticsIframe.contentWindow) {
+                    analyticsIframe.contentWindow.postMessage({
+                        type: 'HEATMAP_DATA_RESPONSE',
+                        data: heatmapData
+                    }, '*');
+                }
+            } catch (error) {
+                console.error('Error fetching heatmap data:', error);
+            }
+        } else if (event.data.type === 'REQUEST_CATEGORIES') {
+            try {
+                // Fetch categories
+                const categories = await window.electronAPI.getCategories();
+
+                // Send response back to iframe
+                const analyticsIframe = document.querySelector('.analytics-iframe-wrapper iframe');
+                if (analyticsIframe && analyticsIframe.contentWindow) {
+                    analyticsIframe.contentWindow.postMessage({
+                        type: 'CATEGORIES_RESPONSE',
+                        categories: categories
+                    }, '*');
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        } else if (event.data.type === 'OPEN_APP_DETAILS') {
+            // Open app details from analytics iframe
+            const appName = event.data.appName;
+            if (appName && typeof showAppDetails === 'function') {
+                showAppDetails(appName);
+            }
+        }
+    });
 });
