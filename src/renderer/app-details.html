@@ -80,7 +80,36 @@
       </div>
     </div>
 
+    <!-- Productivity Settings -->
+    <div class="productivity-settings">
+      <div class="productivity-settings-header">
+        <div class="productivity-label">Productivity Level</div>
+        <div class="productivity-inherited" id="productivity-inherited-info" style="display: none;">
+          <span id="productivity-inherited-text"></span>
+        </div>
+      </div>
+      <div class="productivity-selector-inline">
+        <button type="button" class="productivity-btn-inline" data-level="productive">
+          <span class="productivity-icon">✅</span>
+          <span>Productive</span>
+        </button>
+        <button type="button" class="productivity-btn-inline" data-level="neutral">
+          <span class="productivity-icon">⚪</span>
+          <span>Neutral</span>
+        </button>
+        <button type="button" class="productivity-btn-inline" data-level="unproductive">
+          <span class="productivity-icon">❌</span>
+          <span>Unproductive</span>
+        </button>
+        <button type="button" class="productivity-btn-inline" data-level="inherit" id="inherit-btn">
+          <span class="productivity-icon">↩️</span>
+          <span>Use Category Default</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Quick Stats -->
+    <div class="section-title">Overview</div>
     <div class="quick-stats">
       <div class="quick-stat-card">
         <div class="quick-stat-icon">⏱️</div>

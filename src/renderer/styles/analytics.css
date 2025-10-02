@@ -27,8 +27,54 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 16px;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  }
+
+  .export-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #092442 0%, #07417a 80%);
+    border: 1px solid rgba(102, 192, 244, 0.3);
+    color: #ffffff;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  .export-btn:hover {
+    background: linear-gradient(135deg, #0a2f5a 0%, #0856a0 80%);
+    border-color: rgba(102, 192, 244, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(102, 192, 244, 0.3);
+  }
+
+  .export-btn:active {
+    transform: translateY(0);
+  }
+
+  .export-menu-item {
+    padding: 8px 14px;
+    color: #c6d4df;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .export-menu-item:hover {
+    background: rgba(102, 192, 244, 0.1);
+    color: #66c0f4;
+  }
+
+  .export-menu-item:first-child {
+    border-radius: 3px 3px 0 0;
+  }
+
+  .export-menu-item:last-child {
+    border-radius: 0 0 3px 3px;
   }
 
   .date-range-controls {
@@ -179,12 +225,13 @@
   }
 
   .chart-card {
-    background: linear-gradient(to bottom, rgba(42, 71, 94, 0.3) 5%, rgba(27, 40, 56, 0.5) 95%);
-    border: 1px solid rgba(0, 0, 0, 0.3);
-    border-top: 1px solid rgba(103, 193, 245, 0.15);
-    border-radius: 3px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .chart-card .section-header {
+    margin-bottom: 16px;
   }
 
   .chart-header {
@@ -501,27 +548,45 @@
   }
 
   .category-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    display: flex;
     gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-behavior: smooth;
+  }
+
+  .category-grid::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .category-grid::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+
+  .category-grid::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, #4a5a68, #3c4043);
+    border-radius: 4px;
+  }
+
+  .category-grid::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to right, #66c0f4, #417a9b);
   }
 
   .category-item {
-    background: linear-gradient(135deg, rgba(42, 71, 94, 0.3) 0%, rgba(27, 40, 56, 0.5) 100%);
-    border: 1px solid rgba(0, 0, 0, 0.4);
-    border-top: 1px solid rgba(103, 193, 245, 0.15);
+    background: transparent;
+    border: none;
     border-left: 3px solid;
     padding: 14px;
-    border-radius: 3px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    padding-left: 12px;
     transition: all 0.2s ease;
+    min-width: 200px;
+    flex-shrink: 0;
   }
 
   .category-item:hover {
-    background: linear-gradient(135deg, rgba(52, 81, 104, 0.4) 0%, rgba(37, 50, 66, 0.6) 100%);
-    border-top-color: rgba(103, 193, 245, 0.3);
     transform: translateX(2px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    opacity: 0.9;
   }
 
   .category-name {
@@ -602,11 +667,9 @@
 
   /* Session Timeline */
   .timeline-container {
-    background: #16202d;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    padding: 20px;
-    margin-bottom: 20px;
+    background: transparent;
+    border: none;
+    padding: 0;
   }
 
   .timeline-hours {
@@ -646,6 +709,36 @@
   }
 
   /* Hourly Heatmap */
+  .heatmap-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    margin-bottom: 8px;
+  }
+
+  .heatmap-count-btn {
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #8f98a0;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 11px;
+    font-weight: 400;
+  }
+
+  .heatmap-count-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #c6d4df;
+  }
+
+  .heatmap-count-btn.active {
+    background: linear-gradient(135deg, #092442 0%, #07417a 80%);
+    color: #ffffff;
+    border-color: rgba(102, 192, 244, 0.3);
+  }
+
   .heatmap-grid {
     display: grid;
     grid-template-columns: auto repeat(24, 1fr);

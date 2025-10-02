@@ -91,6 +91,17 @@ window.addEventListener('message', (event) => {
     // Received analytics data from parent window
     console.log('Received analytics data:', event.data.data);
     updateAnalyticsUI(event.data.data);
+
+    // Load heatmap data after main UI renders
+    setTimeout(() => {
+      loadHeatmapData(event.data.data.dateRange.start, event.data.data.dateRange.end);
+    }, 50);
+  } else if (event.data.type === 'HEATMAP_DATA_RESPONSE') {
+    // Received heatmap data
+    console.log('Received heatmap data');
+    if (currentAnalyticsData) {
+      updateHourlyHeatmap(event.data.data, currentAnalyticsData.topApps);
+    }
   } else if (event.data.type === 'CATEGORIES_RESPONSE') {
     // Received categories from parent window
     console.log('Received categories:', event.data.categories);
@@ -103,6 +114,8 @@ window.addEventListener('message', (event) => {
 
 let currentPeriod = 'today';
 let categoriesCache = {}; // Cache for category colors
+let heatmapAppCount = 5; // Default to top 5 apps
+let currentAnalyticsData = null; // Cache analytics data for heatmap updates
 
 // Calculate date range based on period
 function calculateDateRange(period) {
@@ -162,8 +175,21 @@ async function loadAnalyticsData(period, customStartDate, customEndDate) {
   }
 }
 
+// Load heatmap data asynchronously
+function loadHeatmapData(startDate, endDate) {
+  // Request heatmap data from parent window
+  window.parent.postMessage({
+    type: 'REQUEST_HEATMAP_DATA',
+    startDate: startDate,
+    endDate: endDate
+  }, '*');
+}
+
 // Update the UI with analytics data
 function updateAnalyticsUI(data) {
+  // Cache the data for heatmap updates
+  currentAnalyticsData = data;
+
   // Update stats cards
   updateStatsCards(data);
   // Update daily usage chart
@@ -178,6 +204,9 @@ function updateAnalyticsUI(data) {
   updateInsights(data);
   // Update date info
   updateDateInfo(data.dateRange);
+
+  // Show loading state for heatmap
+  showHeatmapLoading();
 }
 
 function updateStatsCards(data) {
@@ -456,32 +485,7 @@ function updateInsights(data) {
     `;
   }
 
-  // 6. Multitasking Score
-  if (data.overlappingSessions && data.overlappingSessions.length > 0) {
-    const totalOverlaps = data.overlappingSessions.reduce((sum, day) => sum + day.overlapping_count, 0);
-    const avgOverlaps = Math.round(totalOverlaps / data.overlappingSessions.length);
-
-    let multitaskingMessage = '';
-    if (avgOverlaps === 0) {
-      multitaskingMessage = 'Single-tasking - you focus on one app at a time.';
-    } else if (avgOverlaps <= 5) {
-      multitaskingMessage = `Light multitasking - averaging ${avgOverlaps} concurrent apps.`;
-    } else if (avgOverlaps <= 15) {
-      multitaskingMessage = `Moderate multitasking - averaging ${avgOverlaps} concurrent apps.`;
-    } else {
-      multitaskingMessage = `Heavy multitasking - averaging ${avgOverlaps} concurrent apps.`;
-    }
-
-    insightsGrid.innerHTML += `
-      <div class="insight-card">
-        <div class="insight-icon">⚡</div>
-        <div class="insight-content">
-          <div class="insight-title">Multitasking Score</div>
-          <div class="insight-text">${multitaskingMessage}</div>
-        </div>
-      </div>
-    `;
-  }
+  // Multitasking Score removed - was too slow (1.4s query time)
 }
 
 function updateDateInfo(dateRange) {
@@ -491,15 +495,293 @@ function updateDateInfo(dateRange) {
   }
 }
 
+function showHeatmapLoading() {
+  const heatmapGrid = document.querySelector('.heatmap-grid');
+  if (!heatmapGrid) return;
+
+  heatmapGrid.innerHTML = '';
+  heatmapGrid.innerHTML += '<div></div>';
+  for (let i = 0; i < 24; i++) {
+    heatmapGrid.innerHTML += `<div class="heatmap-hour">${i}</div>`;
+  }
+  heatmapGrid.innerHTML += `<div class="heatmap-label" style="color: #66c0f4;">Loading...</div>`;
+  for (let i = 0; i < 24; i++) {
+    heatmapGrid.innerHTML += `<div class="heatmap-cell" style="background: rgba(102, 192, 244, 0.1);"></div>`;
+  }
+}
+
+function updateHourlyHeatmap(hourlyAppBreakdown, topApps) {
+  const heatmapGrid = document.querySelector('.heatmap-grid');
+  if (!heatmapGrid) return;
+
+  // Clear existing content except the hour headers
+  heatmapGrid.innerHTML = '';
+
+  // Add empty corner cell
+  heatmapGrid.innerHTML += '<div></div>';
+
+  // Add hour headers (0-23)
+  for (let i = 0; i < 24; i++) {
+    heatmapGrid.innerHTML += `<div class="heatmap-hour">${i}</div>`;
+  }
+
+  if (!hourlyAppBreakdown || hourlyAppBreakdown.length === 0) {
+    heatmapGrid.innerHTML += `<div class="heatmap-label">No data</div>`;
+    for (let i = 0; i < 24; i++) {
+      heatmapGrid.innerHTML += `<div class="heatmap-cell" style="background: rgba(255, 255, 255, 0.02);"></div>`;
+    }
+    return;
+  }
+
+  // Get apps to display based on selected count
+  const topAppsToShow = heatmapAppCount === 'all'
+    ? topApps
+    : topApps ? topApps.slice(0, heatmapAppCount) : [];
+
+  // Group hourly data by app
+  const appHourlyData = {};
+  hourlyAppBreakdown.forEach(item => {
+    if (!appHourlyData[item.name]) {
+      appHourlyData[item.name] = {
+        name: item.name,
+        category: item.category,
+        hours: {}
+      };
+    }
+    appHourlyData[item.name].hours[item.hour] = item.total_time;
+  });
+
+  // Get category colors from cache for each app
+  const getAppColor = (category) => {
+    return categoriesCache[category] || '#66c0f4';
+  };
+
+  // Render each top app's hourly data
+  topAppsToShow.forEach(app => {
+    const appData = appHourlyData[app.name];
+    if (!appData) return;
+
+    // Find max time for this app to normalize opacity
+    const maxTime = Math.max(...Object.values(appData.hours));
+
+    // Add app label
+    heatmapGrid.innerHTML += `<div class="heatmap-label">${app.name}</div>`;
+
+    // Get base color for this app
+    const baseColor = getAppColor(app.category);
+    // Extract RGB from hex color
+    const rgbMatch = baseColor.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    const rgb = rgbMatch ? {
+      r: parseInt(rgbMatch[1], 16),
+      g: parseInt(rgbMatch[2], 16),
+      b: parseInt(rgbMatch[3], 16)
+    } : { r: 102, g: 192, b: 244 }; // Default Steam blue
+
+    // Add hourly cells
+    for (let hour = 0; hour < 24; hour++) {
+      const timeInHour = appData.hours[hour] || 0;
+      const opacity = timeInHour > 0 ? Math.max(0.1, (timeInHour / maxTime)) : 0.05;
+
+      const tooltip = timeInHour > 0 ?
+        `title="${hour}:00 - ${formatTime(timeInHour)}"` : '';
+
+      heatmapGrid.innerHTML += `
+        <div class="heatmap-cell"
+             style="background: rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity});"
+             ${tooltip}></div>
+      `;
+    }
+  });
+}
+
+// Setup heatmap controls
+function setupHeatmapControls() {
+  const heatmapBtns = document.querySelectorAll('.heatmap-count-btn');
+
+  heatmapBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Remove active class from all buttons
+      heatmapBtns.forEach(b => b.classList.remove('active'));
+      // Add active class to clicked button
+      btn.classList.add('active');
+
+      // Update the count
+      const count = btn.dataset.count;
+      heatmapAppCount = count === 'all' ? 'all' : parseInt(count);
+
+      // Refresh heatmap - reload the data with new count
+      if (currentAnalyticsData) {
+        showHeatmapLoading();
+        loadHeatmapData(currentAnalyticsData.dateRange.start, currentAnalyticsData.dateRange.end);
+      }
+    });
+  });
+}
+
+// Export analytics data
+function exportAnalytics() {
+  if (!currentAnalyticsData) {
+    alert('No data to export');
+    return;
+  }
+
+  // Create export options menu
+  const exportOptions = document.createElement('div');
+  exportOptions.className = 'export-menu';
+  exportOptions.innerHTML = `
+    <div class="export-menu-item" data-format="csv">Export as CSV</div>
+    <div class="export-menu-item" data-format="json">Export as JSON</div>
+  `;
+  exportOptions.style.cssText = `
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 4px;
+    background: #16202d;
+    border: 1px solid rgba(102, 192, 244, 0.3);
+    border-radius: 3px;
+    min-width: 150px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  `;
+
+  const exportBtn = document.querySelector('.export-btn');
+  exportBtn.style.position = 'relative';
+  exportBtn.appendChild(exportOptions);
+
+  // Handle export format selection
+  exportOptions.addEventListener('click', (e) => {
+    const format = e.target.dataset.format;
+    if (format) {
+      if (format === 'csv') {
+        exportAsCSV();
+      } else if (format === 'json') {
+        exportAsJSON();
+      }
+      exportOptions.remove();
+    }
+  });
+
+  // Close menu when clicking outside
+  setTimeout(() => {
+    document.addEventListener('click', function closeMenu(e) {
+      if (!exportBtn.contains(e.target)) {
+        exportOptions.remove();
+        document.removeEventListener('click', closeMenu);
+      }
+    });
+  }, 0);
+}
+
+function exportAsCSV() {
+  const data = currentAnalyticsData;
+  const dateRange = `${data.dateRange.start}_to_${data.dateRange.end}`;
+
+  // Create CSV content
+  let csv = 'App Time Analytics Export\n\n';
+  csv += `Period: ${data.dateRange.start} to ${data.dateRange.end}\n`;
+  csv += `Total Days: ${data.dateRange.days}\n\n`;
+
+  csv += 'OVERVIEW\n';
+  csv += `Total Time,${formatTime(data.overallStats.totalTime)}\n`;
+  csv += `Unique Apps,${data.overallStats.uniqueApps}\n`;
+  csv += `Total Sessions,${data.overallStats.totalSessions}\n`;
+  csv += `Avg Session,${Math.floor(data.overallStats.avgSessionDuration / (1000 * 60))} min\n\n`;
+
+  csv += 'TOP APPLICATIONS\n';
+  csv += 'App Name,Total Time,Sessions\n';
+  data.topApps.forEach(app => {
+    csv += `"${app.name}",${formatTime(app.total_time)},${app.session_count}\n`;
+  });
+
+  csv += '\nCATEGORY BREAKDOWN\n';
+  csv += 'Category,Total Time,Apps,Sessions\n';
+  data.categoryBreakdown.forEach(cat => {
+    csv += `"${cat.category}",${formatTime(cat.total_time)},${cat.app_count},${cat.session_count}\n`;
+  });
+
+  // Download CSV
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `analytics_${dateRange}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportAsJSON() {
+  const data = currentAnalyticsData;
+  const dateRange = `${data.dateRange.start}_to_${data.dateRange.end}`;
+
+  // Create clean JSON export
+  const exportData = {
+    exportDate: new Date().toISOString(),
+    period: {
+      start: data.dateRange.start,
+      end: data.dateRange.end,
+      days: data.dateRange.days
+    },
+    summary: {
+      totalTime: data.overallStats.totalTime,
+      totalTimeFormatted: formatTime(data.overallStats.totalTime),
+      uniqueApps: data.overallStats.uniqueApps,
+      totalSessions: data.overallStats.totalSessions,
+      avgSessionDuration: data.overallStats.avgSessionDuration,
+      avgSessionDurationFormatted: `${Math.floor(data.overallStats.avgSessionDuration / (1000 * 60))} min`
+    },
+    topApplications: data.topApps.map(app => ({
+      name: app.name,
+      category: app.category,
+      totalTime: app.total_time,
+      totalTimeFormatted: formatTime(app.total_time),
+      sessionCount: app.session_count
+    })),
+    categoryBreakdown: data.categoryBreakdown.map(cat => ({
+      category: cat.category,
+      totalTime: cat.total_time,
+      totalTimeFormatted: formatTime(cat.total_time),
+      appCount: cat.app_count,
+      sessionCount: cat.session_count
+    })),
+    dailyBreakdown: data.dailyBreakdown.map(day => ({
+      date: day.date,
+      totalTime: day.total_time,
+      totalTimeFormatted: formatTime(day.total_time),
+      sessionCount: day.session_count,
+      appCount: day.app_count
+    })),
+    mostActiveDay: data.mostActiveDay,
+    leastActiveDay: data.leastActiveDay,
+    longestSession: data.longestSession
+  };
+
+  // Download JSON
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `analytics_${dateRange}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 // Initialize analytics
 function initAnalytics() {
   setupDateRangeControls();
+  setupHeatmapControls();
   // Request categories from parent window
   window.parent.postMessage({
     type: 'REQUEST_CATEGORIES'
   }, '*');
   // Load default period (today)
   loadAnalyticsData(currentPeriod);
+
+  // Add export button handler
+  const exportBtn = document.querySelector('.export-btn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', exportAnalytics);
+  }
 
   // Add click handler for app cards
   document.addEventListener('click', (e) => {

@@ -235,6 +235,24 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error('Error fetching analytics data:', error);
             }
+        } else if (event.data.type === 'REQUEST_HEATMAP_DATA') {
+            const { startDate, endDate } = event.data;
+
+            try {
+                // Fetch hourly app breakdown data
+                const heatmapData = await window.electronAPI.getHourlyAppBreakdown(startDate, endDate);
+
+                // Send response back to iframe
+                const analyticsIframe = document.querySelector('.analytics-iframe-wrapper iframe');
+                if (analyticsIframe && analyticsIframe.contentWindow) {
+                    analyticsIframe.contentWindow.postMessage({
+                        type: 'HEATMAP_DATA_RESPONSE',
+                        data: heatmapData
+                    }, '*');
+                }
+            } catch (error) {
+                console.error('Error fetching heatmap data:', error);
+            }
         } else if (event.data.type === 'REQUEST_CATEGORIES') {
             try {
                 // Fetch categories

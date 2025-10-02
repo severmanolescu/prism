@@ -92,26 +92,27 @@ async function getAllCategories() {
 // Create category
 async function createCategory(category) {
   const db = getDb();
-  const { id, name, color, icon } = category;
-  
+  const { id, name, color, icon, productivityLevel } = category;
+
   return await db.run(`
-    INSERT INTO categories (id, name, color, icon, is_default, created_at)
-    VALUES (?, ?, ?, ?, 0, ?)
-  `, [id, name, color, icon, Date.now()]);
+    INSERT INTO categories (id, name, color, icon, productivity_level, is_default, created_at)
+    VALUES (?, ?, ?, ?, ?, 0, ?)
+  `, [id, name, color, icon, productivityLevel || 'neutral', Date.now()]);
 }
 
 // Update category
 async function updateCategory(categoryId, updates) {
   const db = getDb();
-  const { name, color, icon } = updates;
-  
+  const { name, color, icon, productivityLevel } = updates;
+
   return await db.run(`
-    UPDATE categories 
+    UPDATE categories
     SET name = COALESCE(?, name),
         color = COALESCE(?, color),
-        icon = COALESCE(?, icon)
+        icon = COALESCE(?, icon),
+        productivity_level = COALESCE(?, productivity_level)
     WHERE id = ?
-  `, [name, color, icon, categoryId]);
+  `, [name, color, icon, productivityLevel, categoryId]);
 }
 
 // Delete category (moves apps to uncategorized)
@@ -270,6 +271,7 @@ async function getAnalyticsData(startDate, endDate) {
   `, [startTime, endTime]);
 
   // Get top applications
+  console.time('Top Apps');
   const topApps = await db.all(`
     SELECT
       a.id,
@@ -290,7 +292,10 @@ async function getAnalyticsData(startDate, endDate) {
   // Get category breakdown
   const categoryBreakdown = await db.all(`
     SELECT
-      a.category,
+      CASE
+        WHEN LOWER(a.category) = 'uncategorized' THEN 'Uncategorized'
+        ELSE a.category
+      END as category,
       SUM(s.duration) as total_time,
       COUNT(DISTINCT a.id) as app_count,
       COUNT(s.id) as session_count
@@ -299,7 +304,7 @@ async function getAnalyticsData(startDate, endDate) {
     WHERE s.start_time >= ? AND s.start_time <= ?
       AND s.end_time IS NOT NULL
       AND s.duration > 0
-    GROUP BY a.category
+    GROUP BY LOWER(a.category)
     ORDER BY total_time DESC
   `, [startTime, endTime]);
 
@@ -359,25 +364,6 @@ async function getAnalyticsData(startDate, endDate) {
     ORDER BY hour ASC
   `, [startTime, endTime]);
 
-  // Get overlapping sessions for multitasking analysis
-  const overlappingSessions = await db.all(`
-    SELECT
-      DATE(s1.start_time/1000, 'unixepoch', 'localtime') as date,
-      COUNT(DISTINCT s2.id) as overlapping_count
-    FROM sessions s1
-    INNER JOIN sessions s2 ON
-      s1.id != s2.id AND
-      s1.start_time < s2.end_time AND
-      s1.end_time > s2.start_time AND
-      DATE(s1.start_time/1000, 'unixepoch', 'localtime') = DATE(s2.start_time/1000, 'unixepoch', 'localtime')
-    WHERE s1.start_time >= ? AND s1.start_time <= ?
-      AND s1.end_time IS NOT NULL
-      AND s2.end_time IS NOT NULL
-      AND s1.duration > 0
-      AND s2.duration > 0
-    GROUP BY date
-  `, [startTime, endTime]);
-
   return {
     overallStats: {
       totalTime: overallStats.total_time || 0,
@@ -392,12 +378,234 @@ async function getAnalyticsData(startDate, endDate) {
     leastActiveDay,
     longestSession,
     hourlyBreakdown,
-    overlappingSessions,
     dateRange: {
       start: startDate,
       end: endDate,
       days: Math.ceil((endTime - startTime) / (1000 * 60 * 60 * 24))
     }
+  };
+}
+
+// Get hourly breakdown per app (for heatmap) - separate function for async loading
+async function getHourlyAppBreakdown(startDate, endDate) {
+  const db = getDb();
+  const startTime = new Date(startDate).setHours(0, 0, 0, 0);
+  const endTime = new Date(endDate).setHours(23, 59, 59, 999);
+
+  return await db.all(`
+    SELECT
+      a.id,
+      a.name,
+      a.category,
+      CAST(strftime('%H', datetime(s.start_time/1000, 'unixepoch', 'localtime')) AS INTEGER) as hour,
+      SUM(s.duration) as total_time
+    FROM apps a
+    INNER JOIN sessions s ON a.id = s.app_id
+    WHERE s.start_time >= ? AND s.start_time <= ?
+      AND s.end_time IS NOT NULL
+      AND s.duration > 0
+    GROUP BY a.id, hour
+    ORDER BY a.id, hour ASC
+  `, [startTime, endTime]);
+}
+
+// =====================
+// Productivity Functions
+// =====================
+
+// Set productivity level for a category
+async function setCategoryProductivityLevel(categoryId, level) {
+  const db = getDb();
+  const validLevels = ['productive', 'neutral', 'unproductive'];
+
+  if (!validLevels.includes(level)) {
+    throw new Error(`Invalid productivity level: ${level}`);
+  }
+
+  return await db.run(`
+    UPDATE categories
+    SET productivity_level = ?
+    WHERE id = ?
+  `, [level, categoryId]);
+}
+
+// Get productivity level for a category
+async function getCategoryProductivityLevel(categoryId) {
+  const db = getDb();
+  const result = await db.get(`
+    SELECT productivity_level
+    FROM categories
+    WHERE id = ?
+  `, [categoryId]);
+
+  return result ? result.productivity_level : 'neutral';
+}
+
+// Set productivity level override for an app
+async function setAppProductivityOverride(appId, level) {
+  const db = getDb();
+  const validLevels = ['productive', 'neutral', 'unproductive'];
+
+  if (level !== null && !validLevels.includes(level)) {
+    throw new Error(`Invalid productivity level: ${level}`);
+  }
+
+  return await db.run(`
+    UPDATE apps
+    SET productivity_level_override = ?
+    WHERE id = ?
+  `, [level, appId]);
+}
+
+// Get effective productivity level for an app (override or category default)
+async function getAppProductivityLevel(appId) {
+  const db = getDb();
+  const result = await db.get(`
+    SELECT
+      a.productivity_level_override,
+      c.productivity_level as category_level
+    FROM apps a
+    LEFT JOIN categories c ON a.category = c.name
+    WHERE a.id = ?
+  `, [appId]);
+
+  if (!result) {
+    return 'neutral';
+  }
+
+  // Use override if set, otherwise use category level
+  return result.productivity_level_override || result.category_level || 'neutral';
+}
+
+// Get productivity stats for a date range
+async function getProductivityStats(startDate, endDate) {
+  const db = getDb();
+  const startTime = new Date(startDate).setHours(0, 0, 0, 0);
+  const endTime = new Date(endDate).setHours(23, 59, 59, 999);
+
+  // Get total time per productivity level
+  const breakdown = await db.all(`
+    SELECT
+      COALESCE(a.productivity_level_override, c.productivity_level, 'neutral') as productivity_level,
+      SUM(s.duration) as total_time,
+      COUNT(DISTINCT a.id) as app_count,
+      COUNT(s.id) as session_count
+    FROM apps a
+    INNER JOIN sessions s ON a.id = s.app_id
+    LEFT JOIN categories c ON a.category = c.name
+    WHERE s.start_time >= ? AND s.start_time <= ?
+      AND s.end_time IS NOT NULL
+      AND s.duration > 0
+    GROUP BY productivity_level
+  `, [startTime, endTime]);
+
+  // Calculate overall stats
+  const totalTime = breakdown.reduce((sum, item) => sum + item.total_time, 0);
+
+  const productive = breakdown.find(b => b.productivity_level === 'productive') || { total_time: 0, app_count: 0, session_count: 0 };
+  const neutral = breakdown.find(b => b.productivity_level === 'neutral') || { total_time: 0, app_count: 0, session_count: 0 };
+  const unproductive = breakdown.find(b => b.productivity_level === 'unproductive') || { total_time: 0, app_count: 0, session_count: 0 };
+
+  // Calculate productivity score (0-100)
+  const score = totalTime > 0
+    ? Math.round((productive.total_time * 100 + neutral.total_time * 50) / totalTime)
+    : 0;
+
+  // Get top productive and unproductive apps
+  const topProductive = await db.all(`
+    SELECT
+      a.id,
+      a.name,
+      a.category,
+      SUM(s.duration) as total_time,
+      COUNT(s.id) as session_count
+    FROM apps a
+    INNER JOIN sessions s ON a.id = s.app_id
+    LEFT JOIN categories c ON a.category = c.name
+    WHERE s.start_time >= ? AND s.start_time <= ?
+      AND s.end_time IS NOT NULL
+      AND s.duration > 0
+      AND COALESCE(a.productivity_level_override, c.productivity_level, 'neutral') = 'productive'
+    GROUP BY a.id
+    ORDER BY total_time DESC
+    LIMIT 10
+  `, [startTime, endTime]);
+
+  const topUnproductive = await db.all(`
+    SELECT
+      a.id,
+      a.name,
+      a.category,
+      SUM(s.duration) as total_time,
+      COUNT(s.id) as session_count
+    FROM apps a
+    INNER JOIN sessions s ON a.id = s.app_id
+    LEFT JOIN categories c ON a.category = c.name
+    WHERE s.start_time >= ? AND s.start_time <= ?
+      AND s.end_time IS NOT NULL
+      AND s.duration > 0
+      AND COALESCE(a.productivity_level_override, c.productivity_level, 'neutral') = 'unproductive'
+    GROUP BY a.id
+    ORDER BY total_time DESC
+    LIMIT 10
+  `, [startTime, endTime]);
+
+  // Get daily productivity trend
+  const dailyTrend = await db.all(`
+    SELECT
+      DATE(s.start_time/1000, 'unixepoch', 'localtime') as date,
+      SUM(CASE WHEN COALESCE(a.productivity_level_override, c.productivity_level, 'neutral') = 'productive' THEN s.duration ELSE 0 END) as productive_time,
+      SUM(CASE WHEN COALESCE(a.productivity_level_override, c.productivity_level, 'neutral') = 'neutral' THEN s.duration ELSE 0 END) as neutral_time,
+      SUM(CASE WHEN COALESCE(a.productivity_level_override, c.productivity_level, 'neutral') = 'unproductive' THEN s.duration ELSE 0 END) as unproductive_time,
+      SUM(s.duration) as total_time
+    FROM apps a
+    INNER JOIN sessions s ON a.id = s.app_id
+    LEFT JOIN categories c ON a.category = c.name
+    WHERE s.start_time >= ? AND s.start_time <= ?
+      AND s.end_time IS NOT NULL
+      AND s.duration > 0
+    GROUP BY date
+    ORDER BY date ASC
+  `, [startTime, endTime]);
+
+  // Calculate productivity score for each day
+  const dailyScores = dailyTrend.map(day => ({
+    date: day.date,
+    score: day.total_time > 0
+      ? Math.round((day.productive_time * 100 + day.neutral_time * 50) / day.total_time)
+      : 0,
+    productive_time: day.productive_time,
+    neutral_time: day.neutral_time,
+    unproductive_time: day.unproductive_time,
+    total_time: day.total_time
+  }));
+
+  return {
+    score,
+    breakdown: {
+      productive: {
+        time: productive.total_time,
+        percentage: totalTime > 0 ? Math.round((productive.total_time / totalTime) * 100) : 0,
+        apps: productive.app_count,
+        sessions: productive.session_count
+      },
+      neutral: {
+        time: neutral.total_time,
+        percentage: totalTime > 0 ? Math.round((neutral.total_time / totalTime) * 100) : 0,
+        apps: neutral.app_count,
+        sessions: neutral.session_count
+      },
+      unproductive: {
+        time: unproductive.total_time,
+        percentage: totalTime > 0 ? Math.round((unproductive.total_time / totalTime) * 100) : 0,
+        apps: unproductive.app_count,
+        sessions: unproductive.session_count
+      }
+    },
+    totalTime,
+    topProductive,
+    topUnproductive,
+    dailyScores
   };
 }
 
@@ -423,5 +631,11 @@ module.exports = {
   getStatsForRange,
   getDailyStats,
   getTodayStats,
-  getAnalyticsData
+  getAnalyticsData,
+  getHourlyAppBreakdown,
+  setCategoryProductivityLevel,
+  getCategoryProductivityLevel,
+  setAppProductivityOverride,
+  getAppProductivityLevel,
+  getProductivityStats
 };

@@ -7,8 +7,7 @@
 <body>
 <div class="analytics-container">
   <div class="analytics-header">
-    <h1>Analytics</h1>
-    
+
     <div class="date-range-controls">
       <div class="time-range-selector">
         <button class="time-range-btn active">Today</button>
@@ -28,10 +27,17 @@
       <div class="date-info">
         7 days of data available
       </div>
+
+      <button class="export-btn" title="Export analytics data">
+          <span>📊</span>
+          <span>Export</span>
+      </button>
+
     </div>
   </div>
 
   <!-- Stats Overview -->
+  <h3 class="section-header">Overview</h3>
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-label">Total Time</div>
@@ -68,10 +74,7 @@
   <!-- Charts -->
   <div class="charts-grid">
     <div class="chart-card">
-      <div class="chart-header">
-        <div class="chart-title">Daily Usage</div>
-        <div class="chart-subtitle"></div>
-      </div>
+      <h3 class="section-header">Daily Usage</h3>
       <div class="daily-usage-chart">
         <canvas id="daily-usage-canvas" width="800" height="350"></canvas>
       </div>
@@ -83,42 +86,11 @@
         <div class="chart-subtitle"></div>
       </div>
       <div class="daily-usage-chart-old">
-        <div class="bar" style="height: 60%;">
-          <span class="bar-value">0h 0m</span>
-          <span class="bar-label">Mon 24</span>
-        </div>
-        <div class="bar" style="height: 75%;">
-          <span class="bar-value">7h 45m</span>
-          <span class="bar-label">Tue 25</span>
-        </div>
-        <div class="bar" style="height: 85%;">
-          <span class="bar-value">8h 52m</span>
-          <span class="bar-label">Wed 26</span>
-        </div>
-        <div class="bar" style="height: 55%;">
-          <span class="bar-value">5h 41m</span>
-          <span class="bar-label">Thu 27</span>
-        </div>
-        <div class="bar" style="height: 90%;">
-          <span class="bar-value">9h 21m</span>
-          <span class="bar-label">Fri 28</span>
-        </div>
-        <div class="bar" style="height: 70%;">
-          <span class="bar-value">7h 18m</span>
-          <span class="bar-label">Sat 29</span>
-        </div>
-        <div class="bar" style="height: 68%;">
-          <span class="bar-value">7h 9m</span>
-          <span class="bar-label">Sun 30</span>
-        </div>
       </div>
     </div>
 
     <div class="chart-card">
-      <div class="chart-header">
-        <div class="chart-title">Top Applications</div>
-        <div class="chart-subtitle">By time used</div>
-      </div>
+      <h3 class="section-header">Top Applications</h3>
       <div class="top-apps-list">
       </div>
     </div>
@@ -135,31 +107,6 @@
   <div class="full-width-section">
     <h3 class="section-header">Category Breakdown</h3>
     <div class="category-grid">
-      <div class="category-item" style="border-left-color: #66c0f4;">
-        <div class="category-name">💻 Development</div>
-        <div class="category-time">22h 15m</div>
-        <div class="category-percentage">42.5% of total time</div>
-      </div>
-      <div class="category-item" style="border-left-color: #f39c12;">
-        <div class="category-name">🌐 Browsing</div>
-        <div class="category-time">14h 30m</div>
-        <div class="category-percentage">27.7% of total time</div>
-      </div>
-      <div class="category-item" style="border-left-color: #e74c3c;">
-        <div class="category-name">💬 Communication</div>
-        <div class="category-time">8h 45m</div>
-        <div class="category-percentage">16.7% of total time</div>
-      </div>
-      <div class="category-item" style="border-left-color: #9b59b6;">
-        <div class="category-name">🎵 Entertainment</div>
-        <div class="category-time">4h 22m</div>
-        <div class="category-percentage">8.4% of total time</div>
-      </div>
-      <div class="category-item" style="border-left-color: #2ecc71;">
-        <div class="category-name">📝 Productivity</div>
-        <div class="category-time">2h 26m</div>
-        <div class="category-percentage">4.7% of total time</div>
-      </div>
     </div>
   </div>
 
@@ -167,89 +114,20 @@
   <div class="full-width-section">
     <h3 class="section-header">Insights</h3>
     <div class="insights-grid">
-      <div class="insight-card">
-        <div class="insight-icon">📅</div>
-        <div class="insight-content">
-          <div class="insight-title">Period Summary</div>
-          <div class="insight-text">Data from Sep 24 to Sep 30. Total of 247 sessions tracked.</div>
-        </div>
-      </div>
-      <div class="insight-card">
-        <div class="insight-icon">📈</div>
-        <div class="insight-content">
-          <div class="insight-title">Productivity Increased</div>
-          <div class="insight-text">Development time up 18% compared to previous period.</div>
-        </div>
-      </div>
-      <div class="insight-card">
-        <div class="insight-icon">⏰</div>
-        <div class="insight-content">
-          <div class="insight-title">Peak Activity Hours</div>
-          <div class="insight-text">Most active between 2 PM - 6 PM (22h total).</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Session Timeline -->
-  <div class="full-width-section">
-    <div class="timeline-container">
-      <div class="chart-header">
-        <div class="chart-title">Today's Session Timeline</div>
-        <div class="chart-subtitle">Visual representation of your activity throughout the day</div>
-      </div>
-      <div style="display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; margin-top: 12px;">
-        <div style="grid-column: span 24; display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px;">
-          <div class="timeline-hour-label">0</div>
-          <div class="timeline-hour-label"></div>
-          <div class="timeline-hour-label">2</div>
-          <div class="timeline-hour-label"></div>
-          <div class="timeline-hour-label">4</div>
-          <div class="timeline-hour-label"></div>
-          <div class="timeline-hour-label">6</div>
-          <div class="timeline-hour-label"></div>
-          <div class="timeline-hour-label">8</div>
-          <div class="timeline-hour-label"></div>
-          <div class="timeline-hour-label">10</div>
-          <div class="timeline-hour-label"></div>
-          <div class="timeline-hour-label">12</div>
-          <div class="timeline-hour-label"></div>
-          <div class="timeline-hour-label">14</div>
-          <div class="timeline-hour-label"></div>
-          <div class="timeline-hour-label">16</div>
-          <div class="timeline-hour-label"></div>
-          <div class="timeline-hour-label">18</div>
-          <div class="timeline-hour-label"></div>
-          <div class="timeline-hour-label">20</div>
-          <div class="timeline-hour-label"></div>
-          <div class="timeline-hour-label">22</div>
-          <div class="timeline-hour-label"></div>
-        </div>
-        <div style="grid-column: span 24; position: relative; height: 30px; background: rgba(255, 255, 255, 0.02); border-radius: 2px;">
-          <!-- VS Code 8:30-11:00 -->
-          <div style="position: absolute; left: 35.4%; width: 10.4%; height: 100%; background: linear-gradient(135deg, #d95d5d, #c44b4b); border-radius: 2px;" title="VS Code: 8:30-11:00"></div>
-          <!-- Chrome 11:00-13:30 -->
-          <div style="position: absolute; left: 45.8%; width: 10.4%; height: 100%; background: linear-gradient(135deg, #7d8c9a, #6a7785); border-radius: 2px;" title="Chrome: 11:00-13:30"></div>
-          <!-- Slack 13:30-14:00 -->
-          <div style="position: absolute; left: 56.2%; width: 2.1%; height: 100%; background: linear-gradient(135deg, #d9a05d, #c48b4b); border-radius: 2px;" title="Slack: 13:30-14:00"></div>
-          <!-- VS Code 14:00-18:00 -->
-          <div style="position: absolute; left: 58.3%; width: 16.7%; height: 100%; background: linear-gradient(135deg, #d95d5d, #c44b4b); border-radius: 2px;" title="VS Code: 14:00-18:00"></div>
-          <!-- Spotify 18:00-20:30 -->
-          <div style="position: absolute; left: 75%; width: 10.4%; height: 100%; background: linear-gradient(135deg, #9b7dd9, #8566c4); border-radius: 2px;" title="Spotify: 18:00-20:30"></div>
-          <!-- Discord 20:30-22:00 -->
-          <div style="position: absolute; left: 85.4%; width: 6.25%; height: 100%; background: linear-gradient(135deg, #5d9bd9, #4b86c4); border-radius: 2px;" title="Discord: 20:30-22:00"></div>
-        </div>
-      </div>
     </div>
   </div>
 
   <!-- Hourly Heatmap -->
   <div class="full-width-section">
+    <h3 class="section-header">Hourly Activity Heatmap</h3>
+    <div class="heatmap-controls" style="display: flex; gap: 8px; margin-top: 12px; margin-bottom: 8px;">
+      <span style="color: #c6d4df; font-size: 13px; margin-right: 8px;">Show top:</span>
+      <button class="heatmap-count-btn active" data-count="5">5</button>
+      <button class="heatmap-count-btn" data-count="10">10</button>
+      <button class="heatmap-count-btn" data-count="15">15</button>
+      <button class="heatmap-count-btn" data-count="all">All</button>
+    </div>
     <div class="timeline-container">
-      <div class="chart-header">
-        <div class="chart-title">Hourly Activity Heatmap</div>
-        <div class="chart-subtitle">Usage intensity by hour for top apps</div>
-      </div>
       <div class="heatmap-grid">
         <div></div>
         <div class="heatmap-hour">0</div>
@@ -276,162 +154,10 @@
         <div class="heatmap-hour">21</div>
         <div class="heatmap-hour">22</div>
         <div class="heatmap-hour">23</div>
-        
-        <div class="heatmap-label">VS Code</div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.5);" title="8:00 - 2.5h"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.8);" title="9:00 - 3.2h"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.6);" title="10:00 - 2.8h"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.3);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.2);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.2);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.9);" title="14:00 - 3.5h"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 1);" title="15:00 - 4h"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.95);" title="16:00 - 3.8h"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.7);" title="17:00 - 3h"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.2);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(217, 93, 93, 0.1);"></div>
-        
-        <div class="heatmap-label">Chrome</div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.2);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.3);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.4);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.8);" title="11:00 - 2h"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.9);" title="12:00 - 2.5h"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.6);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.4);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.3);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.2);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.2);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(125, 140, 154, 0.1);"></div>
-        
-        <div class="heatmap-label">Spotify</div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.3);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.5);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.4);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.3);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.2);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.2);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.4);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.5);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.6);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.7);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.95);" title="18:00 - 1.5h"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 1);" title="19:00 - 2h"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.8);" title="20:00 - 1.2h"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.4);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.2);"></div>
-        <div class="heatmap-cell" style="background: rgba(155, 125, 217, 0.1);"></div>
       </div>
     </div>
   </div>
 
-  <!-- App Detail Breakdown -->
-  <div class="full-width-section">
-    <div class="app-detail-section">
-      <div class="chart-header">
-        <div class="chart-title">Detailed Breakdown: Visual Studio Code</div>
-        <div class="chart-subtitle">Complete session analysis for Sep 30, 2025</div>
-      </div>
-      
-      <div class="detail-stats-grid">
-        <div class="detail-stat">
-          <div class="detail-stat-label">Total Time</div>
-          <div class="detail-stat-value">18h 42m</div>
-        </div>
-        <div class="detail-stat">
-          <div class="detail-stat-label">Sessions</div>
-          <div class="detail-stat-value">8</div>
-        </div>
-        <div class="detail-stat">
-          <div class="detail-stat-label">First Session</div>
-          <div class="detail-stat-value">08:30</div>
-        </div>
-        <div class="detail-stat">
-          <div class="detail-stat-label">Last Session</div>
-          <div class="detail-stat-value">22:15</div>
-        </div>
-        <div class="detail-stat">
-          <div class="detail-stat-label">Longest Session</div>
-          <div class="detail-stat-value">4h 12m</div>
-        </div>
-        <div class="detail-stat">
-          <div class="detail-stat-label">Avg Session</div>
-          <div class="detail-stat-value">2h 20m</div>
-        </div>
-      </div>
-
-      <div style="margin-top: 20px;">
-        <div style="font-size: 13px; color: #c6d4df; margin-bottom: 8px; font-weight: 500;">All Sessions</div>
-        <div class="sessions-list">
-          <div class="session-item">
-            <div class="session-time">08:30 - 11:02</div>
-            <div class="session-duration">2h 32m</div>
-          </div>
-          <div class="session-item">
-            <div class="session-time">11:15 - 12:45</div>
-            <div class="session-duration">1h 30m</div>
-          </div>
-          <div class="session-item">
-            <div class="session-time">13:10 - 14:00</div>
-            <div class="session-duration">50m</div>
-          </div>
-          <div class="session-item">
-            <div class="session-time">14:05 - 18:17</div>
-            <div class="session-duration">4h 12m</div>
-          </div>
-          <div class="session-item">
-            <div class="session-time">18:30 - 19:15</div>
-            <div class="session-duration">45m</div>
-          </div>
-          <div class="session-item">
-            <div class="session-time">19:45 - 21:20</div>
-            <div class="session-duration">1h 35m</div>
-          </div>
-          <div class="session-item">
-            <div class="session-time">21:30 - 22:15</div>
-            <div class="session-duration">45m</div>
-          </div>
-          <div class="session-item">
-            <div class="session-time">22:25 - 23:18</div>
-            <div class="session-duration">53m</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 <script src="./js/utils.js"></script>
 <script src="./js/analytics/daily-usage-chart.js"></script>
