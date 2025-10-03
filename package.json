@@ -46,6 +46,7 @@
     "win": {
       "target": "nsis",
       "icon": "assets/prism.ico"
-    }
+    },
+    "publish": null
   }
 }
