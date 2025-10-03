@@ -52,7 +52,7 @@ jobs:
     # Automatically attach to release if triggered by release event
     - name: Upload to GitHub Release
       if: github.event_name == 'release'
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         files: |
           dist/*.exe
