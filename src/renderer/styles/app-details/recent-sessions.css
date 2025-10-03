@@ -1,0 +1,44 @@
+/* Recent Sessions */
+.sessions-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.session-item {
+  background: linear-gradient(135deg, rgba(42, 71, 94, 0.3) 0%, rgba(27, 40, 56, 0.5) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(103, 193, 245, 0.15);
+  border-radius: 3px;
+  padding: 10px;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+
+.session-item:hover {
+  background: linear-gradient(135deg, rgba(52, 81, 104, 0.4) 0%, rgba(37, 50, 66, 0.6) 100%);
+  border-top-color: rgba(103, 193, 245, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.session-date {
+  color: #c7d5e0;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.session-time {
+  color: #8f98a0;
+  font-size: 10px;
+}
+
+.session-duration {
+  color: #66c0f4;
+  font-size: 12px;
+  font-weight: 500;
+}
+

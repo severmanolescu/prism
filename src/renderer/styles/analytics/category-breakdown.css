@@ -1,0 +1,61 @@
+.category-grid {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-behavior: smooth;
+  }
+
+  .category-grid::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .category-grid::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+
+  .category-grid::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, #4a5a68, #3c4043);
+    border-radius: 4px;
+  }
+
+  .category-grid::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to right, #66c0f4, #417a9b);
+  }
+
+  .category-item {
+    background: transparent;
+    border: none;
+    border-left: 3px solid;
+    padding: 14px;
+    padding-left: 12px;
+    transition: all 0.2s ease;
+    min-width: 200px;
+    flex-shrink: 0;
+  }
+
+  .category-item:hover {
+    transform: translateX(2px);
+    opacity: 0.9;
+  }
+
+  .category-name {
+    color: #c6d4df;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .category-time {
+    color: #66c0f4;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .category-percentage {
+    color: #8f98a0;
+    font-size: 10px;
+  }
+  

@@ -51,16 +51,24 @@ npm run build
 ```bash
 prism/
 ├── src/
-│ ├── main/ # Main process (Electron/Node.js)
-│ │ ├── ipc/ # IPC handlers organized by domain
-│ │ ├── services/ # Business logic
-│ │ └── utils/ # Helper functions
-│ └── renderer/ # Renderer process (UI)
-│ ├── styles/ # Modular CSS files
-│ ├── js/ # Frontend JavaScript
-│ └── index.html # Main HTML file
-├── data/ # User data (JSON files)
-└── package.json
+│   ├── main/                    # Main process (Electron/Node.js)
+│   │   ├── ipc/                 # IPC handlers organized by domain
+│   │   ├── services/            # Business logic (tracking, database, storage)
+│   │   └── utils/               # Helper functions
+│   ├── preload/                 # Preload script for IPC bridge
+│   └── renderer/                # Renderer process (UI)
+│       ├── styles/              # Modular CSS files
+│       │   ├── analytics/       # Analytics page styles
+│       │   ├── app-details/     # App details page styles
+│       │   └── index-page/      # Main page styles
+│       └── js/                  # Frontend JavaScript modules
+│           ├── analytics/       # Analytics page logic
+│           ├── app-details/     # App details page logic
+│           └── index-page/      # Main page logic
+├── data/                        # User data storage (JSON & SQLite)
+├── assets/                      # Images and icons
+├── icons/                       # App icon resources
+└── main.js                      # Main Electron entry point
 ```
 
 ## Usage
@@ -81,12 +89,9 @@ Apps can be hidden from the main view while still being tracked:
 -   Right-click an app → More → Hide from Library
 -   Access hidden apps via Library → Hidden in the top menu
 
-### Configuration
-Data is stored in JSON files in the `data/` directory:
--   `apps.json` - Application data and usage statistics
--   `sessions.json` - Individual usage sessions
--   `categories.json` - Custom collections
--   `favorites.json` - Favorited applications
+### Data Storage
+The application uses SQLite database for efficient data management
+SQLite database provides better performance for queries and analytics while maintaining data integrity.
 
 ## Development
 ### Tech Stack
@@ -98,6 +103,8 @@ Data is stored in JSON files in the `data/` directory:
 ### Key Dependencies
 -   `electron` - Desktop application framework
 -   `active-win` - Get active window information (Windows/macOS/Linux)
+-   `sqlite3` - SQLite database for data persistence
+-   `auto-launch` - Auto-start on system boot
 
 ## Roadmap
 -   Weekly/Monthly statistics view

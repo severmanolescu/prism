@@ -1,0 +1,242 @@
+/* Usage Trends */
+.trends-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.trend-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.trend-stat {
+  background: linear-gradient(135deg, rgba(42, 71, 94, 0.4) 0%, rgba(27, 40, 56, 0.6) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(103, 193, 245, 0.2);
+  border-radius: 3px;
+  padding: 10px 12px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+}
+
+.trend-stat:hover {
+  background: linear-gradient(135deg, rgba(52, 81, 104, 0.5) 0%, rgba(37, 50, 66, 0.7) 100%);
+  border-top-color: rgba(103, 193, 245, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
+}
+
+.trend-label {
+  color: #8f98a0;
+  font-size: 9px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.trend-value {
+  color: #66c0f4;
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+
+.trend-change {
+  font-size: 10px;
+  color: #8f98a0;
+}
+
+.trend-change.positive {
+  color: #a4d007;
+}
+
+.trend-change.negative {
+  color: #d95d5d;
+}
+
+/* Day of Week Chart */
+.day-of-week-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.day-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.day-label {
+  width: 50px;
+  color: #8f98a0;
+  font-size: 11px;
+}
+
+.day-bar-wrapper {
+  flex: 1;
+  height: 26px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(103, 193, 245, 0.1);
+}
+
+.day-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #66c0f4, #4a8fb3);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.day-bar-value {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 500;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Session Duration Chart */
+.session-duration-chart {
+  height: 280px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 20px 16px;
+}
+
+.duration-bar {
+  flex: 1;
+  background: linear-gradient(to top, #66c0f4, #5199c7);
+  border-radius: 3px 3px 0 0;
+  position: relative;
+  transition: all 0.2s ease;
+  opacity: 0.8;
+  cursor: pointer;
+  min-width: 0;
+  min-height: 2px;
+}
+
+.duration-bar:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(102, 192, 244, 0.4);
+}
+
+.duration-bar-label {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: #8f98a0;
+  white-space: nowrap;
+  font-weight: 500;
+}
+/* Heatmap */
+.heatmap-container {
+  overflow-x: auto;
+  padding: 8px 0;
+}
+
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: 50px repeat(24, 28px);
+  gap: 2px;
+  min-width: 750px;
+}
+
+.heatmap-row-label {
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  color: #8f98a0;
+  padding-right: 8px;
+}
+
+.heatmap-cell {
+  width: 28px;
+  height: 28px;
+  border-radius: 2px;
+  background: rgba(102, 192, 244, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 8px rgba(102, 192, 244, 0.5);
+  z-index: 10;
+}
+
+.heatmap-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: #8f98a0;
+}
+
+/* Time Distribution */
+.full-width-section {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.time-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.distribution-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.distribution-label {
+  width: 80px;
+  color: #8f98a0;
+  font-size: 11px;
+}
+
+.distribution-bar-container {
+  flex: 1;
+  height: 22px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(103, 193, 245, 0.1);
+}
+
+.distribution-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #66c0f4, #4a8fb3);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.distribution-value {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 500;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
