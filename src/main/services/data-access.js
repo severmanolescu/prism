@@ -271,7 +271,6 @@ async function getAnalyticsData(startDate, endDate) {
   `, [startTime, endTime]);
 
   // Get top applications
-  console.time('Top Apps');
   const topApps = await db.all(`
     SELECT
       a.id,

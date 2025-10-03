@@ -1,0 +1,107 @@
+ /* Session Timeline */
+  .timeline-container {
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .timeline-hours {
+    display: grid;
+    grid-template-columns: repeat(24, 1fr);
+    gap: 2px;
+    margin-top: 12px;
+    position: relative;
+  }
+
+  .timeline-hour-label {
+    font-size: 9px;
+    color: #8f98a0;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .timeline-bar-container {
+    height: 30px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .timeline-segment {
+    position: absolute;
+    height: 100%;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .timeline-segment:hover {
+    filter: brightness(1.2);
+    z-index: 10;
+  }
+
+  /* Hourly Heatmap */
+  .heatmap-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    margin-bottom: 8px;
+  }
+
+  .heatmap-count-btn {
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #8f98a0;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 11px;
+    font-weight: 400;
+  }
+
+  .heatmap-count-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #c6d4df;
+  }
+
+  .heatmap-count-btn.active {
+    background: linear-gradient(135deg, #092442 0%, #07417a 80%);
+    color: #ffffff;
+    border-color: rgba(102, 192, 244, 0.3);
+  }
+
+  .heatmap-grid {
+    display: grid;
+    grid-template-columns: auto repeat(24, 1fr);
+    gap: 2px;
+    margin-top: 12px;
+  }
+
+  .heatmap-label {
+    font-size: 10px;
+    color: #8f98a0;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+  }
+
+  .heatmap-hour {
+    font-size: 9px;
+    color: #8f98a0;
+    text-align: center;
+    padding: 2px;
+  }
+
+  .heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .heatmap-cell:hover {
+    transform: scale(1.1);
+    z-index: 10;
+  }
