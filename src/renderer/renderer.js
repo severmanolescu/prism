@@ -161,6 +161,17 @@ document.addEventListener('DOMContentLoaded', () => {
     homeButton.addEventListener('click', (e) => {
         showHomeView();
     })
+
+    // Handle Library tab click to show home view
+    const libraryTab = document.querySelector('.nav-tab.library-tab');
+    if (libraryTab) {
+        libraryTab.addEventListener('click', (e) => {
+            // Only trigger if clicking the tab itself, not the submenu
+            if (!e.target.closest('.library-submenu-item')) {
+                showHomeView();
+            }
+        });
+    }
     
     // Handle search input
     const searchInput = document.querySelector('.search-input');

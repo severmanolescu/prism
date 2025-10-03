@@ -141,6 +141,50 @@ window.addEventListener('message', async (event) => {
                 isFavorite: isFavorite
             }, '*');
         }
+    } else if (event.data.type === 'SET_PRODUCTIVITY_LEVEL') {
+        // Handle productivity level update from iframe
+        try {
+            console.log('Parent: Received SET_PRODUCTIVITY_LEVEL:', event.data);
+            const result = await window.electronAPI.setAppProductivityOverride(
+                event.data.appId,
+                event.data.level === 'inherit' ? null : event.data.level
+            );
+            console.log('Parent: Productivity level updated:', result);
+        } catch (error) {
+            console.error('Parent: Error setting productivity level:', error);
+        }
+    } else if (event.data.type === 'GET_PRODUCTIVITY_DATA') {
+        // Send productivity data back to iframe
+        try {
+            const appData = await window.electronAPI.getAppById(event.data.appId);
+            const categories = await window.electronAPI.getCategories();
+
+            const iframe = document.querySelector('#app-details-iframe');
+            if (iframe) {
+                iframe.contentWindow.postMessage({
+                    type: 'PRODUCTIVITY_DATA',
+                    appData: appData,
+                    categories: categories
+                }, '*');
+            }
+        } catch (error) {
+            console.error('Parent: Error getting productivity data:', error);
+        }
+    } else if (event.data.type === 'GET_CATEGORIES') {
+        // Send categories back to iframe
+        try {
+            const categories = await window.electronAPI.getCategories();
+
+            const iframe = document.querySelector('#app-details-iframe');
+            if (iframe) {
+                iframe.contentWindow.postMessage({
+                    type: 'CATEGORIES_DATA',
+                    categories: categories
+                }, '*');
+            }
+        } catch (error) {
+            console.error('Parent: Error getting categories:', error);
+        }
     } else if (event.data.type === 'BACK_TO_LIBRARY') {
         // Show sidebar again
         const sidebar = document.querySelector('.sidebar');
