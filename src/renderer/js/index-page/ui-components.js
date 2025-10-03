@@ -5,8 +5,9 @@ function createAppElement(app, bgColor) {
     item.dataset.appId = app.id;
     item.dataset.category = app.category;
 
-    const iconHtml = app.iconPath 
-        ? `<img src="app-icon://${app.iconPath.replace('icons/', '')}" alt="${app.name}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 4px;" onerror="this.style.display='none';">` 
+    const iconFilename = app.iconPath ? app.iconPath.replace(/^.*[\\\/]/, '').replace('icons/', '') : null;
+    const iconHtml = iconFilename
+        ? `<img src="app-icon://${iconFilename}" alt="${app.name}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 4px;" onerror="this.style.display='none';">`
         : `<div class="app-icon-small">${getAppIcon(app.name, app.category)}</div>`;
     
     item.innerHTML = `
@@ -31,8 +32,9 @@ function createRecentAppElement(app, bgColor) {
     item.className = 'recent-item';
     item.dataset.appId = app.id;
     
-    const iconHtml = app.iconPath 
-        ? `<img src="app-icon://${app.iconPath.replace('icons/', '')}" alt="${app.name}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 4px;" onerror="this.style.display='none';">` 
+    const iconFilename = app.iconPath ? app.iconPath.replace(/^.*[\\\/]/, '').replace('icons/', '') : null;
+    const iconHtml = iconFilename
+        ? `<img src="app-icon://${iconFilename}" alt="${app.name}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 4px;" onerror="this.style.display='none';">`
         : `<div class="app-icon-small">${getAppIcon(app.name, app.category)}</div>`;
 
     item.innerHTML = `
@@ -88,8 +90,12 @@ function createNavSection(categoryName, apps, isFavorites = false) {
         navItem.draggable = true; 
         
         const iconHtml = app.iconPath
-            ? `<img src="app-icon://${app.iconPath.replace('icons/', '')}" alt="${app.name}" 
-                style="width: 18px; height: 18px; object-fit: contain; margin-right: 6px;">`
+            ? (() => {
+                // Extract just the filename from the path (handles both full paths and relative paths)
+                const iconFilename = app.iconPath.replace(/^.*[\\\/]/, '').replace('icons/', '');
+                return `<img src="app-icon://${iconFilename}" alt="${app.name}"
+                    style="width: 18px; height: 18px; object-fit: contain; margin-right: 6px;">`;
+              })()
             : `<span class="icon">${getAppIcon(app.name, app.category)}</span>`;
         
         navItem.innerHTML = `
@@ -160,7 +166,9 @@ function createCategoryCard(categoryName, apps, color = '#4a90e2') {
             if (i < sampleApps.length) {
                 const app = sampleApps[i];
                 if (app.iconPath) {
-                    backgroundIcons.push(`<img src="app-icon://${app.iconPath.replace('icons/', '')}" alt="${app.name}">`);
+                    // Extract just the filename from the path (handles both full paths and relative paths)
+                    const iconFilename = app.iconPath.replace(/^.*[\\\/]/, '').replace('icons/', '');
+                    backgroundIcons.push(`<img src="app-icon://${iconFilename}" alt="${app.name}">`);
                 } else {
                     backgroundIcons.push(`<span class="bg-icon">${getAppIcon(app.name, app.category)}</span>`);
                 }

@@ -34,8 +34,15 @@ app.whenReady().then(async () => {
     // Register a custom protocol to serve icon files
     protocol.handle('app-icon', (request) => {
       const iconName = request.url.replace('app-icon://', '');
-      const iconPath = path.join(__dirname, 'icons', iconName);
-      
+
+      // Use userData directory in production, or project icons directory in development
+      const isDev = !app.isPackaged;
+      const iconDir = isDev
+        ? path.join(__dirname, 'icons')
+        : path.join(app.getPath('userData'), 'icons');
+
+      const iconPath = path.join(iconDir, iconName);
+
       if (fs.existsSync(iconPath)) {
         return net.fetch(`file://${iconPath}`);
       } else {
@@ -61,7 +68,7 @@ app.whenReady().then(async () => {
     
     // Test database connection
     try {
-      await db.get('SELECT 1');
+      db.prepare('SELECT 1').get();
       console.log('Database connection verified');
     } catch (dbError) {
       console.error('Database connection test failed:', dbError);

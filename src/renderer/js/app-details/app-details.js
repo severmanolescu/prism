@@ -43,7 +43,9 @@ async function loadAppDetails() {
     // Update hero icon
     const heroIcon = document.querySelector('.app-hero-icon');
     if (details.app.icon_path) {
-      heroIcon.innerHTML = `<img src="app-icon://${details.app.icon_path.replace('icons/', '')}"
+      // Extract just the filename from the path (handles both full paths and relative paths)
+      const iconFilename = details.app.icon_path.replace(/^.*[\\\/]/, '').replace('icons/', '');
+      heroIcon.innerHTML = `<img src="app-icon://${iconFilename}"
         style="width: 120px; height: 120px; object-fit: contain;">`;
     }
 

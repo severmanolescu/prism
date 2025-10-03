@@ -1,177 +1,173 @@
 const { getDb } = require('./database');
 
 // Get all apps (excluding hidden if specified)
-async function getAllApps(includeHidden = false) {
+function getAllApps(includeHidden = false) {
   const db = getDb();
-  const query = includeHidden 
+  const query = includeHidden
     ? 'SELECT * FROM apps ORDER BY last_used DESC'
     : 'SELECT * FROM apps WHERE hidden = 0 ORDER BY last_used DESC';
-  
-  return await db.all(query);
+
+  return db.prepare(query).all();
 }
 
 // Get recent apps (most recently used)
-async function getRecentApps(limit = 20) {
+function getRecentApps(limit = 20) {
   const db = getDb();
-  return await db.all(`
-    SELECT * FROM apps 
+  return db.prepare(`
+    SELECT * FROM apps
     WHERE hidden = 0 AND last_used IS NOT NULL
-    ORDER BY last_used DESC 
+    ORDER BY last_used DESC
     LIMIT ?
-  `, limit);
+  `).all(limit);
 }
 
 // Get apps by category
-async function getAppsByCategory(category) {
+function getAppsByCategory(category) {
   const db = getDb();
-  return await db.all(`
-    SELECT * FROM apps 
+  return db.prepare(`
+    SELECT * FROM apps
     WHERE category = ? AND hidden = 0
-    ORDER BY total_time DESC 
-  `, category);
+    ORDER BY total_time DESC
+  `).all(category);
 }
 
 // Get hidden apps
-async function getHiddenApps() {
+function getHiddenApps() {
   const db = getDb();
-  return await db.all('SELECT * FROM apps WHERE hidden = 1 ORDER BY name');
+  return db.prepare('SELECT * FROM apps WHERE hidden = 1 ORDER BY name').all();
 }
 
 // Get app by ID
-async function getAppById(appId) {
+function getAppById(appId) {
   const db = getDb();
-  return await db.get('SELECT * FROM apps WHERE id = ?', appId);
+  return db.prepare('SELECT * FROM apps WHERE id = ?').get(appId);
 }
 
 // Hide an app
-async function hideApp(appId) {
+function hideApp(appId) {
   const db = getDb();
-  return await db.run('UPDATE apps SET hidden = 1 WHERE id = ?', appId);
+  return db.prepare('UPDATE apps SET hidden = 1 WHERE id = ?').run(appId);
 }
 
 // Restore a hidden app
-async function restoreApp(appId) {
+function restoreApp(appId) {
   const db = getDb();
-  return await db.run('UPDATE apps SET hidden = 0 WHERE id = ?', appId);
+  return db.prepare('UPDATE apps SET hidden = 0 WHERE id = ?').run(appId);
 }
 
 // Delete app and all its sessions
-async function deleteAppAndSessions(appId) {
+function deleteAppAndSessions(appId) {
   const db = getDb();
-  await db.run('DELETE FROM sessions WHERE app_id = ?', appId);
-  await db.run('DELETE FROM apps WHERE id = ?', appId);
+  db.prepare('DELETE FROM sessions WHERE app_id = ?').run(appId);
+  db.prepare('DELETE FROM apps WHERE id = ?').run(appId);
 }
 
 // Add to blacklist
-async function addToBlacklist(blacklistEntry) {
+function addToBlacklist(blacklistEntry) {
   const db = getDb();
   const { name, path, executable, reason } = blacklistEntry;
-  
-  return await db.run(`
+
+  return db.prepare(`
     INSERT INTO blacklist (name, path, executable, reason, created_at)
     VALUES (?, ?, ?, ?, ?)
-  `, [name, path, executable, reason, Date.now()]);
+  `).run([name, path, executable, reason, Date.now()]);
 }
 
 // Check if app is blacklisted
-async function isBlacklisted(executable) {
+function isBlacklisted(executable) {
   const db = getDb();
-  const result = await db.get(
-    'SELECT * FROM blacklist WHERE executable = ?',
-    executable
-  );
+  const result = db.prepare(
+    'SELECT * FROM blacklist WHERE executable = ?'
+  ).get(executable);
   return !!result;
 }
 
 // Get all categories
-async function getAllCategories() {
+function getAllCategories() {
   const db = getDb();
-  return await db.all('SELECT * FROM categories ORDER BY name');
+  return db.prepare('SELECT * FROM categories ORDER BY name').all();
 }
 
 // Create category
-async function createCategory(category) {
+function createCategory(category) {
   const db = getDb();
   const { id, name, color, icon, productivityLevel } = category;
 
-  return await db.run(`
+  return db.prepare(`
     INSERT INTO categories (id, name, color, icon, productivity_level, is_default, created_at)
     VALUES (?, ?, ?, ?, ?, 0, ?)
-  `, [id, name, color, icon, productivityLevel || 'neutral', Date.now()]);
+  `).run([id, name, color, icon, productivityLevel || 'neutral', Date.now()]);
 }
 
 // Update category
-async function updateCategory(categoryId, updates) {
+function updateCategory(categoryId, updates) {
   const db = getDb();
   const { name, color, icon, productivityLevel } = updates;
 
-  return await db.run(`
+  return db.prepare(`
     UPDATE categories
     SET name = COALESCE(?, name),
         color = COALESCE(?, color),
         icon = COALESCE(?, icon),
         productivity_level = COALESCE(?, productivity_level)
     WHERE id = ?
-  `, [name, color, icon, productivityLevel, categoryId]);
+  `).run([name, color, icon, productivityLevel, categoryId]);
 }
 
 // Delete category (moves apps to uncategorized)
-async function deleteCategory(categoryId) {
+function deleteCategory(categoryId) {
   const db = getDb();
-  
+
   // Move apps to uncategorized
-  await db.run(
-    'UPDATE apps SET category = ? WHERE category = ?',
-    ['uncategorized', categoryId]
-  );
-  
+  db.prepare(
+    'UPDATE apps SET category = ? WHERE category = ?'
+  ).run(['uncategorized', categoryId]);
+
   // Delete category
-  return await db.run(
-    'DELETE FROM categories WHERE id = ? AND is_default = 0',
-    categoryId
-  );
+  return db.prepare(
+    'DELETE FROM categories WHERE id = ? AND is_default = 0'
+  ).run(categoryId);
 }
 
 // Move app to category
-async function moveAppToCategory(appId, categoryId) {
+function moveAppToCategory(appId, categoryId) {
   const db = getDb();
-  return await db.run(
-    'UPDATE apps SET category = ? WHERE id = ?',
-    [categoryId, appId]
-  );
+  return db.prepare(
+    'UPDATE apps SET category = ? WHERE id = ?'
+  ).run([categoryId, appId]);
 }
 
 // Get favorites
-async function getFavorites() {
+function getFavorites() {
   const db = getDb();
-  return await db.all(`
+  return db.prepare(`
     SELECT a.* FROM apps a
     INNER JOIN favorites f ON a.id = f.app_id
     ORDER BY f.added_at DESC
-  `);
+  `).all();
 }
 
 // Add to favorites
-async function addFavorite(appId) {
+function addFavorite(appId) {
   const db = getDb();
-  return await db.run(`
+  return db.prepare(`
     INSERT OR IGNORE INTO favorites (app_id, added_at)
     VALUES (?, ?)
-  `, [appId, Date.now()]);
+  `).run([appId, Date.now()]);
 }
 
 // Remove from favorites
-async function removeFavorite(appId) {
+function removeFavorite(appId) {
   const db = getDb();
-  return await db.run('DELETE FROM favorites WHERE app_id = ?', appId);
+  return db.prepare('DELETE FROM favorites WHERE app_id = ?').run(appId);
 }
 
 // Get stats for a specific time range
-async function getStatsForRange(startTime, endTime) {
+function getStatsForRange(startTime, endTime) {
   const db = getDb();
-  
-  return await db.all(`
-    SELECT 
+
+  return db.prepare(`
+    SELECT
       a.id,
       a.name,
       a.category,
@@ -182,17 +178,17 @@ async function getStatsForRange(startTime, endTime) {
     WHERE s.start_time >= ? AND s.start_time <= ?
     GROUP BY a.id
     ORDER BY total_time DESC
-  `, [startTime, endTime]);
+  `).all([startTime, endTime]);
 }
 
 // Get daily stats
-async function getDailyStats(days = 7) {
+function getDailyStats(days = 7) {
   const db = getDb();
   const now = Date.now();
   const startTime = now - (days * 24 * 60 * 60 * 1000);
-  
-  return await db.all(`
-    SELECT 
+
+  return db.prepare(`
+    SELECT
       DATE(start_time/1000, 'unixepoch') as date,
       SUM(duration) as total_time,
       COUNT(*) as session_count
@@ -200,11 +196,11 @@ async function getDailyStats(days = 7) {
     WHERE start_time >= ?
     GROUP BY date
     ORDER BY date DESC
-  `, startTime);
+  `).all(startTime);
 }
 
 // Get today's stats
-async function getTodayStats() {
+function getTodayStats() {
   const db = getDb();
 
   // Get start and end of today (midnight to midnight)
@@ -213,14 +209,14 @@ async function getTodayStats() {
   const endOfToday = startOfToday + (24 * 60 * 60 * 1000); // Add 24 hours
 
   // Count apps used today
-  const appsToday = await db.get(`
+  const appsToday = db.prepare(`
     SELECT COUNT(DISTINCT app_id) as count
     FROM sessions
     WHERE start_time >= ? AND start_time < ?
-  `, [startOfToday, endOfToday]);
+  `).get([startOfToday, endOfToday]);
 
   // Total time today - only count sessions that both started AND ended today
-  const timeToday = await db.get(`
+  const timeToday = db.prepare(`
     SELECT SUM(duration) as total
     FROM sessions
     WHERE start_time >= ?
@@ -228,7 +224,7 @@ async function getTodayStats() {
       AND end_time IS NOT NULL
       AND duration > 0
       AND duration < 86400000
-  `, [startOfToday, endOfToday]);
+  `).get([startOfToday, endOfToday]);
 
   return {
     appCount: appsToday.count || 0,
@@ -237,13 +233,13 @@ async function getTodayStats() {
 }
 
 // Get analytics data for a given period
-async function getAnalyticsData(startDate, endDate) {
+function getAnalyticsData(startDate, endDate) {
   const db = getDb();
   const startTime = new Date(startDate).setHours(0, 0, 0, 0);
   const endTime = new Date(endDate).setHours(23, 59, 59, 999);
 
   // Get overall stats
-  const overallStats = await db.get(`
+  const overallStats = db.prepare(`
     SELECT
       COUNT(DISTINCT app_id) as unique_apps,
       COUNT(*) as total_sessions,
@@ -253,10 +249,10 @@ async function getAnalyticsData(startDate, endDate) {
     WHERE start_time >= ? AND start_time <= ?
       AND end_time IS NOT NULL
       AND duration > 0
-  `, [startTime, endTime]);
+  `).get([startTime, endTime]);
 
   // Get daily breakdown
-  const dailyBreakdown = await db.all(`
+  const dailyBreakdown = db.prepare(`
     SELECT
       DATE(start_time/1000, 'unixepoch', 'localtime') as date,
       SUM(duration) as total_time,
@@ -268,10 +264,10 @@ async function getAnalyticsData(startDate, endDate) {
       AND duration > 0
     GROUP BY date
     ORDER BY date ASC
-  `, [startTime, endTime]);
+  `).all([startTime, endTime]);
 
   // Get top applications
-  const topApps = await db.all(`
+  const topApps = db.prepare(`
     SELECT
       a.id,
       a.name,
@@ -286,10 +282,10 @@ async function getAnalyticsData(startDate, endDate) {
       AND s.duration > 0
     GROUP BY a.id
     ORDER BY total_time DESC
-  `, [startTime, endTime]);
+  `).all([startTime, endTime]);
 
   // Get category breakdown
-  const categoryBreakdown = await db.all(`
+  const categoryBreakdown = db.prepare(`
     SELECT
       CASE
         WHEN LOWER(a.category) = 'uncategorized' THEN 'Uncategorized'
@@ -305,10 +301,10 @@ async function getAnalyticsData(startDate, endDate) {
       AND s.duration > 0
     GROUP BY LOWER(a.category)
     ORDER BY total_time DESC
-  `, [startTime, endTime]);
+  `).all([startTime, endTime]);
 
   // Get most/least active days
-  const mostActiveDay = await db.get(`
+  const mostActiveDay = db.prepare(`
     SELECT
       DATE(start_time/1000, 'unixepoch', 'localtime') as date,
       SUM(duration) as total_time
@@ -319,9 +315,9 @@ async function getAnalyticsData(startDate, endDate) {
     GROUP BY date
     ORDER BY total_time DESC
     LIMIT 1
-  `, [startTime, endTime]);
+  `).get([startTime, endTime]);
 
-  const leastActiveDay = await db.get(`
+  const leastActiveDay = db.prepare(`
     SELECT
       DATE(start_time/1000, 'unixepoch', 'localtime') as date,
       SUM(duration) as total_time
@@ -332,10 +328,10 @@ async function getAnalyticsData(startDate, endDate) {
     GROUP BY date
     ORDER BY total_time ASC
     LIMIT 1
-  `, [startTime, endTime]);
+  `).get([startTime, endTime]);
 
   // Get longest session (Focus Time)
-  const longestSession = await db.get(`
+  const longestSession = db.prepare(`
     SELECT
       a.name as app_name,
       s.duration,
@@ -347,10 +343,10 @@ async function getAnalyticsData(startDate, endDate) {
       AND s.duration > 0
     ORDER BY s.duration DESC
     LIMIT 1
-  `, [startTime, endTime]);
+  `).get([startTime, endTime]);
 
   // Get hourly breakdown (Time of Day Pattern)
-  const hourlyBreakdown = await db.all(`
+  const hourlyBreakdown = db.prepare(`
     SELECT
       CAST(strftime('%H', datetime(start_time/1000, 'unixepoch', 'localtime')) AS INTEGER) as hour,
       SUM(duration) as total_time,
@@ -361,7 +357,7 @@ async function getAnalyticsData(startDate, endDate) {
       AND duration > 0
     GROUP BY hour
     ORDER BY hour ASC
-  `, [startTime, endTime]);
+  `).all([startTime, endTime]);
 
   return {
     overallStats: {
@@ -386,12 +382,12 @@ async function getAnalyticsData(startDate, endDate) {
 }
 
 // Get hourly breakdown per app (for heatmap) - separate function for async loading
-async function getHourlyAppBreakdown(startDate, endDate) {
+function getHourlyAppBreakdown(startDate, endDate) {
   const db = getDb();
   const startTime = new Date(startDate).setHours(0, 0, 0, 0);
   const endTime = new Date(endDate).setHours(23, 59, 59, 999);
 
-  return await db.all(`
+  return db.prepare(`
     SELECT
       a.id,
       a.name,
@@ -405,7 +401,7 @@ async function getHourlyAppBreakdown(startDate, endDate) {
       AND s.duration > 0
     GROUP BY a.id, hour
     ORDER BY a.id, hour ASC
-  `, [startTime, endTime]);
+  `).all([startTime, endTime]);
 }
 
 // =====================
@@ -413,7 +409,7 @@ async function getHourlyAppBreakdown(startDate, endDate) {
 // =====================
 
 // Set productivity level for a category
-async function setCategoryProductivityLevel(categoryId, level) {
+function setCategoryProductivityLevel(categoryId, level) {
   const db = getDb();
   const validLevels = ['productive', 'neutral', 'unproductive'];
 
@@ -421,27 +417,27 @@ async function setCategoryProductivityLevel(categoryId, level) {
     throw new Error(`Invalid productivity level: ${level}`);
   }
 
-  return await db.run(`
+  return db.prepare(`
     UPDATE categories
     SET productivity_level = ?
     WHERE id = ?
-  `, [level, categoryId]);
+  `).run([level, categoryId]);
 }
 
 // Get productivity level for a category
-async function getCategoryProductivityLevel(categoryId) {
+function getCategoryProductivityLevel(categoryId) {
   const db = getDb();
-  const result = await db.get(`
+  const result = db.prepare(`
     SELECT productivity_level
     FROM categories
     WHERE id = ?
-  `, [categoryId]);
+  `).get([categoryId]);
 
   return result ? result.productivity_level : 'neutral';
 }
 
 // Set productivity level override for an app
-async function setAppProductivityOverride(appId, level) {
+function setAppProductivityOverride(appId, level) {
   const db = getDb();
   const validLevels = ['productive', 'neutral', 'unproductive'];
 
@@ -449,29 +445,24 @@ async function setAppProductivityOverride(appId, level) {
     throw new Error(`Invalid productivity level: ${level}`);
   }
 
-  const result = await db.run(`
+  return db.prepare(`
     UPDATE apps
     SET productivity_level_override = ?
     WHERE id = ?
-  `, [level, appId]);
-
-  // Verify the update
-  const app = await db.get('SELECT productivity_level_override FROM apps WHERE id = ?', [appId]);
-
-  return result;
+  `).run([level, appId]);
 }
 
 // Get effective productivity level for an app (override or category default)
-async function getAppProductivityLevel(appId) {
+function getAppProductivityLevel(appId) {
   const db = getDb();
-  const result = await db.get(`
+  const result = db.prepare(`
     SELECT
       a.productivity_level_override,
       c.productivity_level as category_level
     FROM apps a
     LEFT JOIN categories c ON a.category = c.name
     WHERE a.id = ?
-  `, [appId]);
+  `).get([appId]);
 
   if (!result) {
     return 'neutral';
@@ -482,13 +473,13 @@ async function getAppProductivityLevel(appId) {
 }
 
 // Get productivity stats for a date range
-async function getProductivityStats(startDate, endDate) {
+function getProductivityStats(startDate, endDate) {
   const db = getDb();
   const startTime = new Date(startDate).setHours(0, 0, 0, 0);
   const endTime = new Date(endDate).setHours(23, 59, 59, 999);
 
   // Get total time per productivity level
-  const breakdown = await db.all(`
+  const breakdown = db.prepare(`
     SELECT
       COALESCE(a.productivity_level_override, c.productivity_level, 'neutral') as productivity_level,
       SUM(s.duration) as total_time,
@@ -501,7 +492,7 @@ async function getProductivityStats(startDate, endDate) {
       AND s.end_time IS NOT NULL
       AND s.duration > 0
     GROUP BY productivity_level
-  `, [startTime, endTime]);
+  `).all([startTime, endTime]);
 
   // Calculate overall stats
   const totalTime = breakdown.reduce((sum, item) => sum + item.total_time, 0);
@@ -516,7 +507,7 @@ async function getProductivityStats(startDate, endDate) {
     : 0;
 
   // Get top productive and unproductive apps
-  const topProductive = await db.all(`
+  const topProductive = db.prepare(`
     SELECT
       a.id,
       a.name,
@@ -533,9 +524,9 @@ async function getProductivityStats(startDate, endDate) {
     GROUP BY a.id
     ORDER BY total_time DESC
     LIMIT 10
-  `, [startTime, endTime]);
+  `).all([startTime, endTime]);
 
-  const topUnproductive = await db.all(`
+  const topUnproductive = db.prepare(`
     SELECT
       a.id,
       a.name,
@@ -552,10 +543,10 @@ async function getProductivityStats(startDate, endDate) {
     GROUP BY a.id
     ORDER BY total_time DESC
     LIMIT 10
-  `, [startTime, endTime]);
+  `).all([startTime, endTime]);
 
   // Get daily productivity trend
-  const dailyTrend = await db.all(`
+  const dailyTrend = db.prepare(`
     SELECT
       DATE(s.start_time/1000, 'unixepoch', 'localtime') as date,
       SUM(CASE WHEN COALESCE(a.productivity_level_override, c.productivity_level, 'neutral') = 'productive' THEN s.duration ELSE 0 END) as productive_time,
@@ -570,7 +561,7 @@ async function getProductivityStats(startDate, endDate) {
       AND s.duration > 0
     GROUP BY date
     ORDER BY date ASC
-  `, [startTime, endTime]);
+  `).all([startTime, endTime]);
 
   // Calculate productivity score for each day
   const dailyScores = dailyTrend.map(day => ({

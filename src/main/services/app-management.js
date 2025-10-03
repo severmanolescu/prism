@@ -2,6 +2,7 @@ const fs = require('fs');
 const { exec } = require('child_process');
 const util = require('util');
 const path = require('path');
+const { app } = require('electron');
 
 const execAsync = util.promisify(exec);
 
@@ -95,32 +96,39 @@ async function extractAppIcon(executablePath, appName) {
   if (!executablePath || !fs.existsSync(executablePath)) {
     return null;
   }
-  
+
   try {
-    const iconDir = path.join(__dirname, './../../../icons');
+    // Use userData directory in production, or project icons directory in development
+    const isDev = !app.isPackaged;
+    const iconDir = isDev
+      ? path.join(__dirname, './../../../icons')
+      : path.join(app.getPath('userData'), 'icons');
+
     if (!fs.existsSync(iconDir)) {
-      fs.mkdirSync(iconDir);
+      fs.mkdirSync(iconDir, { recursive: true });
     }
-    
+
     const iconFileName = `${appName.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
     const iconPath = path.join(iconDir, iconFileName);
-    
+
+    // Check if icon already exists
     if (fs.existsSync(iconPath)) {
-      return `./../../../icons/${iconFileName}`;
+      return iconFileName; // Return just the filename for app-icon:// protocol
     }
-    
+
     // PowerShell command to extract icon
     const psCommand = `Add-Type -AssemblyName System.Drawing; $icon = [System.Drawing.Icon]::ExtractAssociatedIcon('${executablePath}'); if($icon) { $icon.ToBitmap().Save('${iconPath}', [System.Drawing.Imaging.ImageFormat]::Png); $icon.Dispose(); Write-Host 'SUCCESS' } else { Write-Host 'FAILED' }`;
-    
+
     const { stdout } = await execAsync(`powershell -Command "${psCommand}"`);
-    
+
     if (stdout.includes('SUCCESS') && fs.existsSync(iconPath)) {
-      return `./../../../icons/${iconFileName}`;
+      return iconFileName; // Return just the filename for app-icon:// protocol
     } else {
       return null;
     }
-    
+
   } catch (error) {
+    console.error('Error extracting icon:', error);
     return null;
   }
 }

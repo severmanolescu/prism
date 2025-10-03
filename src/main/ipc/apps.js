@@ -249,64 +249,64 @@ function initializeAppHandlers() {
 
   ipcMain.handle('get-app-details', async (event, appId) => {
     const db = getDb();
-    
+
     try {
       // Get app info
-      const app = await db.get(`
+      const app = db.prepare(`
         SELECT * FROM apps WHERE id = ?
-      `, [appId]);
+      `).get([appId]);
 
       if (!app) {
         throw new Error('App not found');
       }
 
       // Get total sessions count
-      const sessionCount = await db.get(`
+      const sessionCount = db.prepare(`
         SELECT COUNT(*) as count FROM sessions WHERE app_id = ?
-      `, [appId]);
+      `).get([appId]);
 
       // Get last 7 days usage
       const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-      const weeklyUsage = await db.all(`
-        SELECT 
+      const weeklyUsage = db.prepare(`
+        SELECT
           DATE(start_time / 1000, 'unixepoch') as date,
           SUM(duration) as total_duration
         FROM sessions
         WHERE app_id = ? AND start_time >= ?
         GROUP BY date
         ORDER BY date ASC
-      `, [appId, sevenDaysAgo]);
+      `).all([appId, sevenDaysAgo]);
 
       // Get this week's total time
-      const thisWeek = await db.get(`
-        SELECT SUM(duration) as total FROM sessions 
+      const thisWeek = db.prepare(`
+        SELECT SUM(duration) as total FROM sessions
         WHERE app_id = ? AND start_time >= ?
-      `, [appId, sevenDaysAgo]);
+      `).get([appId, sevenDaysAgo]);
 
       // Get longest session
-      const longestSession = await db.get(`
+      const longestSession = db.prepare(`
         SELECT MAX(duration) as longest FROM sessions WHERE app_id = ?
-      `, [appId]);
+      `).get([appId]);
 
       // Get average session
-      const avgSession = await db.get(`
+      const avgSession = db.prepare(`
         SELECT AVG(duration) as average FROM sessions WHERE app_id = ?
-      `, [appId]);
+      `).get([appId]);
 
       // Get current streak (consecutive days)
-      const streak = await calculateStreak(db, appId);
+      const streak = calculateStreak(db, appId);
 
       // Get recent sessions (last 10)
-      const recentSessions = await db.all(`
-        SELECT * FROM sessions 
-        WHERE app_id = ? 
-        ORDER BY start_time DESC 
+      const recentSessions = db.prepare(`
+        SELECT * FROM sessions
+        WHERE app_id = ?
+        ORDER BY start_time DESC
         LIMIT 10
-      `, [appId]);
+      `).all([appId]);
 
       // Get today's activity by hour
       const todayStart = new Date().setHours(0, 0, 0, 0);
-      const todayActivity = await db.all(`
+      const todayActivity = db.prepare(`
         SELECT
           CAST(strftime('%H', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as hour,
           SUM(duration) as total_duration
@@ -314,17 +314,12 @@ function initializeAppHandlers() {
         WHERE app_id = ? AND start_time >= ?
         GROUP BY hour
         ORDER BY hour
-      `, [appId, todayStart]);
-
-      // Test: Check if sessions exist for this app
-      const testSessions = await db.get(`
-        SELECT COUNT(*) as total FROM sessions WHERE app_id = ?
-      `, [appId]);
-
+      `).all([appId, todayStart]);
+      
       // Get last 30 days usage for monthly view
       const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
 
-      const monthlyUsage = await db.all(`
+      const monthlyUsage = db.prepare(`
         SELECT
           DATE(start_time / 1000, 'unixepoch') as date,
           SUM(duration) as total_duration,
@@ -333,10 +328,10 @@ function initializeAppHandlers() {
         WHERE app_id = ? AND start_time >= ?
         GROUP BY date
         ORDER BY date ASC
-      `, [appId, thirtyDaysAgo]);
+      `).all([appId, thirtyDaysAgo]);
 
       // Get usage by day of week
-      const dayOfWeekUsage = await db.all(`
+      const dayOfWeekUsage = db.prepare(`
         SELECT
           CAST(strftime('%w', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as day_of_week,
           SUM(duration) as total_duration,
@@ -345,16 +340,16 @@ function initializeAppHandlers() {
         WHERE app_id = ?
         GROUP BY day_of_week
         ORDER BY day_of_week
-      `, [appId]);
+      `).all([appId]);
 
       // Get session duration distribution
-      const sessionDurations = await db.all(`
+      const sessionDurations = db.prepare(`
         SELECT duration FROM sessions WHERE app_id = ?
-      `, [appId]);
+      `).all([appId]);
 
       // Get all sessions for heatmap (last 90 days)
       const ninetyDaysAgo = Date.now() - (90 * 24 * 60 * 60 * 1000);
-      const heatmapData = await db.all(`
+      const heatmapData = db.prepare(`
         SELECT
           CAST(strftime('%w', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as day_of_week,
           CAST(strftime('%H', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as hour,
@@ -362,22 +357,22 @@ function initializeAppHandlers() {
         FROM sessions
         WHERE app_id = ? AND start_time >= ?
         GROUP BY day_of_week, hour
-      `, [appId, ninetyDaysAgo]);
+      `).all([appId, ninetyDaysAgo]);
 
       // Get category ranking
-      const categoryRanking = await db.all(`
+      const categoryRanking = db.prepare(`
         SELECT id, name, total_time
         FROM apps
         WHERE category = ? AND hidden = 0
         ORDER BY total_time DESC
-      `, [app.category]);
+      `).all([app.category]);
 
       const appRankInCategory = categoryRanking.findIndex(a => a.id === appId) + 1;
 
       // Get total time for all apps
-      const totalAllApps = await db.get(`
+      const totalAllApps = db.prepare(`
         SELECT SUM(total_time) as total FROM apps WHERE hidden = 0
-      `);
+      `).get();
 
       const usagePercentage = totalAllApps?.total > 0
         ? (app.total_time / totalAllApps.total) * 100
@@ -385,13 +380,13 @@ function initializeAppHandlers() {
 
       // Get last week's time for comparison
       const twoWeeksAgo = Date.now() - (14 * 24 * 60 * 60 * 1000);
-      const lastWeek = await db.get(`
+      const lastWeek = db.prepare(`
         SELECT SUM(duration) as total FROM sessions
         WHERE app_id = ? AND start_time >= ? AND start_time < ?
-      `, [appId, twoWeeksAgo, sevenDaysAgo]);
+      `).get([appId, twoWeeksAgo, sevenDaysAgo]);
 
       // Get streak history (all streaks)
-      const streakHistory = await calculateStreakHistory(db, appId);
+      const streakHistory = calculateStreakHistory(db, appId);
 
       const result = {
         app,
@@ -428,13 +423,13 @@ function initializeAppHandlers() {
   console.log('App IPC handlers initialized');
 }
 
-async function calculateStreak(db, appId) {
-  const sessions = await db.all(`
+function calculateStreak(db, appId) {
+  const sessions = db.prepare(`
     SELECT DISTINCT DATE(start_time / 1000, 'unixepoch') as date
     FROM sessions
     WHERE app_id = ?
     ORDER BY date DESC
-  `, [appId]);
+  `).all([appId]);
 
   if (sessions.length === 0) return 0;
 
@@ -466,13 +461,13 @@ async function calculateStreak(db, appId) {
   return streak;
 }
 
-async function calculateStreakHistory(db, appId) {
-  const sessions = await db.all(`
+function calculateStreakHistory(db, appId) {
+  const sessions = db.prepare(`
     SELECT DISTINCT DATE(start_time / 1000, 'unixepoch') as date
     FROM sessions
     WHERE app_id = ?
     ORDER BY date DESC
-  `, [appId]);
+  `).all([appId]);
 
   if (sessions.length === 0) return [];
 
