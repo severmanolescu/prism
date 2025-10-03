@@ -449,11 +449,16 @@ async function setAppProductivityOverride(appId, level) {
     throw new Error(`Invalid productivity level: ${level}`);
   }
 
-  return await db.run(`
+  const result = await db.run(`
     UPDATE apps
     SET productivity_level_override = ?
     WHERE id = ?
   `, [level, appId]);
+
+  // Verify the update
+  const app = await db.get('SELECT productivity_level_override FROM apps WHERE id = ?', [appId]);
+
+  return result;
 }
 
 // Get effective productivity level for an app (override or category default)

@@ -292,6 +292,90 @@ function updateMonthlyCalendar(details) {
 let currentProductivityLevel = null;
 let currentCategoryProductivityLevel = null;
 
+// Helper function to update the dropdown button display
+function updateDropdownButton(level, categoryDefault = null) {
+  const levelConfig = {
+    'productive': { icon: '✅', text: 'Productive' },
+    'neutral': { icon: '⚪', text: 'Neutral' },
+    'unproductive': { icon: '❌', text: 'Unproductive' },
+    'inherit': { icon: '↩️', text: 'Use Category Default' }
+  };
+
+  let displayLevel = level;
+  let effectiveLevel = level;
+
+  // If level is 'inherit' and we have category default, we can show more info
+  if (level === 'inherit' && categoryDefault) {
+    // Still show "Use Category Default" but we know what that default is
+    currentCategoryProductivityLevel = categoryDefault;
+    effectiveLevel = categoryDefault;
+  }
+
+  const config = levelConfig[displayLevel];
+  if (config) {
+    const productivityIcon = document.getElementById('productivity-icon');
+    const productivityText = document.getElementById('productivity-text');
+    if (productivityIcon) productivityIcon.textContent = config.icon;
+    if (productivityText) productivityText.textContent = config.text;
+
+    console.log('Updated dropdown button to:', displayLevel, config);
+  }
+
+  // Update the productivity stat card
+  updateProductivityStatCard(effectiveLevel, level === 'inherit');
+}
+
+// Helper function to update the productivity stat card in quick stats
+function updateProductivityStatCard(level, isInherited = false) {
+  const statCard = document.getElementById('productivity-stat-card');
+  const statIcon = document.getElementById('productivity-stat-icon');
+  const statValue = document.getElementById('productivity-stat-value');
+  const statSubtitle = document.getElementById('productivity-stat-subtitle');
+
+  if (!statCard || !statIcon || !statValue) return;
+
+  const levelConfig = {
+    'productive': {
+      icon: '✅',
+      text: 'Productive',
+      class: 'productive'
+    },
+    'neutral': {
+      icon: '⚪',
+      text: 'Neutral',
+      class: 'neutral'
+    },
+    'unproductive': {
+      icon: '❌',
+      text: 'Unproductive',
+      class: 'unproductive'
+    }
+  };
+
+  const config = levelConfig[level] || levelConfig['neutral'];
+
+  // Update icon and text
+  statIcon.textContent = config.icon;
+  statValue.textContent = config.text;
+
+  // Update subtitle
+  if (statSubtitle) {
+    if (isInherited) {
+      statSubtitle.textContent = `From category default`;
+    } else {
+      statSubtitle.textContent = `Custom setting`;
+    }
+  }
+
+  // Remove all productivity classes
+  statCard.classList.remove('productive', 'neutral', 'unproductive');
+
+  // Add the appropriate class
+  statCard.classList.add(config.class);
+
+  console.log('Updated productivity stat card to:', level, isInherited ? '(inherited)' : '(custom)');
+}
+
 async function initializeProductivitySelector() {
   if (!appDetails) return;
 
@@ -299,42 +383,33 @@ async function initializeProductivitySelector() {
   const category = appDetails.app.category;
 
   try {
-    // Get app's current productivity level (override or inherited)
-    const effectiveLevel = await window.electronAPI.invoke('get-app-productivity-level', appId);
+    console.log('Initializing productivity selector for app:', appId);
+    console.log('Full app details:', appDetails);
+    console.log('App object:', appDetails.app);
+    console.log('App productivity_level_override:', appDetails.app.productivity_level_override);
 
-    // Get app's actual override value
-    const appData = await window.electronAPI.getAppById(appId);
-    const hasOverride = appData.productivity_level_override != null;
-    const overrideLevel = appData.productivity_level_override;
+    // Get the app's override value
+    const hasOverride = appDetails.app.productivity_level_override != null;
+    const overrideLevel = appDetails.app.productivity_level_override;
 
-    // Get category's default level
-    const categories = await window.electronAPI.getCategories();
-    const categoryData = categories.find(cat => cat.name === category);
-    currentCategoryProductivityLevel = categoryData?.productivity_level || 'neutral';
+    console.log('hasOverride:', hasOverride, 'overrideLevel:', overrideLevel);
 
-    // Update UI
-    const buttons = document.querySelectorAll('.productivity-btn-inline');
-    buttons.forEach(btn => btn.classList.remove('active'));
+    // Request categories from parent to get category default
+    window.parent.postMessage({
+      type: 'GET_CATEGORIES'
+    }, '*');
 
-    if (!hasOverride) {
-      // Using category default
-      const inheritBtn = document.querySelector('[data-level="inherit"]');
-      if (inheritBtn) {
-        inheritBtn.classList.add('active');
-      }
-      showInheritedInfo(category, currentCategoryProductivityLevel);
+    // We'll update the dropdown when we receive the categories response
+    // For now, set based on what we know
+    if (hasOverride) {
+      updateDropdownButton(overrideLevel);
     } else {
-      // Has override
-      const activeBtn = document.querySelector(`[data-level="${overrideLevel}"]`);
-      if (activeBtn) {
-        activeBtn.classList.add('active');
-      }
-      hideInheritedInfo();
+      // Will be updated when we get category data
+      updateDropdownButton('inherit');
     }
 
-    currentProductivityLevel = effectiveLevel;
-
-    // Setup click handlers
+    // Setup click handlers for old inline buttons (if they still exist)
+    const buttons = document.querySelectorAll('.productivity-btn-inline');
     buttons.forEach(btn => {
       btn.onclick = async () => {
         const level = btn.dataset.level;
@@ -348,13 +423,19 @@ async function initializeProductivitySelector() {
 
 async function setProductivityLevel(level, appId) {
   try {
+    console.log('Setting productivity level:', { level, appId });
+
+    // Since we're in an iframe, send message to parent window to handle IPC
+    window.parent.postMessage({
+      type: 'SET_PRODUCTIVITY_LEVEL',
+      appId: appId,
+      level: level
+    }, '*');
+
+    // Update UI immediately (optimistic update)
     if (level === 'inherit') {
-      // Clear override (set to null)
-      await window.electronAPI.invoke('set-app-productivity-override', appId, null);
       showInheritedInfo(appDetails.app.category, currentCategoryProductivityLevel);
     } else {
-      // Set override
-      await window.electronAPI.invoke('set-app-productivity-override', appId, level);
       hideInheritedInfo();
     }
 
@@ -367,14 +448,22 @@ async function setProductivityLevel(level, appId) {
     }
 
     currentProductivityLevel = level === 'inherit' ? currentCategoryProductivityLevel : level;
+    console.log('Productivity level update request sent to parent');
   } catch (error) {
     console.error('Error setting productivity level:', error);
+    console.error('Error stack:', error.stack);
   }
 }
 
 function showInheritedInfo(category, level) {
   const inheritedInfo = document.getElementById('productivity-inherited-info');
   const inheritedText = document.getElementById('productivity-inherited-text');
+
+  // These elements don't exist in the new dropdown design, so just skip if not found
+  if (!inheritedInfo || !inheritedText) {
+    console.log('Inherited info elements not found (expected for dropdown design)');
+    return;
+  }
 
   const levelNames = {
     'productive': 'Productive',
@@ -388,15 +477,12 @@ function showInheritedInfo(category, level) {
 
 function hideInheritedInfo() {
   const inheritedInfo = document.getElementById('productivity-inherited-info');
+
+  // Element doesn't exist in the new dropdown design, so just skip if not found
+  if (!inheritedInfo) {
+    console.log('Inherited info element not found (expected for dropdown design)');
+    return;
+  }
+
   inheritedInfo.style.display = 'none';
 }
-
-// Call after app details are loaded
-window.addEventListener('message', (event) => {
-  if (event.data.type === 'APP_DETAILS') {
-    appDetails = event.data.details;
-    loadAppDetails().then(() => {
-      initializeProductivitySelector();
-    });
-  }
-});

@@ -36,6 +36,31 @@
         <span>Start</span>
       </button>
       <div class="spacer"></div>
+      <div class="productivity-dropdown">
+        <button class="btn-secondary" id="productivity-dropdown-btn">
+          <span class="btn-icon" id="productivity-icon">⚪</span>
+          <span id="productivity-text">Neutral</span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        <div class="productivity-dropdown-menu" id="productivity-dropdown-menu">
+          <button class="productivity-option" data-level="productive">
+            <span class="productivity-icon">✅</span>
+            <span>Productive</span>
+          </button>
+          <button class="productivity-option" data-level="neutral">
+            <span class="productivity-icon">⚪</span>
+            <span>Neutral</span>
+          </button>
+          <button class="productivity-option" data-level="unproductive">
+            <span class="productivity-icon">❌</span>
+            <span>Unproductive</span>
+          </button>
+          <button class="productivity-option" data-level="inherit">
+            <span class="productivity-icon">↩️</span>
+            <span>Use Category Default</span>
+          </button>
+        </div>
+      </div>
       <button class="btn-secondary" id="favorite-btn">
         <span class="btn-icon">⭐</span>
         <span>Add to Favorites</span>
@@ -90,33 +115,6 @@
       </div>
     </div>
 
-    <!-- Productivity Settings -->
-    <div class="productivity-settings">
-      <div class="productivity-settings-header">
-        <div class="productivity-label">Productivity Level</div>
-        <div class="productivity-inherited" id="productivity-inherited-info" style="display: none;">
-          <span id="productivity-inherited-text"></span>
-        </div>
-      </div>
-      <div class="productivity-selector-inline">
-        <button type="button" class="productivity-btn-inline" data-level="productive">
-          <span class="productivity-icon">✅</span>
-          <span>Productive</span>
-        </button>
-        <button type="button" class="productivity-btn-inline" data-level="neutral">
-          <span class="productivity-icon">⚪</span>
-          <span>Neutral</span>
-        </button>
-        <button type="button" class="productivity-btn-inline" data-level="unproductive">
-          <span class="productivity-icon">❌</span>
-          <span>Unproductive</span>
-        </button>
-        <button type="button" class="productivity-btn-inline" data-level="inherit" id="inherit-btn">
-          <span class="productivity-icon">↩️</span>
-          <span>Use Category Default</span>
-        </button>
-      </div>
-    </div>
 
     <!-- Quick Stats -->
     <div class="section-title">Overview</div>
@@ -161,6 +159,14 @@
         <div class="quick-stat-content">
           <div class="quick-stat-label">Peak Day</div>
           <div class="quick-stat-value">0h</div>
+        </div>
+      </div>
+      <div class="quick-stat-card productivity-stat-card" id="productivity-stat-card">
+        <div class="quick-stat-icon" id="productivity-stat-icon">⚪</div>
+        <div class="quick-stat-content">
+          <div class="quick-stat-label">Productivity</div>
+          <div class="quick-stat-value" id="productivity-stat-value">Neutral</div>
+          <div class="productivity-stat-subtitle" id="productivity-stat-subtitle"></div>
         </div>
       </div>
     </div>
