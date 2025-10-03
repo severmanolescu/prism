@@ -144,7 +144,7 @@ function createWindow() {
     },
     backgroundColor: '#1b2838',
     show: false,
-    icon: path.join(__dirname, 'assets/icon.png')
+    icon: path.join(__dirname, 'assets/prism.ico')
   });
 
   mainWindow.loadFile('src/renderer/index.html');
@@ -185,10 +185,10 @@ async function initAutoLaunch() {
 }
 
 function createTray() {
-  // Create tray icon (you'll need a 16x16 or 32x32 icon file)
-  const iconPath = path.join(__dirname, 'assets', 'tray-icon.png');
+  // Create tray icon using the prism.ico file
+  const iconPath = path.join(__dirname, 'assets', 'prism.ico');
   const icon = nativeImage.createFromPath(iconPath);
-  
+
   tray = new Tray(icon);
   
   // Create context menu
