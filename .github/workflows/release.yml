@@ -38,6 +38,7 @@ jobs:
       run: npm run build
       env:
         CI: true
+        CSC_IDENTITY_AUTO_DISCOVERY: false  # Skip code signing in CI
 
     - name: Upload Windows artifacts
       if: matrix.os == 'windows-latest'
