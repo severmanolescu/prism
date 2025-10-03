@@ -1,5 +1,5 @@
 const { ipcMain } = require('electron');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 const fsPromises = require('fs').promises;
 const path = require('path');
 
@@ -224,20 +224,34 @@ function initializeAppHandlers() {
       }
       
       console.log(`Launching app: ${app.name} from ${app.path}`);
-      
+
+      // Use spawn instead of exec to prevent command injection
+      let child;
       if (process.platform === 'win32') {
-        exec(`start "" "${app.path}"`, (error) => {
-          if (error) console.error('Failed to launch app:', error);
+        // Use cmd.exe with /C start for Windows
+        child = spawn('cmd.exe', ['/c', 'start', '', app.path], {
+          detached: true,
+          stdio: 'ignore'
         });
       } else if (process.platform === 'darwin') {
-        exec(`open "${app.path}"`, (error) => {
-          if (error) console.error('Failed to launch app:', error);
+        // Use open command for macOS
+        child = spawn('open', [app.path], {
+          detached: true,
+          stdio: 'ignore'
         });
       } else {
-        exec(`"${app.path}"`, (error) => {
-          if (error) console.error('Failed to launch app:', error);
+        // Direct execution for Linux
+        child = spawn(app.path, [], {
+          detached: true,
+          stdio: 'ignore'
         });
       }
+
+      child.on('error', (error) => {
+        console.error('Failed to launch app:', error);
+      });
+
+      child.unref(); // Allow parent to exit independently
       
       return { success: true };
       

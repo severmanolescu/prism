@@ -77,7 +77,7 @@ function updateHourlyHeatmap(hourlyAppBreakdown, topApps) {
     const maxTime = Math.max(...Object.values(appData.hours));
 
     // Add app label
-    heatmapGrid.innerHTML += `<div class="heatmap-label">${app.name}</div>`;
+    heatmapGrid.innerHTML += `<div class="heatmap-label">${escapeHtml(app.name)}</div>`;
 
     // Get base color for this app
     const baseColor = getAppColor(app.category);

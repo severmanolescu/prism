@@ -14,7 +14,7 @@ function updateInsights(data) {
         <div class="insight-icon">🎯</div>
         <div class="insight-content">
           <div class="insight-title">Focus Time</div>
-          <div class="insight-text">Longest session: ${focusTime} on ${data.longestSession.app_name} (${sessionDate}).</div>
+          <div class="insight-text">Longest session: ${focusTime} on ${escapeHtml(data.longestSession.app_name)} (${sessionDate}).</div>
         </div>
       </div>
     `;

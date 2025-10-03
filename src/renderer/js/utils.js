@@ -1,3 +1,10 @@
+// Sanitize HTML to prevent XSS attacks
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // Get app icon based on name and category
 function getAppIcon(name, category) {
     const nameLower = name.toLowerCase();

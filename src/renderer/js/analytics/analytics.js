@@ -246,7 +246,7 @@ function updateTopAppsList(topApps) {
         <div class="app-row">
             <div class="app-rank">${i + 1}</div>
             <div class="app-info">
-                <div class="app-name">${app.name}</div>
+                <div class="app-name">${escapeHtml(app.name)}</div>
             </div>
             <div class="app-time">${formatTime(app.total_time)}</div>
         </div>
@@ -285,17 +285,17 @@ function updateAllApplications(allApps){
         ? (() => {
             // Extract just the filename from the path (handles both full paths and relative paths)
             const iconFilename = app.icon_path.replace(/^.*[\\\/]/, '').replace('icons/', '');
-            return `<img src="app-icon://${iconFilename}" alt="${app.name}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 4px;" onerror="this.style.display='none';">`;
+            return `<img src="app-icon://${escapeHtml(iconFilename)}" alt="${escapeHtml(app.name)}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 4px;" onerror="this.style.display='none';">`;
           })()
         : `<div class="app-icon-small">${getAppIcon(app.name, app.category)}</div>`;
 
         top_apps_list.innerHTML += `
-        <div class="recent-item" data-app-name="${app.name}">
+        <div class="recent-item" data-app-name="${escapeHtml(app.name)}">
             <div class="recent-item-bg" style="background: ${categoriesCache[app.category] || '#092442'};">
                 ${iconHtml}
             </div>
             <div class="recent-item-info">
-                <div class="recent-item-name">${app.name}</div>
+                <div class="recent-item-name">${escapeHtml(app.name)}</div>
                 <div class="recent-item-time">${formatTime(app.total_time)}</div>
             </div>
         </div>
@@ -346,7 +346,7 @@ function updateCategoryBreakdown(categoryBreakdown) {
 
         category_grid.innerHTML += `
         <div class="category-item" style="border-left-color: ${categoriesCache[category.category] || '#66c0f4'}">
-            <div class="category-name">${category.category}</div>
+            <div class="category-name">${escapeHtml(category.category)}</div>
             <div class="category-time">${formatTime(category.total_time)}</div>
             <div class="category-percentage">${percentage}% of total time</div>
         </div>

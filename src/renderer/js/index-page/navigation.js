@@ -40,7 +40,7 @@ function updateLibraryTitle(categoryName) {
     const libraryTitle = document.querySelector('.library-title');
     if (libraryTitle) {
         const icon = getCategoryIcon(categoryName);
-        libraryTitle.innerHTML = `${icon} ${categoryName}`;
+        libraryTitle.innerHTML = `${icon} ${escapeHtml(categoryName)}`;
     }
 }
 
@@ -265,7 +265,7 @@ function createDroppableCategoryCard(categoryName, apps, color = '#4a90e2') {
                 if (app.iconPath) {
                     // Extract just the filename from the path (handles both full paths and relative paths)
                     const iconFilename = app.iconPath.replace(/^.*[\\\/]/, '').replace('icons/', '');
-                    backgroundIcons.push(`<img src="app-icon://${iconFilename}" alt="${app.name}">`);
+                    backgroundIcons.push(`<img src="app-icon://${escapeHtml(iconFilename)}" alt="${escapeHtml(app.name)}">`);
                 } else {
                     backgroundIcons.push(`<span class="bg-icon">${getAppIcon(app.name, app.category)}</span>`);
                 }
@@ -280,7 +280,7 @@ function createDroppableCategoryCard(categoryName, apps, color = '#4a90e2') {
             <div class="collection-bg-icons ${gridClass}">${backgroundIcons.join('')}</div>
         </div>
         <div class="collection-card-content">
-            <div class="collection-title">${categoryName.toUpperCase()}</div>
+            <div class="collection-title">${escapeHtml(categoryName.toUpperCase())}</div>
             <div class="collection-count">( ${apps.length} )</div>
         </div>
     `;

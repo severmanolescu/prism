@@ -45,7 +45,7 @@ async function loadAppDetails() {
     if (details.app.icon_path) {
       // Extract just the filename from the path (handles both full paths and relative paths)
       const iconFilename = details.app.icon_path.replace(/^.*[\\\/]/, '').replace('icons/', '');
-      heroIcon.innerHTML = `<img src="app-icon://${iconFilename}"
+      heroIcon.innerHTML = `<img src="app-icon://${escapeHtml(iconFilename)}"
         style="width: 120px; height: 120px; object-fit: contain;">`;
     }
 

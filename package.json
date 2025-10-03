@@ -45,16 +45,11 @@
     ],
     "win": {
       "target": [
-        {
-          "target": "nsis",
-          "arch": ["x64"]
-        },
-        {
-          "target": "zip",
-          "arch": ["x64"]
-        }
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "zip", "arch": ["x64"] }
       ],
       "icon": "assets/prism.ico"
-    }
+    },
+    "publish": null
   }
 }
