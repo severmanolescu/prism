@@ -316,11 +316,6 @@ function initializeAppHandlers() {
         ORDER BY hour
       `).all([appId, todayStart]);
 
-      // Test: Check if sessions exist for this app
-      const testSessions = db.prepare(`
-        SELECT COUNT(*) as total FROM sessions WHERE app_id = ?
-      `).get([appId]);
-
       // Get last 30 days usage for monthly view
       const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
 
