@@ -283,7 +283,11 @@ function updateAllApplications(allApps){
 
         // Check for icon_path (database column name)
         const iconHtml = app.icon_path
-        ? `<img src="app-icon://${app.icon_path.replace('icons/', '')}" alt="${app.name}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 4px;" onerror="this.style.display='none';">`
+        ? (() => {
+            // Extract just the filename from the path (handles both full paths and relative paths)
+            const iconFilename = app.icon_path.replace(/^.*[\\\/]/, '').replace('icons/', '');
+            return `<img src="app-icon://${iconFilename}" alt="${app.name}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 4px;" onerror="this.style.display='none';">`;
+          })()
         : `<div class="app-icon-small">${getAppIcon(app.name, app.category)}</div>`;
 
         top_apps_list.innerHTML += `

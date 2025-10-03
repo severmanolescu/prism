@@ -107,23 +107,22 @@ async function getOrCreateApp(appInfo) {
   const { name, executable, path: execPath } = appInfo;
   const appId = generateAppId(executable);
   const cleanName = getCleanAppName(name, executable);
-  
+
   try {
     // Check if app exists
-    let app = await db.get('SELECT * FROM apps WHERE id = ?', appId);
-    
+    let app = db.prepare('SELECT * FROM apps WHERE id = ?').get(appId);
+
     if (app) {
       // Update last used time
-      await db.run(
-        'UPDATE apps SET last_used = ? WHERE id = ?',
-        [Date.now(), appId]
-      );
+      db.prepare(
+        'UPDATE apps SET last_used = ? WHERE id = ?'
+      ).run([Date.now(), appId]);
       return app;
     }
-    
+
     // Create new app
     log(`Creating new app: ${cleanName} (${executable})`);
-    
+
     let iconPath = null;
     if (execPath) {
       try {
@@ -135,10 +134,10 @@ async function getOrCreateApp(appInfo) {
     }
 
     const now = Date.now();
-    await db.run(`
+    db.prepare(`
       INSERT INTO apps (id, name, path, executable, category, icon_path, hidden, first_used, last_used, total_time, launch_count)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
+    `).run([
       appId,
       cleanName,
       execPath || '',
@@ -151,16 +150,16 @@ async function getOrCreateApp(appInfo) {
       0,
       1
     ]);
-    
+
     log(`✓ Created app: ${cleanName} with ID: ${appId}`);
-    
+
     // Notify renderer
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('app-list-updated');
     }
-    
-    return await db.get('SELECT * FROM apps WHERE id = ?', appId);
-    
+
+    return db.prepare('SELECT * FROM apps WHERE id = ?').get(appId);
+
   } catch (error) {
     log(`ERROR in getOrCreateApp: ${error.message}`);
     console.error('Stack:', error.stack);
@@ -169,7 +168,7 @@ async function getOrCreateApp(appInfo) {
 }
 
 // Start new session in database
-async function startSession(appId) {
+function startSession(appId) {
   const db = getDb();
   if (!db) {
     log('ERROR: Database not available');
@@ -178,20 +177,20 @@ async function startSession(appId) {
 
   try {
     const now = Date.now();
-    
-    const result = await db.run(`
+
+    const result = db.prepare(`
       INSERT INTO sessions (app_id, start_time, end_time, duration)
       VALUES (?, ?, NULL, 0)
-    `, [appId, now]);
-    
-    const sessionId = result.lastID;
-    
+    `).run([appId, now]);
+
+    const sessionId = result.lastInsertRowid;
+
     return {
       id: sessionId,
       appId: appId,
       startTime: now
     };
-    
+
   } catch (error) {
     log(`ERROR in startSession: ${error.message}`);
     console.error('Stack:', error.stack);
@@ -200,7 +199,7 @@ async function startSession(appId) {
 }
 
 // End session in database
-async function endSession(session) {
+function endSession(session) {
   const db = getDb();
   if (!db || !session) {
     return;
@@ -209,21 +208,21 @@ async function endSession(session) {
   try {
     const now = Date.now();
     const duration = now - session.startTime;
-    
+
     // Update session
-    await db.run(`
-      UPDATE sessions 
+    db.prepare(`
+      UPDATE sessions
       SET end_time = ?, duration = ?
       WHERE id = ?
-    `, [now, duration, session.id]);
-    
+    `).run([now, duration, session.id]);
+
     // Update app total time
-    await db.run(`
-      UPDATE apps 
+    db.prepare(`
+      UPDATE apps
       SET total_time = total_time + ?, last_used = ?
       WHERE id = ?
-    `, [duration, now, session.appId]);
-        
+    `).run([duration, now, session.appId]);
+
     // Notify renderer
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('stats-updated');
@@ -232,7 +231,7 @@ async function endSession(session) {
         duration: duration,
       });
     }
-    
+
   } catch (error) {
     log(`ERROR in endSession: ${error.message}`);
     console.error('Stack:', error.stack);

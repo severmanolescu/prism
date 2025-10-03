@@ -1,21 +1,34 @@
 const fs = require('fs');
 const path = require('path');
+const { app } = require('electron');
 
 let appData = {};
 let sessionsData = [];
 
-const dataDir = path.join(__dirname, './../../../data');
+// Determine data directory based on environment
+const isDev = !app.isPackaged;
+const dataDir = isDev
+  ? path.join(__dirname, './../../../data')
+  : path.join(app.getPath('userData'), 'data');
 const appsFile = path.join(dataDir, 'apps.json');
 const sessionsFile = path.join(dataDir, 'sessions.json');
-
 const categoriesFile = path.join(dataDir, 'categories.json');
+
 let categoriesData = [];
 
 // Initialize data storage
 function initDataStorage() {
   // Create data directory if it doesn't exist
   if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir);
+    fs.mkdirSync(dataDir, { recursive: true });
+  } else {
+    // Check if it's actually a directory and not a file
+    const stats = fs.statSync(dataDir);
+    if (!stats.isDirectory()) {
+      // If it's a file, remove it and create directory
+      fs.unlinkSync(dataDir);
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
   }
   
   // Load existing data

@@ -263,7 +263,9 @@ function createDroppableCategoryCard(categoryName, apps, color = '#4a90e2') {
             if (i < sampleApps.length) {
                 const app = sampleApps[i];
                 if (app.iconPath) {
-                    backgroundIcons.push(`<img src="app-icon://${app.iconPath.replace('icons/', '')}" alt="${app.name}">`);
+                    // Extract just the filename from the path (handles both full paths and relative paths)
+                    const iconFilename = app.iconPath.replace(/^.*[\\\/]/, '').replace('icons/', '');
+                    backgroundIcons.push(`<img src="app-icon://${iconFilename}" alt="${app.name}">`);
                 } else {
                     backgroundIcons.push(`<span class="bg-icon">${getAppIcon(app.name, app.category)}</span>`);
                 }

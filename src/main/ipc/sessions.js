@@ -9,14 +9,14 @@ function initializeSessionHandlers() {
   ipcMain.handle('get-session-stats', async () => {
     try {
       const db = getDb();
-      const stats = await db.get(`
-        SELECT 
+      const stats = db.prepare(`
+        SELECT
           COUNT(*) as total,
           SUM(CASE WHEN end_time IS NULL THEN 1 ELSE 0 END) as orphaned,
           SUM(CASE WHEN end_time IS NOT NULL THEN 1 ELSE 0 END) as completed
         FROM sessions
-      `);
-      
+      `).get();
+
       return {
         total: stats.total || 0,
         completed: stats.completed || 0,
