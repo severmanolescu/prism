@@ -68,7 +68,6 @@ function renderSingleDayCanvasChart(ctx, canvas, dayData) {
 }
 
 function updateDailyUsageChart(dailyBreakdown) {
-    console.log('Daily breakdown:', dailyBreakdown);
     const canvas = document.getElementById('daily-usage-canvas');
     if (!canvas) return;
 

@@ -51,30 +51,30 @@ function updateHourlyHeatmap(hourlyAppBreakdown, topApps) {
     : topApps ? topApps.slice(0, heatmapAppCount) : [];
 
   // Group hourly data by app
-  const appHourlyData = {};
+  const appHourlyData = new Map();
   hourlyAppBreakdown.forEach(item => {
-    if (!appHourlyData[item.name]) {
-      appHourlyData[item.name] = {
+    if (!appHourlyData.has(item.name)) {
+      appHourlyData.set(item.name, {
         name: item.name,
         category: item.category,
-        hours: {}
-      };
+        hours: new Map()
+      });
     }
-    appHourlyData[item.name].hours[item.hour] = item.total_time;
+    appHourlyData.get(item.name).hours.set(item.hour, item.total_time);
   });
 
   // Get category colors from cache for each app
   const getAppColor = (category) => {
-    return categoriesCache[category] || '#66c0f4';
+    return categoriesCache.get(category) || '#66c0f4';
   };
 
   // Render each top app's hourly data
   topAppsToShow.forEach(app => {
-    const appData = appHourlyData[app.name];
+    const appData = appHourlyData.get(app.name);
     if (!appData) return;
 
     // Find max time for this app to normalize opacity
-    const maxTime = Math.max(...Object.values(appData.hours));
+    const maxTime = Math.max(...appData.hours.values());
 
     // Add app label
     heatmapGrid.innerHTML += `<div class="heatmap-label">${escapeHtml(app.name)}</div>`;
@@ -91,7 +91,7 @@ function updateHourlyHeatmap(hourlyAppBreakdown, topApps) {
 
     // Add hourly cells
     for (let hour = 0; hour < 24; hour++) {
-      const timeInHour = appData.hours[hour] || 0;
+      const timeInHour = appData.hours.get(hour) || 0;
       const opacity = timeInHour > 0 ? Math.max(0.1, (timeInHour / maxTime)) : 0.05;
 
       const tooltip = timeInHour > 0 ?

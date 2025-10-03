@@ -14,14 +14,13 @@ function updateInsights(data) {
         <div class="insight-icon">🎯</div>
         <div class="insight-content">
           <div class="insight-title">Focus Time</div>
-          <div class="insight-text">Longest session: ${focusTime} on ${escapeHtml(data.longestSession.app_name)} (${sessionDate}).</div>
+          <div class="insight-text">Longest session: ${escapeHtml(focusTime)} on ${escapeHtml(data.longestSession.app_name)} (${sessionDate}).</div>
         </div>
       </div>
     `;
   }
 
   // 3. Variety Score (App Diversity)
-  const varietyPercentage = Math.round((data.overallStats.uniqueApps / (data.topApps.length || 1)) * 100);
   let varietyMessage = '';
   if (data.overallStats.uniqueApps === 1) {
     varietyMessage = 'Highly focused - using only 1 app.';
@@ -38,7 +37,7 @@ function updateInsights(data) {
       <div class="insight-icon">🎨</div>
       <div class="insight-content">
         <div class="insight-title">Variety Score</div>
-        <div class="insight-text">${varietyMessage}</div>
+        <div class="insight-text">${escapeHtml(varietyMessage)}</div>
       </div>
     </div>
   `;
@@ -81,7 +80,7 @@ function updateInsights(data) {
         <div class="insight-icon">⏰</div>
         <div class="insight-content">
           <div class="insight-title">Peak Activity Hours</div>
-          <div class="insight-text">Most active around ${peakTimeText} (${formatTime(maxTime)} total).</div>
+          <div class="insight-text">Most active around ${escapeHtml(peakTimeText)} (${escapeHtml(formatTime(maxTime))} total).</div>
         </div>
       </div>
     `;
@@ -108,7 +107,7 @@ function updateInsights(data) {
         <div class="insight-icon">🔄</div>
         <div class="insight-content">
           <div class="insight-title">App Switching Rate</div>
-          <div class="insight-text">${switchingMessage}</div>
+          <div class="insight-text">${escapeHtml(switchingMessage)}</div>
         </div>
       </div>
     `;

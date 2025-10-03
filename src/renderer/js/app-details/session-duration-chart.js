@@ -4,8 +4,6 @@ function updateSessionDurationChart(details) {
   if (!chart) return;
 
   const durations = details.sessionDurations || [];
-  console.log('Session durations:', durations);
-  console.log('Session durations length:', durations.length);
 
   if (!durations || durations.length === 0) {
     chart.innerHTML = '<div style="text-align: center; color: #8f98a0;">No session data available</div>';

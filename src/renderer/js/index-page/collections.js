@@ -117,7 +117,7 @@ function showCreateCollectionModal() {
       if (result.success) {
         modal.remove();
         showCategoryOverview();
-        showDragFeedback("Collection created successfully!", true)
+        showDragFeedback("Collection created successfully!", true);
       } else {
         showDragFeedback(result.error || 'Failed to create collection, please try again', false);
       }

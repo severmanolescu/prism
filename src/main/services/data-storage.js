@@ -189,11 +189,10 @@ module.exports = {
     saveBlacklistedApps,
     loadBlacklistedApps,
     removeAppSessions,
-    saveSessionsData,
 
     get appData() { return appData; },
     get sessionsData() { return sessionsData; },
     set appData(value) { appData = value; },
     set sessionsData(value) { sessionsData = value; },
     get categoriesData() { return categoriesData; },
-}
+};

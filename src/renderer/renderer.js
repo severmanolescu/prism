@@ -52,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
             e.stopPropagation();
             
             const toggleButton = e.target.closest('.category-toggle');
-            const categoryName = toggleButton.dataset.category;
             const navSection = toggleButton.closest('.nav-section');
             const subitemsContainer = navSection.querySelector('.nav-subitems');
             
@@ -156,11 +155,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const homeButton = document.getElementById("home")
+    const homeButton = document.getElementById("home");
 
     homeButton.addEventListener('click', (e) => {
         showHomeView();
-    })
+    });
 
     // Handle Library tab click to show home view
     const libraryTab = document.querySelector('.nav-tab.library-tab');
@@ -228,6 +227,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle analytics data requests from iframe
     window.addEventListener('message', async (event) => {
+        // Verify message comes from our analytics iframe
+        const analyticsIframe = document.querySelector('.analytics-iframe-wrapper iframe');
+        if (!analyticsIframe || event.source !== analyticsIframe.contentWindow) {
+            return;
+        }
+
         if (event.data.type === 'REQUEST_ANALYTICS_DATA') {
             const { startDate, endDate } = event.data;
 

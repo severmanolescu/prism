@@ -1,19 +1,14 @@
 async function loadAppData() {
-    try {
-        console.log('Loading app data...');
-        
+    try {       
         // Load favorites first
         favoritesCache = await window.electronAPI.getFavorites();
-        console.log('Favorites loaded:', favoritesCache);
         
         // Load recent apps
         const recentApps = await window.electronAPI.getRecentApps();
-        console.log('Recent apps loaded:', recentApps.length, 'apps');
         await displayRecentApps(recentApps);
         
         // Load all apps
         const allApps = await window.electronAPI.getAllApps();
-        console.log('All apps loaded:', allApps.length, 'apps');
         
         // Cache all apps for filtering
         allAppsCache = allApps;
@@ -22,8 +17,6 @@ async function loadAppData() {
         
         // Create navigation based on categories
         await createCategoryNavigation(allApps);
-        
-        console.log('App data loaded successfully');
     } catch (error) {
         console.error('Error loading app data:', error);
     }
@@ -106,18 +99,9 @@ async function loadFavoriteApps() {
 }
 
 async function loadHiddenApps(params) {
-        try {
-        console.log('Loading hidden apps');
-        
+        try {     
         // Get current favorites
         const hiddenIds = await window.electronAPI.getHiddenApps();
-        console.log('Hidden IDs:', hiddenIds);
-        
-        // Filter from cached apps to get favorite apps
-        const hiddenApps = allAppsCache.filter(app => hiddenIds.includes(app.id));
-        
-        console.log('Filtered favorite apps:', hiddenApps.length);
-        console.log('Favorite apps:', hiddenApps.map(app => app.name));
         
         await displayAllApps(hiddenIds);
         
@@ -140,7 +124,6 @@ async function loadRecentApps() {
 async function groupAppsByCategory(apps) {
     try {
         const categories = await window.electronAPI.getCategories();
-        console.log('Categories received in renderer:', categories);
         
         if (!categories || !Array.isArray(categories)) {
             console.error('Categories data is invalid:', categories);

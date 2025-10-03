@@ -79,8 +79,6 @@ function createNavSection(categoryName, apps, isFavorites = false) {
     subitemsContainer.className = 'nav-subitems';
     subitemsContainer.dataset.category = categoryName;
     
-    console.log("Creating nav section: ", apps)
-
     // Add each app as a nav item
     apps.forEach(app => {
         const navItem = document.createElement('div');
@@ -210,9 +208,6 @@ function createCategoryCard(categoryName, apps, color = '#4a90e2') {
 }
 
 function showHomeView() {
-    // Reset main-content
-    const mainContent = document.querySelector('.main-content');
-
     // Show home content
     const recentSection = document.querySelector('.recent-section');
     const allAppsSection = document.querySelector('.all-apps-section');
