@@ -315,7 +315,7 @@ function initializeAppHandlers() {
         GROUP BY hour
         ORDER BY hour
       `).all([appId, todayStart]);
-
+      
       // Get last 30 days usage for monthly view
       const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
 
