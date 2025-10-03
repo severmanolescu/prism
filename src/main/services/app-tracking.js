@@ -1,5 +1,4 @@
 const activeWin = require('active-win');
-const path = require('path');
 const fs = require('fs');
 const { getDb } = require('./database');
 

@@ -4,8 +4,6 @@ function updateHeatmap(details) {
   if (!container) return;
 
   const heatmapData = details.heatmapData || [];
-  console.log('Heatmap data:', heatmapData);
-  console.log('Heatmap data length:', heatmapData.length);
 
   if (!heatmapData || heatmapData.length === 0) {
     container.innerHTML = '<div style="text-align: center; color: #8f98a0; padding: 20px;">No heatmap data available</div>';

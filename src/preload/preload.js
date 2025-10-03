@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer, createCollection } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   // Window controls

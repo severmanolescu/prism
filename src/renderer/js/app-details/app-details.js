@@ -27,15 +27,12 @@ async function loadAppDetails() {
     const hero = document.querySelector('.app-hero');
     if (hero) {
       const categoryColor = details.categoryColor || '#092442';
-      console.log('Category color from parent:', categoryColor);
 
       // Convert hex to RGB for gradient
       const rgb = hexToRgb(categoryColor);
-      console.log('RGB values:', rgb);
 
       if (rgb) {
         const gradient = `linear-gradient(135deg, rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.8) 0%, rgba(${Math.floor(rgb.r * 0.7)}, ${Math.floor(rgb.g * 0.7)}, ${Math.floor(rgb.b * 0.7)}, 0.9) 100%)`;
-        console.log('Setting gradient:', gradient);
         hero.style.background = gradient;
       }
     }
@@ -234,9 +231,6 @@ function updateMonthlyCalendar(details) {
   }
 
   const monthlyData = details.monthlyUsage || [];
-  console.log('Monthly data:', monthlyData);
-  console.log('Monthly data type:', typeof monthlyData);
-  console.log('Is array:', Array.isArray(monthlyData));
 
   if (!monthlyData || monthlyData.length === 0) {
     calendar.innerHTML = '<div style="text-align: center; color: #8f98a0; padding: 20px; grid-column: 1 / -1;">No data available for the last 30 days</div>';
@@ -319,8 +313,6 @@ function updateDropdownButton(level, categoryDefault = null) {
     const productivityText = document.getElementById('productivity-text');
     if (productivityIcon) productivityIcon.textContent = config.icon;
     if (productivityText) productivityText.textContent = config.text;
-
-    console.log('Updated dropdown button to:', displayLevel, config);
   }
 
   // Update the productivity stat card
@@ -374,27 +366,17 @@ function updateProductivityStatCard(level, isInherited = false) {
 
   // Add the appropriate class
   statCard.classList.add(config.class);
-
-  console.log('Updated productivity stat card to:', level, isInherited ? '(inherited)' : '(custom)');
 }
 
 async function initializeProductivitySelector() {
   if (!appDetails) return;
 
   const appId = appDetails.app.id;
-  const category = appDetails.app.category;
 
   try {
-    console.log('Initializing productivity selector for app:', appId);
-    console.log('Full app details:', appDetails);
-    console.log('App object:', appDetails.app);
-    console.log('App productivity_level_override:', appDetails.app.productivity_level_override);
-
     // Get the app's override value
     const hasOverride = appDetails.app.productivity_level_override != null;
     const overrideLevel = appDetails.app.productivity_level_override;
-
-    console.log('hasOverride:', hasOverride, 'overrideLevel:', overrideLevel);
 
     // Request categories from parent to get category default
     window.parent.postMessage({
@@ -425,8 +407,6 @@ async function initializeProductivitySelector() {
 
 async function setProductivityLevel(level, appId) {
   try {
-    console.log('Setting productivity level:', { level, appId });
-
     // Since we're in an iframe, send message to parent window to handle IPC
     window.parent.postMessage({
       type: 'SET_PRODUCTIVITY_LEVEL',
@@ -450,7 +430,6 @@ async function setProductivityLevel(level, appId) {
     }
 
     currentProductivityLevel = level === 'inherit' ? currentCategoryProductivityLevel : level;
-    console.log('Productivity level update request sent to parent');
   } catch (error) {
     console.error('Error setting productivity level:', error);
     console.error('Error stack:', error.stack);
@@ -482,7 +461,6 @@ function hideInheritedInfo() {
 
   // Element doesn't exist in the new dropdown design, so just skip if not found
   if (!inheritedInfo) {
-    console.log('Inherited info element not found (expected for dropdown design)');
     return;
   }
 

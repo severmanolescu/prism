@@ -1,5 +1,10 @@
 // Listen for data from parent window
 window.addEventListener('message', (event) => {
+  // Verify message comes from parent window
+  if (event.source !== window.parent) {
+    return;
+  }
+
   if (event.data.type === 'APP_DETAILS') {
     appDetails = event.data.data;
     loadAppDetails().then(() => {
@@ -19,13 +24,10 @@ window.addEventListener('message', (event) => {
     }
   } else if (event.data.type === 'CATEGORIES_DATA') {
     // Received categories from parent
-    console.log('Received categories:', event.data.categories);
     if (appDetails) {
       const category = appDetails.app.category;
       const categoryData = event.data.categories.find(cat => cat.name === category);
       const categoryProductivityLevel = categoryData?.productivity_level || 'neutral';
-
-      console.log('Category productivity level:', categoryProductivityLevel);
 
       // Update the dropdown if app has no override (is using inherit)
       if (appDetails.app.productivity_level_override == null) {

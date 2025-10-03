@@ -1,10 +1,7 @@
 // Update today's stats display
 async function updateTodayStats() {
-    console.log('updateTodayStats called');
     try {
-        console.log('Calling getTodayStats...');
         const stats = await window.electronAPI.getTodayStats();
-        console.log('Stats received:', stats);
         
         const timeElement = document.getElementById('todayTotalTime');
         const countElement = document.getElementById('todayAppCount');

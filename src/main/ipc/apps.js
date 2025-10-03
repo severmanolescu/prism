@@ -1,7 +1,5 @@
 const { ipcMain } = require('electron');
 const { spawn } = require('child_process');
-const fsPromises = require('fs').promises;
-const path = require('path');
 
 const {
   getAllApps,
@@ -12,7 +10,6 @@ const {
   restoreApp,
   deleteAppAndSessions,
   addToBlacklist,
-  moveAppToCategory
 } = require('../services/data-access');
 
 const { formatTime, formatLastUsed } = require('../utils/utils');

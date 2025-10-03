@@ -79,9 +79,12 @@ function updateCustomDatesForPeriod(period, dateInputs) {
 
 // Listen for data from parent window
 window.addEventListener('message', (event) => {
+  // Verify message comes from parent window
+  if (event.source !== window.parent) {
+    return;
+  }
   if (event.data.type === 'ANALYTICS_DATA_RESPONSE') {
     // Received analytics data from parent window
-    console.log('Received analytics data:', event.data.data);
     updateAnalyticsUI(event.data.data);
 
     // Load heatmap data after main UI renders
@@ -90,22 +93,19 @@ window.addEventListener('message', (event) => {
     }, 50);
   } else if (event.data.type === 'HEATMAP_DATA_RESPONSE') {
     // Received heatmap data
-    console.log('Received heatmap data');
     if (currentAnalyticsData) {
       updateHourlyHeatmap(event.data.data, currentAnalyticsData.topApps);
     }
   } else if (event.data.type === 'CATEGORIES_RESPONSE') {
-    // Received categories from parent window
-    console.log('Received categories:', event.data.categories);
     // Store categories in cache
     event.data.categories.forEach(cat => {
-      categoriesCache[cat.name] = cat.color || '#092442';
+      categoriesCache.set(cat.name, cat.color || '#092442');
     });
   }
 });
 
 let currentPeriod = 'today';
-let categoriesCache = {}; // Cache for category colors
+let categoriesCache = new Map(); // Cache for category colors
 let heatmapAppCount = 5; // Default to top 5 apps
 let currentAnalyticsData = null; // Cache analytics data for heatmap updates
 
@@ -134,7 +134,7 @@ function calculateDateRange(period) {
       endDate = today;
       break;
     case 'alltime':
-      startDate = new Date(2020, 0, 1); // Jan 1, 2020
+      startDate = new Date(2025, 7, 1); 
       endDate = today;
       break;
   }
@@ -224,7 +224,6 @@ function updateStatsCards(data) {
 }
 
 function updateTopAppsList(topApps) {
-    console.log(topApps)
     const top_apps_list = document.querySelector('.top-apps-list');
     if (!top_apps_list) return;
 
@@ -255,7 +254,6 @@ function updateTopAppsList(topApps) {
 }
 
 function updateAllApplications(allApps){
-    console.log(allApps)
     const top_apps_list = document.querySelector('.apps-used-grid');
     if (!top_apps_list) return;
 
@@ -291,7 +289,7 @@ function updateAllApplications(allApps){
 
         top_apps_list.innerHTML += `
         <div class="recent-item" data-app-name="${escapeHtml(app.name)}">
-            <div class="recent-item-bg" style="background: ${categoriesCache[app.category] || '#092442'};">
+            <div class="recent-item-bg" style="background: ${categoriesCache.get(app.category) || '#092442'};">
                 ${iconHtml}
             </div>
             <div class="recent-item-info">
@@ -304,8 +302,6 @@ function updateAllApplications(allApps){
 }
 
 function updateCategoryBreakdown(categoryBreakdown) {
-    console.log('Category breakdown:', categoryBreakdown);
-
     const category_grid = document.querySelector('.category-grid');
     if (!category_grid) return;
 
@@ -345,7 +341,7 @@ function updateCategoryBreakdown(categoryBreakdown) {
         const percentage = Math.round((category.total_time / totalTime) * 100);
 
         category_grid.innerHTML += `
-        <div class="category-item" style="border-left-color: ${categoriesCache[category.category] || '#66c0f4'}">
+        <div class="category-item" style="border-left-color: ${categoriesCache.get(category.category) || '#66c0f4'}">
             <div class="category-name">${escapeHtml(category.category)}</div>
             <div class="category-time">${formatTime(category.total_time)}</div>
             <div class="category-percentage">${percentage}% of total time</div>

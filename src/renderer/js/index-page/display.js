@@ -1,6 +1,5 @@
 // Display all apps
 async function displayAllApps(apps) {
-    console.log('Displaying all apps:', apps);
     const appsContainer = document.querySelector('.apps-grid');
     const sectionHeader = document.querySelector('.all-apps-section .section-header');
     const allAppsSection = document.querySelector('.all-apps-section');
@@ -38,8 +37,6 @@ async function displayAllApps(apps) {
         appsContainer.classList.add('categorized-view');
         
         const appsByCategory = await groupAppsByCategory(apps);
-
-        console.log("Apps by category: ", appsByCategory);
         
         // Display each category with its apps
         Object.keys(appsByCategory).forEach(categoryName => {
@@ -98,7 +95,6 @@ async function displayAllApps(apps) {
 
 // Display recent apps
 async function displayRecentApps(apps) {
-    console.log('Displaying recent apps:', apps);
     const recentContainer = document.querySelector('.recent-games');
     if (!recentContainer) {
         console.error('Recent container not found!');

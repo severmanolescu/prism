@@ -5,7 +5,6 @@ function updateDayOfWeekChart(details) {
 
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const dayData = details.dayOfWeekUsage || [];
-  console.log('Day of week data:', dayData);
 
   if (!dayData || dayData.length === 0) {
     chart.innerHTML = '<div style="text-align: center; color: #8f98a0; padding: 20px;">No data available</div>';

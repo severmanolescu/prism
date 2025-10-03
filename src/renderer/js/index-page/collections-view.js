@@ -19,9 +19,7 @@ function toggleView(viewType) {
             appsGrid.classList.remove('list-view');
         }
     }
-    
-    console.log(`Switched to ${viewType} view`);
-}
+    }
 
 
 async function showCategoryOverview() {

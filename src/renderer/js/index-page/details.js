@@ -1,5 +1,4 @@
 async function showAppDetails(appName) {
-    console.log(`Opening details for: ${appName}`);
     
     // Get the app ID from the clicked element or find it
     const appData = allAppsCache.find(app => app.name === appName);
@@ -14,7 +13,6 @@ async function showAppDetails(appName) {
     // Get category color
     const categoryColor = await getCategoryColor(details.app.category);
     details.categoryColor = categoryColor;
-    console.log(`Category: ${details.app.category}, Color: ${categoryColor}`);
 
     // Hide current content
     const recentSection = document.querySelector('.recent-section');
@@ -95,6 +93,11 @@ async function showAppDetails(appName) {
 
 // Listen for messages from app-details iframe
 window.addEventListener('message', async (event) => {
+    const appDetailsIframe = document.querySelector('.app-details-iframe-wrapper iframe');
+    if (!appDetailsIframe || event.source !== appDetailsIframe.contentWindow) {
+        return;
+    }
+
     if (event.data.type === 'LAUNCH_APP') {
         try {
             const result = await window.electronAPI.launchApp(event.data.appId);
@@ -144,12 +147,10 @@ window.addEventListener('message', async (event) => {
     } else if (event.data.type === 'SET_PRODUCTIVITY_LEVEL') {
         // Handle productivity level update from iframe
         try {
-            console.log('Parent: Received SET_PRODUCTIVITY_LEVEL:', event.data);
             const result = await window.electronAPI.setAppProductivityOverride(
                 event.data.appId,
                 event.data.level === 'inherit' ? null : event.data.level
             );
-            console.log('Parent: Productivity level updated:', result);
         } catch (error) {
             console.error('Parent: Error setting productivity level:', error);
         }

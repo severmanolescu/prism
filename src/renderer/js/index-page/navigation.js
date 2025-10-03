@@ -1,8 +1,6 @@
 
 // Create navigation sections based on app categories
-async function createCategoryNavigation(apps) {
-    console.log('Creating category navigation for apps:', apps);
-    
+async function createCategoryNavigation(apps) {    
     const libraryNav = document.querySelector('.library-nav');
     if (!libraryNav) {
         console.error('Library nav container not found!');
@@ -23,7 +21,6 @@ async function createCategoryNavigation(apps) {
     
     // Group apps by category using helper function
     const appsByCategory = await groupAppsByCategory(apps);
-    console.log('Apps grouped by category:', appsByCategory);
     
     // Create nav sections for each category
     Object.keys(appsByCategory).sort().forEach(categoryName => {
@@ -61,7 +58,6 @@ function filterNavigation(searchTerm) {
             // Don't auto-expand when clearing search - keep original collapsed state
             // Just ensure subitems container is properly sized
             const subitems = section.querySelector('.nav-subitems');
-            const toggleButton = section.querySelector('.category-toggle');
             
             if (section.classList.contains('collapsed')) {
                 // Keep it collapsed
