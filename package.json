@@ -15,7 +15,10 @@
     "productivity",
     "prism"
   ],
-  "author": "Sever Manolescu",
+  "author": {
+    "name": "Sever Manolescu",
+    "email": "severmanolescu1@gmail.com"
+  },
   "license": "MIT",
   "devDependencies": {
     "electron": "^38.1.2",
