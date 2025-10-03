@@ -167,7 +167,6 @@ async function loadAnalyticsData(period, customStartDate, customEndDate) {
   }
 }
 
-
 // Update the UI with analytics data
 function updateAnalyticsUI(data) {
   // Cache the data for heatmap updates

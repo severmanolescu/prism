@@ -31,6 +31,7 @@ function mapAppFromDb(app) {
     lastUsed: app.last_used,
     totalTime: app.total_time,
     launchCount: app.launch_count,
+    productivity_level_override: app.productivity_level_override,
     totalTimeFormatted: formatTime(app.total_time),
     lastUsedFormatted: formatLastUsed(app.last_used)
   };
@@ -184,6 +185,27 @@ function initializeAppHandlers() {
     } catch (error) {
       console.error('Error removing app permanently:', error);
       return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-app-by-id', async (event, appId) => {
+    try {
+      const db = getDb();
+      if (!db) {
+        throw new Error('Database not available');
+      }
+
+      const { getAppById } = require('../services/data-access');
+      const app = await getAppById(appId);
+
+      if (!app) {
+        return null;
+      }
+
+      return mapAppFromDb(app);
+    } catch (error) {
+      console.error('Error getting app by id:', error);
+      return null;
     }
   });
 

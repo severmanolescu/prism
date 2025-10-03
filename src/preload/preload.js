@@ -45,7 +45,30 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getTodayStats: () => ipcRenderer.invoke('get-today-stats'),
 
   getAppDetails: (appId) => ipcRenderer.invoke('get-app-details', appId),
+  getAppById: (appId) => ipcRenderer.invoke('get-app-by-id', appId),
 
   getAnalyticsData: (startDate, endDate) => ipcRenderer.invoke('get-analytics-data', startDate, endDate),
-  getHourlyAppBreakdown: (startDate, endDate) => ipcRenderer.invoke('get-hourly-app-breakdown', startDate, endDate)
+  getHourlyAppBreakdown: (startDate, endDate) => ipcRenderer.invoke('get-hourly-app-breakdown', startDate, endDate),
+
+  // Productivity levels - generic invoke method
+  invoke: (channel, ...args) => {
+    const validChannels = [
+      'set-app-productivity-override',
+      'get-app-productivity-level',
+      'set-category-productivity-level',
+      'get-category-productivity-level',
+      'get-productivity-stats'
+    ];
+    if (validChannels.includes(channel)) {
+      return ipcRenderer.invoke(channel, ...args);
+    } else {
+      throw new Error(`Invalid IPC channel: ${channel}`);
+    }
+  },
+
+  // Direct productivity methods for convenience
+  setAppProductivityOverride: (appId, level) => ipcRenderer.invoke('set-app-productivity-override', appId, level),
+  getAppProductivityLevel: (appId) => ipcRenderer.invoke('get-app-productivity-level', appId),
+  setCategoryProductivityLevel: (categoryId, level) => ipcRenderer.invoke('set-category-productivity-level', categoryId, level),
+  getCategoryProductivityLevel: (categoryId) => ipcRenderer.invoke('get-category-productivity-level', categoryId)
 });
