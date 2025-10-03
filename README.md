@@ -1,11 +1,15 @@
 
-# Time Tracker
+# Prism
 
 <div align="center">
-  <img src="./assets/banner.svg" alt="Time Tracker Banner" width="99%">
+  <img src="./assets/banner.svg" alt="Prism Banner" width="99%">
 </div>
 
 A modern desktop application for tracking application usage time, built with Electron and inspired by Steam's UI design.
+
+## Why "Prism"?
+
+Just like a prism breaks white light into a beautiful spectrum of colors, **Prism** breaks down your raw application usage data into colorful, actionable insights. The name reflects the app's core purpose: transforming simple time tracking into detailed analytics, trends, and productivity metrics—making the invisible visible.
 
 ## Features
 
@@ -28,7 +32,7 @@ A modern desktop application for tracking application usage time, built with Ele
 
 ```bash
 git clone https://github.com/severmanolescu/app-time-tracker
-cd time-tracker
+cd prism
 ```
 2. Install dependencies
 ```bash
@@ -45,7 +49,7 @@ npm run build
 ```
 ## Project Structure
 ```bash
-time-tracker/
+prism/
 ├── src/
 │ ├── main/ # Main process (Electron/Node.js)
 │ │ ├── ipc/ # IPC handlers organized by domain

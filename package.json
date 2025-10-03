@@ -1,7 +1,7 @@
 {
-  "name": "app-time-tracker",
+  "name": "prism",
   "version": "0.1.0",
-  "description": "Steam-like application time tracker",
+  "description": "Modern application usage time tracker with analytics",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -11,8 +11,9 @@
   "keywords": [
     "electron",
     "time-tracker",
-    "steam",
-    "productivity"
+    "analytics",
+    "productivity",
+    "prism"
   ],
   "author": "Sever Manolescu",
   "license": "MIT",
@@ -28,8 +29,8 @@
     "sqlite3": "^5.1.7"
   },
   "build": {
-    "appId": "time-tracker",
-    "productName": "Time Tracker",
+    "appId": "prism",
+    "productName": "Prism",
     "directories": {
       "output": "dist"
     },
@@ -39,14 +40,13 @@
       "preload.js",
       "src/**/*",
       "main/**/*",
-      "assets/icon.ico",
-      "assets/tray-icon.png",
+      "assets/prism.ico",
       "package.json",
       "node_modules/**/*"
     ],
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.ico"
+      "icon": "assets/prism.ico"
     }
   }
 }

@@ -1,0 +1,71 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Prism gradient -->
+    <linearGradient id="prismGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Soft glow -->
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="12" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" fill="#1b2838" rx="80"/>
+
+  <!-- Outer glow circle -->
+  <circle cx="256" cy="256" r="180" fill="url(#prismGradient)" opacity="0.15" filter="url(#softGlow)">
+    <animate attributeName="r" values="180;190;180" dur="4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- 3D Triangular Prism (scaled up from banner) -->
+  <g transform="translate(256, 256)" filter="url(#glow)">
+    <!-- Back triangle (depth) -->
+    <path d="M 0 -120 L -100 80 L 100 80 Z" fill="url(#prismGradient)" opacity="0.3"/>
+
+    <!-- Left face -->
+    <path d="M -100 40 L 0 -120 L 0 -80 L -100 80 Z" fill="#4c51bf" opacity="0.85"/>
+
+    <!-- Right face -->
+    <path d="M 100 40 L 0 -120 L 0 -80 L 100 80 Z" fill="#667eea" opacity="0.95"/>
+
+    <!-- Front triangle (main face) -->
+    <path d="M 0 -80 L -100 80 L 100 80 Z" fill="url(#prismGradient)" opacity="0.95"/>
+
+    <!-- Edge highlights for 3D depth -->
+    <line x1="0" y1="-80" x2="-100" y2="80" stroke="#a5b4fc" stroke-width="3" opacity="0.6"/>
+    <line x1="0" y1="-80" x2="100" y2="80" stroke="#a5b4fc" stroke-width="3" opacity="0.6"/>
+    <line x1="-100" y1="80" x2="100" y2="80" stroke="#2d3748" stroke-width="3" opacity="0.8"/>
+    <line x1="0" y1="-80" x2="0" y2="-120" stroke="#e0e7ff" stroke-width="2.5" opacity="0.4"/>
+
+    <!-- Top edge highlight -->
+    <line x1="0" y1="-120" x2="-100" y2="80" stroke="#a5b4fc" stroke-width="1.5" opacity="0.3"/>
+    <line x1="0" y1="-120" x2="100" y2="80" stroke="#a5b4fc" stroke-width="1.5" opacity="0.3"/>
+  </g>
+
+  <!-- Inner glow circle -->
+  <circle cx="256" cy="256" r="140" fill="none" stroke="url(#prismGradient)" stroke-width="2" opacity="0.3">
+    <animate attributeName="opacity" values="0.2;0.4;0.2" dur="3s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Subtle corner accents -->
+  <circle cx="80" cy="80" r="3" fill="#667eea" opacity="0.4"/>
+  <circle cx="432" cy="80" r="3" fill="#764ba2" opacity="0.4"/>
+  <circle cx="80" cy="432" r="3" fill="#764ba2" opacity="0.4"/>
+  <circle cx="432" cy="432" r="3" fill="#667eea" opacity="0.4"/>
+</svg>
