@@ -221,10 +221,12 @@ function showHiddenView() {
     const categoryOverview = document.querySelector('.category-overview');
     const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
     const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
+    const productivityContainer = document.querySelector('.productivity-iframe-wrapper');
 
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (analyticsContainer) analyticsContainer.style.display = 'none';
     if (detailsContainer) detailsContainer.style.display = 'none';
+    if (productivityContainer) productivityContainer.style.display = 'none';
 
     // Reset view state
     toggleView('grid');
@@ -263,10 +265,12 @@ function showHomeView() {
     const categoryOverview = document.querySelector('.category-overview');
     const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
     const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
+    const productivityContainer = document.querySelector('.productivity-iframe-wrapper');
 
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (analyticsContainer) analyticsContainer.style.display = 'none';
     if (detailsContainer) detailsContainer.style.display = 'none';
+    if (productivityContainer) productivityContainer.style.display = 'none';
 
     // Reset view state
     toggleView('grid');
@@ -333,14 +337,15 @@ function showAnalyticsView() {
     const categoryOverview = document.querySelector('.category-overview');
     const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
     const sidebar = document.querySelector('.sidebar');
-    
+    const productivityContainer = document.querySelector('.productivity-iframe-wrapper');
+
     if (recentSection) recentSection.style.display = 'none';
     if (allAppsSection) allAppsSection.style.display = 'none';
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (sidebar) sidebar.style.display = 'none';
     if (detailsContainer) detailsContainer.style.display = 'none';
+    if (productivityContainer) productivityContainer.style.display = 'none';
 
-    
     // Adjust main-content
     const mainContent = document.querySelector('.main-content');
     if (mainContent) {
@@ -388,5 +393,66 @@ function showAnalyticsView() {
     // Update nav tab
     document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
     const analyticsTab = document.querySelector('.nav-tab[data-tab="analytics"]');
+    if (analyticsTab) analyticsTab.classList.add('active');
+}
+
+function showProductivityView() {
+    // Hide current content
+    const recentSection = document.querySelector('.recent-section');
+    const allAppsSection = document.querySelector('.all-apps-section');
+    const categoryOverview = document.querySelector('.category-overview');
+    const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
+    const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (recentSection) recentSection.style.display = 'none';
+    if (allAppsSection) allAppsSection.style.display = 'none';
+    if (categoryOverview) categoryOverview.style.display = 'none';
+    if (sidebar) sidebar.style.display = 'none';
+    if (detailsContainer) detailsContainer.style.display = 'none';
+    if (analyticsContainer) analyticsContainer.style.display = 'none';
+
+    
+    // Adjust main-content
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        mainContent.style.marginLeft = '0';
+        mainContent.style.width = '100%';
+    }
+    
+    // Create iframe to completely isolate analytics
+    let productivityContainer = document.querySelector('.productivity-iframe-wrapper');
+    
+    if (!productivityContainer) {
+        productivityContainer = document.createElement('div');
+        productivityContainer.className = 'productivity-iframe-wrapper';
+        productivityContainer.style.width = '100%';
+        productivityContainer.style.height = '100%';
+        productivityContainer.style.overflow = 'hidden';
+        
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.display = 'block';
+        iframe.src = 'productivity.html';
+
+        productivityContainer.appendChild(iframe);
+        
+        if (mainContent) {
+            mainContent.appendChild(productivityContainer);
+        }
+    } else {
+        productivityContainer.style.display = 'block';
+    }
+    
+    // Clear selections
+    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+    document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
+    
+    // Update nav tab
+    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+    const analyticsTab = document.querySelector('.nav-tab[data-tab="productivity"]');
     if (analyticsTab) analyticsTab.classList.add('active');
 }

@@ -205,6 +205,14 @@ document.addEventListener('DOMContentLoaded', () => {
             showAnalyticsView();
         });
     }
+
+    const pruducivityButton = document.getElementById("productivity");
+
+    if (pruducivityButton) {
+        pruducivityButton.addEventListener('click', (e) => {
+            showProductivityView();
+        });
+    }
     
     // Initialize the app
     console.log('Steam Time Tracker initialized!');
