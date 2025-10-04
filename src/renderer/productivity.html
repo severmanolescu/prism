@@ -7,21 +7,40 @@
 <body>
 <div class="productivity-container">
   <div class="productivity-header">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-      <h1 style="margin: 0;">Productivity</h1>
-    </div>
 
     <div class="date-range-controls">
       <div class="time-range-selector">
-        <button class="time-range-btn active">Today</button>
-        <button class="time-range-btn">Week</button>
-        <button class="time-range-btn">Month</button>
-        <button class="time-range-btn">Year</button>
+        <button class="time-range-btn active" data-period="today">Today</button>
+        <button class="time-range-btn" data-period="week">Week</button>
+        <button class="time-range-btn" data-period="month">Month</button>
+        <button class="time-range-btn" data-period="year">Year</button>
+        <button class="time-range-btn" data-period="all-time">All Time</button>
+      </div>
+
+      <div class="custom-date-picker">
+        <span>Custom: </span>
+        <input type="date" id="startDate" />
+        <span>to</span>
+        <input type="date" id="endDate" />
       </div>
 
       <div class="date-info">
-        7 days of data
+        1 days of data available
       </div>
+    </div>
+
+    <!-- Comparison Controls -->
+    <div class="comparison-controls">
+      <label class="comparison-toggle">
+        <input type="checkbox" id="enableComparison">
+        <span>Compare with</span>
+      </label>
+      <select class="comparison-select" id="comparisonPeriod" disabled>
+        <option value="yesterday">Yesterday</option>
+        <option value="last-week">Last Week</option>
+        <option value="last-month">Last Month</option>
+        <option value="last-year">Last Year</option>
+      </select>
     </div>
   </div>
 
@@ -103,55 +122,30 @@
     <div class="chart-card">
       <h3 class="section-header">Productivity Trend</h3>
       <div class="productivity-trend-chart">
-        <!-- Dummy chart bars -->
-        <div class="trend-bar" style="height: 60%;">
-          <span class="bar-value">68</span>
-          <span class="bar-label">Mon</span>
-        </div>
-        <div class="trend-bar" style="height: 75%;">
-          <span class="bar-value">75</span>
-          <span class="bar-label">Tue</span>
-        </div>
-        <div class="trend-bar" style="height: 85%;">
-          <span class="bar-value">82</span>
-          <span class="bar-label">Wed</span>
-        </div>
-        <div class="trend-bar" style="height: 55%;">
-          <span class="bar-value">58</span>
-          <span class="bar-label">Thu</span>
-        </div>
-        <div class="trend-bar" style="height: 90%;">
-          <span class="bar-value">85</span>
-          <span class="bar-label">Fri</span>
-        </div>
-        <div class="trend-bar" style="height: 70%;">
-          <span class="bar-value">72</span>
-          <span class="bar-label">Sat</span>
-        </div>
-        <div class="trend-bar" style="height: 80%;">
-          <span class="bar-value">78</span>
-          <span class="bar-label">Sun</span>
-        </div>
+        <canvas id="productivity-trend-canvas" width="800" height="350"></canvas>
       </div>
     </div>
 
     <div class="chart-card">
       <h3 class="section-header">Category Distribution</h3>
-      <div class="pie-chart">
-        <svg viewBox="0 0 200 200" style="width: 100%; max-width: 200px; margin: 0 auto; display: block;">
+      <div class="pie-chart" style="position: relative;">
+        <svg viewBox="-10 -10 220 220" style="width: 100%; max-width: 200px; margin: 0 auto; display: block; overflow: visible;">
           <!-- Development - 40% -->
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#66c0f4" stroke-width="40"
-                  stroke-dasharray="201 502" transform="rotate(-90 100 100)"/>
+          <circle class="pie-slice" data-category="Development" data-percentage="40" cx="100" cy="100" r="80" fill="none" stroke="#66c0f4" stroke-width="40"
+                  stroke-dasharray="201 502" transform="rotate(-90 100 100)" style="cursor: pointer; transition: stroke-width 0.2s;"/>
           <!-- Communication - 25% -->
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#f39c12" stroke-width="40"
-                  stroke-dasharray="126 502" stroke-dashoffset="-201" transform="rotate(-90 100 100)"/>
+          <circle class="pie-slice" data-category="Communication" data-percentage="25" cx="100" cy="100" r="80" fill="none" stroke="#f39c12" stroke-width="40"
+                  stroke-dasharray="126 502" stroke-dashoffset="-201" transform="rotate(-90 100 100)" style="cursor: pointer; transition: stroke-width 0.2s;"/>
           <!-- Entertainment - 20% -->
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#e74c3c" stroke-width="40"
-                  stroke-dasharray="100 502" stroke-dashoffset="-327" transform="rotate(-90 100 100)"/>
+          <circle class="pie-slice" data-category="Entertainment" data-percentage="20" cx="100" cy="100" r="80" fill="none" stroke="#e74c3c" stroke-width="40"
+                  stroke-dasharray="100 502" stroke-dashoffset="-327" transform="rotate(-90 100 100)" style="cursor: pointer; transition: stroke-width 0.2s;"/>
           <!-- Other - 15% -->
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#9b59b6" stroke-width="40"
-                  stroke-dasharray="75 502" stroke-dashoffset="-427" transform="rotate(-90 100 100)"/>
+          <circle class="pie-slice" data-category="Other" data-percentage="15" cx="100" cy="100" r="80" fill="none" stroke="#9b59b6" stroke-width="40"
+                  stroke-dasharray="75 502" stroke-dashoffset="-427" transform="rotate(-90 100 100)" style="cursor: pointer; transition: stroke-width 0.2s;"/>
         </svg>
+        <div id="pie-tooltip" class="pie-tooltip" style="display: none;">
+          <div class="pie-tooltip-text"></div>
+        </div>
         <div class="pie-legend">
           <div class="legend-item">
             <span class="legend-color" style="background: #66c0f4;"></span>
@@ -174,8 +168,82 @@
     </div>
   </div>
 
+  <!-- Productivity Heatmap -->
+  <h3 class="section-header">
+    Productivity Heatmap
+    <span class="section-subtitle">Hour-by-hour productivity breakdown</span>
+  </h3>
+  <div class="productivity-heatmap-container">
+    <div class="heatmap-grid" id="productivityHeatmap">
+      <!-- Time labels (hours) -->
+      <div class="heatmap-time-labels">
+        <div class="time-label">12 AM</div>
+        <div class="time-label">3 AM</div>
+        <div class="time-label">6 AM</div>
+        <div class="time-label">9 AM</div>
+        <div class="time-label">12 PM</div>
+        <div class="time-label">3 PM</div>
+        <div class="time-label">6 PM</div>
+        <div class="time-label">9 PM</div>
+      </div>
+
+      <!-- Heatmap rows (days) -->
+      <div class="heatmap-rows">
+        <!-- Monday -->
+        <div class="heatmap-row">
+          <div class="day-label">Mon</div>
+          <div class="heatmap-cells">
+            <div class="heatmap-cell" data-productivity="neutral" title="12 AM - 15 min"></div>
+            <div class="heatmap-cell" data-productivity="neutral" title="1 AM - 0 min"></div>
+            <div class="heatmap-cell" data-productivity="neutral" title="2 AM - 0 min"></div>
+            <div class="heatmap-cell" data-productivity="neutral" title="3 AM - 0 min"></div>
+            <div class="heatmap-cell" data-productivity="neutral" title="4 AM - 0 min"></div>
+            <div class="heatmap-cell" data-productivity="neutral" title="5 AM - 0 min"></div>
+            <div class="heatmap-cell" data-productivity="neutral" title="6 AM - 0 min"></div>
+            <div class="heatmap-cell" data-productivity="neutral" title="7 AM - 0 min"></div>
+            <div class="heatmap-cell" data-productivity="neutral" title="8 AM - 30 min"></div>
+            <div class="heatmap-cell" data-productivity="productive" title="9 AM - 2h 15m"></div>
+            <div class="heatmap-cell" data-productivity="productive" title="10 AM - 2h 30m"></div>
+            <div class="heatmap-cell" data-productivity="productive" title="11 AM - 2h 45m"></div>
+            <div class="heatmap-cell" data-productivity="neutral" title="12 PM - 45 min"></div>
+            <div class="heatmap-cell" data-productivity="productive" title="1 PM - 2h"></div>
+            <div class="heatmap-cell" data-productivity="productive" title="2 PM - 3h"></div>
+            <div class="heatmap-cell" data-productivity="productive" title="3 PM - 2h 45m"></div>
+            <div class="heatmap-cell" data-productivity="productive" title="4 PM - 2h 30m"></div>
+            <div class="heatmap-cell" data-productivity="neutral" title="5 PM - 1h"></div>
+            <div class="heatmap-cell" data-productivity="neutral" title="6 PM - 30 min"></div>
+            <div class="heatmap-cell" data-productivity="unproductive" title="7 PM - 1h 30m"></div>
+            <div class="heatmap-cell" data-productivity="unproductive" title="8 PM - 2h"></div>
+            <div class="heatmap-cell" data-productivity="unproductive" title="9 PM - 1h 45m"></div>
+            <div class="heatmap-cell" data-productivity="neutral" title="10 PM - 45 min"></div>
+            <div class="heatmap-cell" data-productivity="neutral" title="11 PM - 30 min"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="heatmap-legend">
+        <div class="legend-item">
+          <div class="legend-box productive"></div>
+          <span>Productive</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box neutral"></div>
+          <span>Neutral</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box unproductive"></div>
+          <span>Unproductive</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Goals & Targets -->
-  <h3 class="section-header">Goals & Targets</h3>
+  <h3 class="section-header">
+    Goals & Targets
+    <button class="section-action-btn" id="manageGoalsBtn">⚙️ Manage Goals</button>
+  </h3>
   <div class="goals-grid">
     <div class="goal-card">
       <div class="goal-header">
@@ -354,7 +422,68 @@
   </div>
 
 </div>
+
+<!-- Goals Management Modal -->
+<div class="goals-modal" id="goalsModal" style="display: none;">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Manage Goals</h2>
+      <button class="modal-close" id="closeGoalsModal">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="goal-form">
+        <h3>Daily Focus Time Goal</h3>
+        <div class="form-group">
+          <label>Target Hours</label>
+          <input type="number" id="focusTimeGoal" min="0" max="24" value="5" step="0.5">
+          <span class="input-suffix">hours</span>
+        </div>
+
+        <h3>App Time Limits</h3>
+        <div class="form-group">
+          <label>Social Media Limit</label>
+          <input type="number" id="socialMediaLimit" min="0" max="12" value="2" step="0.5">
+          <span class="input-suffix">hours</span>
+        </div>
+
+        <div class="form-group">
+          <label>Entertainment Limit</label>
+          <input type="number" id="entertainmentLimit" min="0" max="12" value="3" step="0.5">
+          <span class="input-suffix">hours</span>
+        </div>
+
+        <h3>Productivity Goals</h3>
+        <div class="form-group">
+          <label>Minimum Productivity Score</label>
+          <input type="number" id="productivityScoreGoal" min="0" max="100" value="70" step="5">
+          <span class="input-suffix">/ 100</span>
+        </div>
+
+        <div class="form-group">
+          <label>Deep Work Sessions per Day</label>
+          <input type="number" id="deepWorkGoal" min="0" max="20" value="3">
+          <span class="input-suffix">sessions</span>
+        </div>
+
+        <div class="form-group">
+          <label>Learning Time Goal</label>
+          <input type="number" id="learningTimeGoal" min="0" max="12" value="2" step="0.5">
+          <span class="input-suffix">hours</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="modal-btn secondary" id="resetGoals">Reset to Defaults</button>
+      <button class="modal-btn primary" id="saveGoals">Save Goals</button>
+    </div>
+  </div>
+</div>
+
 <script src="./js/utils.js"></script>
 <script src="./js/productivity/productivity.js"></script>
+<script src="./js/productivity/productivity_trend_usage_chart.js"></script>
 </body>
 </html>

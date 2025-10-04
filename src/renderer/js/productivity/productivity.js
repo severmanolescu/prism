@@ -36,19 +36,8 @@ function getDateRange(period) {
   return { startDate, endDate };
 }
 
-// Format time helper
-function formatTime(ms) {
-  const hours = Math.floor(ms / (1000 * 60 * 60));
-  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-  return `${minutes}m`;
-}
-
 // Load productivity data
-async function loadProductivityData(period = 'week') {
+async function loadProductivityData(period, customStartDate, customEndDate) {
   const { startDate, endDate } = getDateRange(period);
   currentDateRange = { startDate, endDate, period };
 
@@ -109,36 +98,6 @@ function updateProductivityUI(data) {
   updateTopApps(data.topProductive, data.topUnproductive);
 }
 
-// Update trend chart
-function updateTrendChart(dailyScores) {
-  const chartContainer = document.querySelector('.productivity-trend-chart');
-  if (!chartContainer) return;
-
-  if (!dailyScores || dailyScores.length === 0) {
-    chartContainer.innerHTML = '<p style="text-align: center; color: #8f98a0;">No data available</p>';
-    return;
-  }
-
-  // Take last 7 days
-  const last7Days = dailyScores.slice(-7);
-  const maxScore = Math.max(...last7Days.map(d => d.score), 1);
-
-  chartContainer.innerHTML = '';
-
-  last7Days.forEach(day => {
-    const date = new Date(day.date);
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-    const height = (day.score / maxScore) * 100;
-
-    chartContainer.innerHTML += `
-      <div class="trend-bar" style="height: ${height}%;">
-        <span class="bar-value">${day.score}</span>
-        <span class="bar-label">${dayName}</span>
-      </div>
-    `;
-  });
-}
-
 // Update top apps lists
 function updateTopApps(topProductive, topUnproductive) {
   // Update productive apps
@@ -189,9 +148,11 @@ function updateTopApps(topProductive, topUnproductive) {
 // Setup date range controls
 function setupDateRangeControls() {
   const tabs = document.querySelectorAll('.time-range-btn');
+  const dateInputs = document.querySelectorAll('.custom-date-picker input[type="date"]');
 
   tabs.forEach((tab, index) => {
-    const periods = ['today', 'week', 'month', 'year'];
+    // Set data-period based on button text
+    const periods = ['today', 'week', 'month', 'year', 'alltime'];
     tab.dataset.period = periods[index];
 
     tab.addEventListener('click', () => {
@@ -199,9 +160,65 @@ function setupDateRangeControls() {
       tabs.forEach(t => t.classList.remove('active'));
       // Add active class to clicked tab
       tab.classList.add('active');
+      // Update the analytics view based on selected period
+      currentPeriod = tab.dataset.period;
 
-      // Load data for the selected period
-      loadProductivityData(tab.dataset.period);
+      // Update custom date inputs based on selected period
+      updateCustomDatesForPeriod(tab.dataset.period, dateInputs);
+
+      loadProductivityData(currentPeriod)
+    });
+  });
+
+  // Setup custom date picker
+  dateInputs.forEach(input => {
+    input.addEventListener('change', () => {
+      // When custom dates are changed, deactivate all buttons
+      tabs.forEach(t => t.classList.remove('active'));
+
+      // Load data for custom range
+      const startDate = dateInputs[0].value;
+      const endDate = dateInputs[1].value;
+      if (startDate && endDate) {
+        currentPeriod = 'custom';
+        loadAnalyticsData('custom', startDate, endDate);
+      }
+    });
+  });
+
+  // Initialize with default period (today)
+  const activeTab = document.querySelector('.time-range-btn.active');
+  if (activeTab && activeTab.dataset.period) {
+    updateCustomDatesForPeriod(activeTab.dataset.period, dateInputs);
+  }
+}
+
+// Setup pie chart tooltips
+function setupPieChartTooltips() {
+  const pieSlices = document.querySelectorAll('.pie-slice');
+  const tooltip = document.getElementById('pie-tooltip');
+  const tooltipText = tooltip.querySelector('.pie-tooltip-text');
+  const pieChart = document.querySelector('.pie-chart');
+
+  pieSlices.forEach(slice => {
+    slice.addEventListener('mouseenter', (e) => {
+      const category = slice.dataset.category;
+      const percentage = slice.dataset.percentage;
+      tooltipText.textContent = `${category}: ${percentage}%`;
+      tooltip.style.display = 'block';
+    });
+
+    slice.addEventListener('mousemove', (e) => {
+      const rect = pieChart.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = (y - 40) + 'px';
+    });
+
+    slice.addEventListener('mouseleave', () => {
+      tooltip.style.display = 'none';
     });
   });
 }
@@ -209,9 +226,21 @@ function setupDateRangeControls() {
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   setupDateRangeControls();
+  setupPieChartTooltips();
 
   // Load default data (week view)
-  loadProductivityData('week');
+  // loadProductivityData('week');
+
+  // Initialize chart with dummy data for now
+  updateTrendChart([
+    { date: '2024-01-01', score: 68 },
+    { date: '2024-01-02', score: 75 },
+    { date: '2024-01-03', score: 82 },
+    { date: '2024-01-04', score: 58 },
+    { date: '2024-01-05', score: 85 },
+    { date: '2024-01-06', score: 72 },
+    { date: '2024-01-07', score: 78 }
+  ]);
 
   // Add smooth scroll behavior
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {

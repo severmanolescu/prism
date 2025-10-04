@@ -178,3 +178,39 @@ function formatDateForInput(date) {
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
+// Update custom date inputs based on the selected period
+function updateCustomDatesForPeriod(period, dateInputs) {
+  const today = new Date();
+  let startDate, endDate;
+
+  switch (period) {
+    case 'today':
+      startDate = endDate = today;
+      break;
+    case 'week':
+      startDate = new Date(today);
+      startDate.setDate(today.getDate() - 7);
+      endDate = today;
+      break;
+    case 'month':
+      startDate = new Date(today);
+      startDate.setMonth(today.getMonth() - 1);
+      endDate = today;
+      break;
+    case 'year':
+      startDate = new Date(today);
+      startDate.setFullYear(today.getFullYear() - 1);
+      endDate = today;
+      break;
+    case 'alltime':
+      // Set to earliest possible date in your app
+      startDate = new Date(2020, 0, 1); // Jan 1, 2020
+      endDate = today;
+      break;
+  }
+
+  // Format dates as YYYY-MM-DD for input fields
+  if (dateInputs[0]) dateInputs[0].value = formatDateForInput(startDate);
+  if (dateInputs[1]) dateInputs[1].value = formatDateForInput(endDate);
+}
