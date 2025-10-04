@@ -85,8 +85,7 @@ async function displayAllApps(apps) {
         }
         
         // Show apps in a regular grid without individual category headers
-        apps.forEach((app, index) => {
-            console.log(`Creating app element ${index + 1}:`, app.name);
+        apps.forEach((app) => {
             const appItem = createAppElement(app, bgColor);
             appsContainer.appendChild(appItem);
         });

@@ -198,14 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function showHiddenView() {
-        loadAppsByCategory("Hidden", true);
-        updateLibraryTitle('Hidden');
-        
-        // Clear navigation selection
-        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-    }
-
     const analyticsButton = document.getElementById("analytics");
 
     if (analyticsButton) {
