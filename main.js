@@ -26,7 +26,7 @@ let mainWindow;
 
 const { initDataStorage } = dataStorage;
 const { startTrackingSystem, stopTrackingSystem } = appTracking;
-const { initDatabase, checkMigration, getDb } = require('./src/main/services/database');
+const { initDatabase, getDb } = require('./src/main/services/database');
 
 // App lifecycle
 app.whenReady().then(async () => {
@@ -54,9 +54,7 @@ app.whenReady().then(async () => {
     console.log('Initializing database...');
     await initDatabase();
     console.log('Database initialized');
-    
-    await checkMigration();
-    console.log('Migration checked');
+
 
     // Verify database is accessible
     const db = getDb();

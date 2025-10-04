@@ -410,6 +410,7 @@ class ContextMenu {
         try {
             const result = await window.electronAPI.launchApp(appId);
             if (result.success) {
+                console.log('App launched successfully');
             } else {
                 console.error('Failed to launch app:', result.error);
             }

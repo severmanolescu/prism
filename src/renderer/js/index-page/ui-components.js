@@ -207,6 +207,48 @@ function createCategoryCard(categoryName, apps, color = '#4a90e2') {
     return card;
 }
 
+function showHiddenView() {
+    // Show Hidden Apps
+    const recentSection = document.querySelector('.recent-section');
+    const allAppsSection = document.querySelector('.all-apps-section');
+    const sidebar = document.querySelector('.sidebar');
+
+    if (recentSection) recentSection.style.display = 'block';
+    if (allAppsSection) allAppsSection.style.display = 'block';
+    if (sidebar) sidebar.style.display = 'flex';
+
+    // Hide other views
+    const categoryOverview = document.querySelector('.category-overview');
+    const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
+    const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
+
+    if (categoryOverview) categoryOverview.style.display = 'none';
+    if (analyticsContainer) analyticsContainer.style.display = 'none';
+    if (detailsContainer) detailsContainer.style.display = 'none';
+
+    // Reset view state
+    toggleView('grid');
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
+
+    // Load data
+    currentCategory = 'Hidden';
+    loadAppsByCategory("Hidden", true);
+    updateLibraryTitle('Hidden');
+
+    // Clear selections
+    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+    document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
+
+    // Activate hidden submenu
+    const homeSubmenu = document.querySelector('.library-submenu-item[data-submenu="hidden"]');
+    if (homeSubmenu) homeSubmenu.classList.add('active');
+
+    // Update nav tab
+    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+    const libraryTab = document.querySelector('.nav-tab[data-tab="library"]');
+    if (libraryTab) libraryTab.classList.add('active');
+}
+
 function showHomeView() {
     // Show home content
     const recentSection = document.querySelector('.recent-section');

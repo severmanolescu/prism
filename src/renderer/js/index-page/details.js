@@ -147,9 +147,9 @@ window.addEventListener('message', async (event) => {
     } else if (event.data.type === 'SET_PRODUCTIVITY_LEVEL') {
         // Handle productivity level update from iframe
         try {
-            const result = await window.electronAPI.setAppProductivityOverride(
-                event.data.appId,
-                event.data.level === 'inherit' ? null : event.data.level
+                await window.electronAPI.setAppProductivityOverride(
+                    event.data.appId,
+                    event.data.level === 'inherit' ? null : event.data.level
             );
         } catch (error) {
             console.error('Parent: Error setting productivity level:', error);
