@@ -1,6 +1,19 @@
 // Productivity page functionality
 
 let currentDateRange = null;
+let currentPeriod = 'today';
+
+// Listen for data from parent window
+window.addEventListener('message', (event) => {
+  // Verify message comes from parent window
+  if (event.source !== window.parent) {
+    return;
+  }
+  if (event.data.type === 'PRODUCTIVITY_DATA_RESPONSE') {
+    // Received productivity data from parent window
+    updateProductivityUI(event.data.data);
+  }
+});
 
 // Calculate date ranges for different periods
 function getDateRange(period) {
@@ -9,52 +22,55 @@ function getDateRange(period) {
 
   switch (period) {
     case 'today':
-      startDate = endDate = now.toISOString().split('T')[0];
+      startDate = endDate = formatDateForInput(now);
       break;
     case 'week':
       const weekAgo = new Date(now);
       weekAgo.setDate(now.getDate() - 6);
-      startDate = weekAgo.toISOString().split('T')[0];
-      endDate = now.toISOString().split('T')[0];
+      startDate = formatDateForInput(weekAgo);
+      endDate = formatDateForInput(now);
       break;
     case 'month':
       const monthAgo = new Date(now);
       monthAgo.setMonth(now.getMonth() - 1);
-      startDate = monthAgo.toISOString().split('T')[0];
-      endDate = now.toISOString().split('T')[0];
+      startDate = formatDateForInput(monthAgo);
+      endDate = formatDateForInput(now);
       break;
     case 'year':
       const yearAgo = new Date(now);
       yearAgo.setFullYear(now.getFullYear() - 1);
-      startDate = yearAgo.toISOString().split('T')[0];
-      endDate = now.toISOString().split('T')[0];
+      startDate = formatDateForInput(yearAgo);
+      endDate = formatDateForInput(now);
       break;
     default:
-      startDate = endDate = now.toISOString().split('T')[0];
+      startDate = endDate = formatDateForInput(now);
   }
 
   return { startDate, endDate };
 }
 
-// Format time helper
-function formatTime(ms) {
-  const hours = Math.floor(ms / (1000 * 60 * 60));
-  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-  return `${minutes}m`;
-}
-
 // Load productivity data
-async function loadProductivityData(period = 'week') {
-  const { startDate, endDate } = getDateRange(period);
-  currentDateRange = { startDate, endDate, period };
-
+function loadProductivityData(period, customStartDate, customEndDate) {
   try {
-    const data = await window.electronAPI.invoke('get-productivity-stats', startDate, endDate);
-    updateProductivityUI(data);
+    let startDate, endDate;
+
+    if (period === 'custom' && customStartDate && customEndDate) {
+      startDate = customStartDate;
+      endDate = customEndDate;
+    } else {
+      const range = getDateRange(period);
+      startDate = range.startDate;
+      endDate = range.endDate;
+    }
+
+    currentDateRange = { startDate, endDate, period };
+
+    // Request data from parent window (main renderer process)
+    window.parent.postMessage({
+      type: 'REQUEST_PRODUCTIVITY_DATA',
+      startDate: startDate,
+      endDate: endDate
+    }, '*');
   } catch (error) {
     console.error('Error loading productivity data:', error);
   }
@@ -99,44 +115,81 @@ function updateProductivityUI(data) {
 
   // Update key metrics
   const statValues = document.querySelectorAll('.stat-value');
+  const statSubtitles = document.querySelectorAll('.stat-subtitle');
+
   statValues[0].textContent = formatTime(data.breakdown.productive.time); // Focus Time
   statValues[1].textContent = formatTime(data.breakdown.unproductive.time); // Distraction Time
+
+  // Calculate total time and sessions from all productivity levels
+  const totalTime = data.breakdown.productive.time + data.breakdown.neutral.time + data.breakdown.unproductive.time;
+  const totalSessions = data.breakdown.productive.sessions + data.breakdown.neutral.sessions + data.breakdown.unproductive.sessions;
+
+  const totalHours = totalTime / (1000 * 60 * 60);
+  const switchesPerHour = totalHours > 0 ? Math.round(totalSessions / totalHours) : 0;
+
+  statValues[2].textContent = switchesPerHour; // Context Switches
+
+  // Update deep work sessions
+  if (data.deepWorkSessions && statValues[3]) {
+    statValues[3].textContent = data.deepWorkSessions.count;
+    if (statSubtitles[3] && data.deepWorkSessions.count > 0) {
+      const avgMinutes = Math.round(data.deepWorkSessions.avgDuration / (1000 * 60));
+      statSubtitles[3].textContent = `Avg. ${avgMinutes} min per session`;
+    }
+  }
+
+  // Update peak productivity hour
+  if (data.peakProductivityHour && statValues[4]) {
+    const hour = data.peakProductivityHour.hour;
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    statValues[4].textContent = `${displayHour} ${period}`;
+    if (statSubtitles[4]) {
+      statSubtitles[4].textContent = `${data.peakProductivityHour.percentage}% productive`;
+    }
+  }
+
+  // Update most productive day
+  if (data.dailyScores && data.dailyScores.length > 0 && statValues[5]) {
+    const mostProductiveDay = data.dailyScores.reduce((max, day) =>
+      day.score > max.score ? day : max
+    );
+    const date = new Date(mostProductiveDay.date);
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    statValues[5].textContent = dayName;
+    if (statSubtitles[5]) {
+      statSubtitles[5].textContent = `Score: ${mostProductiveDay.score}`;
+    }
+  }
+
+  // Update date info
+  if (data.dailyScores) {
+    const dateInfo = document.querySelector('.date-info');
+    if (dateInfo) {
+      const dayCount = data.dailyScores.length;
+      dateInfo.textContent = `${dayCount} ${dayCount === 1 ? 'day' : 'days'} of data available`;
+    }
+  }
 
   // Update productivity trend chart
   updateTrendChart(data.dailyScores);
 
   // Update top apps lists
   updateTopApps(data.topProductive, data.topUnproductive);
-}
 
-// Update trend chart
-function updateTrendChart(dailyScores) {
-  const chartContainer = document.querySelector('.productivity-trend-chart');
-  if (!chartContainer) return;
+  // Update category pie chart
+  updateCategoryPieChart(data.categoryBreakdown, data.totalTime);
 
-  if (!dailyScores || dailyScores.length === 0) {
-    chartContainer.innerHTML = '<p style="text-align: center; color: #8f98a0;">No data available</p>';
-    return;
-  }
+  // Update insights
+  updateInsights(data);
 
-  // Take last 7 days
-  const last7Days = dailyScores.slice(-7);
-  const maxScore = Math.max(...last7Days.map(d => d.score), 1);
+  // Update heatmap
+  updateProductivityHeatmap(data.heatmapData);
 
-  chartContainer.innerHTML = '';
-
-  last7Days.forEach(day => {
-    const date = new Date(day.date);
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-    const height = (day.score / maxScore) * 100;
-
-    chartContainer.innerHTML += `
-      <div class="trend-bar" style="height: ${height}%;">
-        <span class="bar-value">${day.score}</span>
-        <span class="bar-label">${dayName}</span>
-      </div>
-    `;
-  });
+  // Update new charts
+  updateSessionLengthChart(data.sessionLengthDistribution);
+  updateAppSwitchingChart(data.appSwitchingFrequency);
+  updateProductivityByHourChart(data.productivityByHour);
 }
 
 // Update top apps lists
@@ -189,9 +242,11 @@ function updateTopApps(topProductive, topUnproductive) {
 // Setup date range controls
 function setupDateRangeControls() {
   const tabs = document.querySelectorAll('.time-range-btn');
+  const dateInputs = document.querySelectorAll('.custom-date-picker input[type="date"]');
 
   tabs.forEach((tab, index) => {
-    const periods = ['today', 'week', 'month', 'year'];
+    // Set data-period based on button text
+    const periods = ['today', 'week', 'month', 'year', 'alltime'];
     tab.dataset.period = periods[index];
 
     tab.addEventListener('click', () => {
@@ -199,19 +254,46 @@ function setupDateRangeControls() {
       tabs.forEach(t => t.classList.remove('active'));
       // Add active class to clicked tab
       tab.classList.add('active');
+      // Update the analytics view based on selected period
+      currentPeriod = tab.dataset.period;
 
-      // Load data for the selected period
-      loadProductivityData(tab.dataset.period);
+      // Update custom date inputs based on selected period
+      updateCustomDatesForPeriod(tab.dataset.period, dateInputs);
+
+      loadProductivityData(currentPeriod)
     });
   });
+
+  // Setup custom date picker
+  dateInputs.forEach(input => {
+    input.addEventListener('change', () => {
+      // When custom dates are changed, deactivate all buttons
+      tabs.forEach(t => t.classList.remove('active'));
+
+      // Load data for custom range
+      const startDate = dateInputs[0].value;
+      const endDate = dateInputs[1].value;
+      if (startDate && endDate) {
+        currentPeriod = 'custom';
+        loadProductivityData('custom', startDate, endDate);
+      }
+    });
+  });
+
+  // Initialize with default period (today)
+  const activeTab = document.querySelector('.time-range-btn.active');
+  if (activeTab && activeTab.dataset.period) {
+    updateCustomDatesForPeriod(activeTab.dataset.period, dateInputs);
+  }
 }
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   setupDateRangeControls();
+  setupPieChartTooltips();
 
-  // Load default data (week view)
-  loadProductivityData('week');
+  // Load default data (today)
+  loadProductivityData(currentPeriod);
 
   // Add smooth scroll behavior
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {

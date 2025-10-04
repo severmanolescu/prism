@@ -31,7 +31,7 @@ Just like a prism breaks white light into a beautiful spectrum of colors, **Pris
 1. Clone the repository
 
 ```bash
-git clone https://github.com/severmanolescu/app-time-tracker
+git clone https://github.com/severmanolescu/prism.git
 cd prism
 ```
 2. Install dependencies
@@ -61,13 +61,13 @@ prism/
 │       │   ├── analytics/       # Analytics page styles
 │       │   ├── app-details/     # App details page styles
 │       │   └── index-page/      # Main page styles
+│       │   └── productivity/    # Productivity page styles
 │       └── js/                  # Frontend JavaScript modules
 │           ├── analytics/       # Analytics page logic
 │           ├── app-details/     # App details page logic
 │           └── index-page/      # Main page logic
-├── data/                        # User data storage (JSON & SQLite)
+│           └── productivity/    # Productivity page Logic
 ├── assets/                      # Images and icons
-├── icons/                       # App icon resources
 └── main.js                      # Main Electron entry point
 ```
 

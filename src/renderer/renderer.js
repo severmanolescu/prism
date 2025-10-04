@@ -205,7 +205,15 @@ document.addEventListener('DOMContentLoaded', () => {
             showAnalyticsView();
         });
     }
-    
+
+    const pruducivityButton = document.getElementById("productivity");
+
+    if (pruducivityButton) {
+        pruducivityButton.addEventListener('click', (e) => {
+            showProductivityView();
+        });
+    }
+
     // Initialize the app
     console.log('Steam Time Tracker initialized!');
     displayCurrentTime();
@@ -217,15 +225,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.collectionContextMenu = new CollectionContextMenu();
 
-    // Handle analytics data requests from iframe
+    // Handle analytics and productivity data requests from iframes
     window.addEventListener('message', async (event) => {
-        // Verify message comes from our analytics iframe
+        // Verify message comes from our analytics or productivity iframe
         const analyticsIframe = document.querySelector('.analytics-iframe-wrapper iframe');
-        if (!analyticsIframe || event.source !== analyticsIframe.contentWindow) {
+        const productivityIframe = document.querySelector('.productivity-iframe-wrapper iframe');
+
+        const isAnalyticsSource = analyticsIframe && event.source === analyticsIframe.contentWindow;
+        const isProductivitySource = productivityIframe && event.source === productivityIframe.contentWindow;
+
+        if (!isAnalyticsSource && !isProductivitySource) {
             return;
         }
 
-        if (event.data.type === 'REQUEST_ANALYTICS_DATA') {
+        if (event.data.type === 'REQUEST_PRODUCTIVITY_DATA') {
+            const { startDate, endDate } = event.data;
+
+            try {
+                // Fetch productivity data (placeholder - you'll need to implement this)
+                const data = await window.electronAPI.getProductivityStats(startDate, endDate);
+
+                // Send response back to productivity iframe
+                if (productivityIframe && productivityIframe.contentWindow) {
+                    productivityIframe.contentWindow.postMessage({
+                        type: 'PRODUCTIVITY_DATA_RESPONSE',
+                        data: data
+                    }, '*');
+                }
+            } catch (error) {
+                console.error('Error fetching productivity data:', error);
+            }
+        } else if (event.data.type === 'REQUEST_ANALYTICS_DATA') {
             const { startDate, endDate } = event.data;
 
             try {

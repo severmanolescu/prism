@@ -1,0 +1,115 @@
+/* Productivity Heatmap */
+.productivity-heatmap-container {
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.heatmap-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.heatmap-time-labels {
+    display: grid;
+    grid-template-columns: 60px repeat(8, 1fr);
+    gap: 2px;
+    margin-bottom: 8px;
+    padding-left: 60px;
+}
+
+.time-label {
+    font-size: 10px;
+    color: #8f98a0;
+    text-align: center;
+}
+
+.heatmap-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.heatmap-row {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 8px;
+    align-items: center;
+}
+
+.day-label {
+    font-size: 11px;
+    color: #c7d5e0;
+    text-align: right;
+    padding-right: 8px;
+}
+
+.heatmap-cells {
+    display: grid;
+    grid-template-columns: repeat(24, 1fr);
+    gap: 2px;
+}
+
+.heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.heatmap-cell[data-productivity="productive"] {
+    background: #86b817;
+}
+
+.heatmap-cell[data-productivity="neutral"] {
+    background: #f39c12;
+}
+
+.heatmap-cell[data-productivity="unproductive"] {
+    background: #e74c3c;
+}
+
+.heatmap-cell:hover {
+    transform: scale(1.2);
+    z-index: 10;
+}
+
+.heatmap-legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.heatmap-legend .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-box {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+}
+
+.legend-box.productive {
+    background: #86b817;
+}
+
+.legend-box.neutral {
+    background: #f39c12;
+}
+
+.legend-box.unproductive {
+    background: #e74c3c;
+}
+
+.heatmap-legend span {
+    font-size: 11px;
+    color: #c7d5e0;
+}

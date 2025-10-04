@@ -41,42 +41,6 @@ function setupDateRangeControls() {
   });
 }
 
-// Update custom date inputs based on the selected period
-function updateCustomDatesForPeriod(period, dateInputs) {
-  const today = new Date();
-  let startDate, endDate;
-
-  switch(period) {
-    case 'today':
-      startDate = endDate = today;
-      break;
-    case 'week':
-      startDate = new Date(today);
-      startDate.setDate(today.getDate() - 7);
-      endDate = today;
-      break;
-    case 'month':
-      startDate = new Date(today);
-      startDate.setMonth(today.getMonth() - 1);
-      endDate = today;
-      break;
-    case 'year':
-      startDate = new Date(today);
-      startDate.setFullYear(today.getFullYear() - 1);
-      endDate = today;
-      break;
-    case 'alltime':
-      // Set to earliest possible date in your app
-      startDate = new Date(2020, 0, 1); // Jan 1, 2020
-      endDate = today;
-      break;
-  }
-
-  // Format dates as YYYY-MM-DD for input fields
-  if (dateInputs[0]) dateInputs[0].value = formatDateForInput(startDate);
-  if (dateInputs[1]) dateInputs[1].value = formatDateForInput(endDate);
-}
-
 // Listen for data from parent window
 window.addEventListener('message', (event) => {
   // Verify message comes from parent window
@@ -306,7 +270,7 @@ function updateCategoryBreakdown(categoryBreakdown) {
     if (!category_grid) return;
 
     // Update section header with category count
-    const categoryHeader = document.querySelectorAll('.section-header')[1]; // Second section header
+    const categoryHeader = document.querySelectorAll('.section-header')[4]; // Second section header
     if (categoryHeader && categoryBreakdown) {
         categoryHeader.textContent = `Category Breakdown (${categoryBreakdown.length || 0})`;
     }
