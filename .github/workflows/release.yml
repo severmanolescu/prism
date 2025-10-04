@@ -19,9 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest]
-        # Can add macOS and Linux later if needed
-        # os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest]
 
     steps:
     - name: Checkout code
@@ -36,8 +34,7 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Build Windows installer
-      if: matrix.os == 'windows-latest'
+    - name: Build application
       run: npm run build
       env:
         CI: true
@@ -53,6 +50,16 @@ jobs:
           dist/*.zip
         retention-days: 30
 
+    - name: Upload Linux artifacts
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: prism-linux-installer
+        path: |
+          dist/*.AppImage
+          dist/*.deb
+        retention-days: 30
+
     # Automatically attach to release if triggered by release event
     - name: Upload to GitHub Release
       if: github.event_name == 'release'
@@ -61,5 +68,7 @@ jobs:
         files: |
           dist/*.exe
           dist/*.zip
+          dist/*.AppImage
+          dist/*.deb
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
