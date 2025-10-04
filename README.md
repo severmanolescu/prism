@@ -61,13 +61,13 @@ prism/
 │       │   ├── analytics/       # Analytics page styles
 │       │   ├── app-details/     # App details page styles
 │       │   └── index-page/      # Main page styles
+│       │   └── index-page/      # Productivity page styles
 │       └── js/                  # Frontend JavaScript modules
 │           ├── analytics/       # Analytics page logic
 │           ├── app-details/     # App details page logic
 │           └── index-page/      # Main page logic
-├── data/                        # User data storage (JSON & SQLite)
+│           └── productivity/    # Productivity page Logic
 ├── assets/                      # Images and icons
-├── icons/                       # App icon resources
 └── main.js                      # Main Electron entry point
 ```
 
