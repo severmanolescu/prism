@@ -1,6 +1,7 @@
 // Productivity page functionality
 
 let currentDateRange = null;
+let currentPeriod = 'today';
 
 // Calculate date ranges for different periods
 function getDateRange(period) {
