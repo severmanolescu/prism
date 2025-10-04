@@ -61,7 +61,7 @@ prism/
 │       │   ├── analytics/       # Analytics page styles
 │       │   ├── app-details/     # App details page styles
 │       │   └── index-page/      # Main page styles
-│       │   └── index-page/      # Productivity page styles
+│       │   └── productivity/    # Productivity page styles
 │       └── js/                  # Frontend JavaScript modules
 │           ├── analytics/       # Analytics page logic
 │           ├── app-details/     # App details page logic
