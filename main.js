@@ -3,6 +3,24 @@ const path = require('path');
 const fs = require('fs');
 const AutoLaunch = require('auto-launch');
 
+// Single instance lock - prevent multiple instances
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  // Another instance is already running, quit this one
+  app.quit();
+} else {
+  // This is the first instance
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, focus our window instead
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+      mainWindow.show();
+    }
+  });
+}
+
 fs.appendFileSync('log.txt', 'App started\n');
 
 const dataStorage = require('./src/main/services/data-storage');
