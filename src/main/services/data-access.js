@@ -280,6 +280,7 @@ function getAnalyticsData(startDate, endDate) {
     WHERE s.start_time >= ? AND s.start_time <= ?
       AND s.end_time IS NOT NULL
       AND s.duration > 0
+      AND a.hidden = 0
     GROUP BY a.id
     ORDER BY total_time DESC
   `).all([startTime, endTime]);
@@ -399,6 +400,7 @@ function getHourlyAppBreakdown(startDate, endDate) {
     WHERE s.start_time >= ? AND s.start_time <= ?
       AND s.end_time IS NOT NULL
       AND s.duration > 0
+      AND a.hidden = 0
     GROUP BY a.id, hour
     ORDER BY a.id, hour ASC
   `).all([startTime, endTime]);

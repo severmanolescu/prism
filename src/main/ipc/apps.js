@@ -96,7 +96,6 @@ function initializeAppHandlers() {
         return [];
       }
       const apps = await getHiddenApps();
-      console.log(`Found ${apps.length} hidden apps`);
       
       return apps.map(mapAppFromDb);
     } catch (error) {
