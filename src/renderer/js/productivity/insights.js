@@ -8,9 +8,6 @@ function updateInsights(data) {
         const hour = data.peakProductivityHour.hour;
         const period = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-        const endHour = hour + 3;
-        const endPeriod = endHour >= 12 ? 'PM' : 'AM';
-        const displayEndHour = endHour === 0 ? 12 : endHour > 12 ? endHour - 12 : endHour;
 
         insights.push({
             icon: '💡',
@@ -135,7 +132,6 @@ function updateInsights(data) {
 
     // Insight 8: Productivity Balance
     const productivePercentage = data.breakdown.productive.percentage;
-    const unproductivePercentage = data.breakdown.unproductive.percentage;
 
     if (productivePercentage > 60) {
         insights.push({

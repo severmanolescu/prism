@@ -67,9 +67,6 @@ function updateProductivityByHourChart(hourlyData) {
                 bars.push({ x, y: currentY, width: barWidth, hour, data });
             }
 
-            // Apply brightness if hovered
-            const brighten = isHovered ? 1.2 : 1;
-
             // Draw unproductive (bottom)
             if (data.unproductive > 0) {
                 const barHeight = (data.unproductive / maxTime) * chartHeight;
