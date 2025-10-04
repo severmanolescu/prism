@@ -22,28 +22,28 @@ function getDateRange(period) {
 
   switch (period) {
     case 'today':
-      startDate = endDate = now.toISOString().split('T')[0];
+      startDate = endDate = formatDateForInput(now);
       break;
     case 'week':
       const weekAgo = new Date(now);
       weekAgo.setDate(now.getDate() - 6);
-      startDate = weekAgo.toISOString().split('T')[0];
-      endDate = now.toISOString().split('T')[0];
+      startDate = formatDateForInput(weekAgo);
+      endDate = formatDateForInput(now);
       break;
     case 'month':
       const monthAgo = new Date(now);
       monthAgo.setMonth(now.getMonth() - 1);
-      startDate = monthAgo.toISOString().split('T')[0];
-      endDate = now.toISOString().split('T')[0];
+      startDate = formatDateForInput(monthAgo);
+      endDate = formatDateForInput(now);
       break;
     case 'year':
       const yearAgo = new Date(now);
       yearAgo.setFullYear(now.getFullYear() - 1);
-      startDate = yearAgo.toISOString().split('T')[0];
-      endDate = now.toISOString().split('T')[0];
+      startDate = formatDateForInput(yearAgo);
+      endDate = formatDateForInput(now);
       break;
     default:
-      startDate = endDate = now.toISOString().split('T')[0];
+      startDate = endDate = formatDateForInput(now);
   }
 
   return { startDate, endDate };

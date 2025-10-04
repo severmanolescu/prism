@@ -329,7 +329,12 @@ body {
 }
 
 .chart-container {
+  background: linear-gradient(135deg, rgba(42, 71, 94, 0.4) 0%, rgba(27, 40, 56, 0.6) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(103, 193, 245, 0.2);
+  border-radius: 3px;
   padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .chart-container canvas {
