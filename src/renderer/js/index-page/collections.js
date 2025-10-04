@@ -285,8 +285,13 @@ class CollectionContextMenu {
             try {
                 const result = await window.electronAPI.deleteCollection(collectionName);
                 if (result.success) {
+                    // Refresh navigation to remove deleted category
+                    const allApps = await window.electronAPI.getAllApps();
+                    allAppsCache = allApps;
+                    await createCategoryNavigation(allApps);
+
                     showCategoryOverview(); // Refresh view
-                    showDragFeedback("Callection deleted successfully!", true);
+                    showDragFeedback("Collection deleted successfully!", true);
                 } else {
                     showDragFeedback(result.error || 'Failed to delete collection', false);
                 }

@@ -104,6 +104,21 @@ function updateCategory(categoryId, updates) {
   const db = getDb();
   const { name, color, icon, productivityLevel } = updates;
 
+  // If name is being changed, we need to update apps table as well
+  if (name) {
+    // Get the old category name first
+    const oldCategory = db.prepare('SELECT name FROM categories WHERE id = ?').get(categoryId);
+
+    if (oldCategory) {
+      // Update all apps that reference the old category name
+      db.prepare(`
+        UPDATE apps
+        SET category = ?
+        WHERE category = ?
+      `).run([name, oldCategory.name]);
+    }
+  }
+
   return db.prepare(`
     UPDATE categories
     SET name = COALESCE(?, name),
@@ -118,12 +133,17 @@ function updateCategory(categoryId, updates) {
 function deleteCategory(categoryId) {
   const db = getDb();
 
-  // Move apps to uncategorized
-  db.prepare(
-    'UPDATE apps SET category = ? WHERE category = ?'
-  ).run(['uncategorized', categoryId]);
+  // Get the category name first (needed to update apps)
+  const category = db.prepare('SELECT name FROM categories WHERE id = ?').get(categoryId);
 
-  // Delete category
+  if (category) {
+    // Move apps to uncategorized using the category name
+    db.prepare(
+      'UPDATE apps SET category = ? WHERE category = ?'
+    ).run(['uncategorized', category.name]);
+  }
+
+  // Delete category by id
   return db.prepare(
     'DELETE FROM categories WHERE id = ? AND is_default = 0'
   ).run(categoryId);

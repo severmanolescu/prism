@@ -53,7 +53,15 @@ function initializeCollectionHandlers() {
 
   ipcMain.handle('delete-collection', async (event, categoryName) => {
     try {
-      await deleteCategory(categoryName);
+      // Find the category by name to get its id
+      const categories = await getAllCategories();
+      const category = categories.find(cat => cat.name === categoryName);
+
+      if (!category) {
+        return { success: false, error: 'Category not found' };
+      }
+
+      await deleteCategory(category.id);
       return { success: true };
     } catch (error) {
       console.error('Error deleting collection:', error);

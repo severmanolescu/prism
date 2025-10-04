@@ -341,7 +341,13 @@ async function handleDrop(e) {
             createCategoryNavigation(allAppsCache);
             
             // Refresh current view based on what's displayed
-            if (currentCategory === 'All Apps') {
+            const categoryOverview = document.querySelector('.category-overview');
+            const isCategoryOverviewVisible = categoryOverview && categoryOverview.style.display !== 'none';
+
+            if (isCategoryOverviewVisible) {
+                // Refresh collections view
+                showCategoryOverview();
+            } else if (currentCategory === 'All Apps') {
                 displayAllApps(allAppsCache);
             } else if (currentCategory === 'Favorites') {
                 await loadFavoriteApps();
