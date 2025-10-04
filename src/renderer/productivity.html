@@ -2,7 +2,13 @@
 <html lang="en">
 
 <head>
-  <link rel="stylesheet" href="styles/productivity.css">
+  <link rel="stylesheet" href="styles/productivity/goals.css">
+  <link rel="stylesheet" href="styles/productivity/heatmap.css">
+  <link rel="stylesheet" href="styles/productivity/insights.css">
+  <link rel="stylesheet" href="styles/productivity/pie_chart.css">
+  <link rel="stylesheet" href="styles/productivity/productivity_score_card.css">
+  <link rel="stylesheet" href="styles/productivity/productivity.css">
+  <link rel="stylesheet" href="styles/productivity/top_apps.css">
 </head>
 <body>
 <div class="productivity-container">
@@ -48,35 +54,35 @@
   <h3 class="section-header">Productivity Score</h3>
   <div class="productivity-score-card">
     <div class="score-circle">
-      <div class="score-value">78</div>
+      <div class="score-value">0</div>
       <div class="score-label">Score</div>
     </div>
     <div class="score-breakdown">
       <div class="score-item">
         <div class="score-bar">
-          <div class="score-bar-fill productive" style="width: 65%"></div>
+          <div class="score-bar-fill productive" style="width: 0%"></div>
         </div>
         <div class="score-text">
           <span class="score-category">Productive</span>
-          <span class="score-time">18h 30m (65%)</span>
+          <span class="score-time">0h (0%)</span>
         </div>
       </div>
       <div class="score-item">
         <div class="score-bar">
-          <div class="score-bar-fill neutral" style="width: 20%"></div>
+          <div class="score-bar-fill neutral" style="width: 0%"></div>
         </div>
         <div class="score-text">
           <span class="score-category">Neutral</span>
-          <span class="score-time">5h 45m (20%)</span>
+          <span class="score-time">0h (0%)</span>
         </div>
       </div>
       <div class="score-item">
         <div class="score-bar">
-          <div class="score-bar-fill unproductive" style="width: 15%"></div>
+          <div class="score-bar-fill unproductive" style="width: 0%"></div>
         </div>
         <div class="score-text">
           <span class="score-category">Unproductive</span>
-          <span class="score-time">4h 15m (15%)</span>
+          <span class="score-time">0h (0%)</span>
         </div>
       </div>
     </div>
@@ -87,33 +93,33 @@
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-label">Focus Time</div>
-      <div class="stat-value">18h 30m</div>
-      <div class="stat-subtitle">↑ 12% from last week</div>
+      <div class="stat-value">0h</div>
+      <div class="stat-subtitle">↑ 0% from last week</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Distraction Time</div>
-      <div class="stat-value">4h 15m</div>
-      <div class="stat-subtitle">↓ 8% from last week</div>
+      <div class="stat-value">0h</div>
+      <div class="stat-subtitle">↑ 0% from last week</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Context Switches</div>
-      <div class="stat-value">34</div>
-      <div class="stat-subtitle">5 per hour avg</div>
+      <div class="stat-value">0</div>
+      <div class="stat-subtitle">0 per hour avg</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Deep Work Sessions</div>
-      <div class="stat-value">12</div>
-      <div class="stat-subtitle">Avg 1h 32m each</div>
+      <div class="stat-value">0</div>
+      <div class="stat-subtitle">Avg 0h each</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Peak Productivity</div>
-      <div class="stat-value">2 PM - 5 PM</div>
-      <div class="stat-subtitle">3 hour window</div>
+      <div class="stat-value">-</div>
+      <div class="stat-subtitle">0 hour window</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Productivity Streak</div>
-      <div class="stat-value">5 days</div>
-      <div class="stat-subtitle">Keep it up!</div>
+      <div class="stat-label">Most Productive Day</div>
+      <div class="stat-value">-</div>
+      <div class="stat-subtitle">Score: 0</div>
     </div>
   </div>
 
@@ -131,7 +137,7 @@
       <div class="pie-chart" style="position: relative;">
         <svg viewBox="-10 -10 220 220" style="width: 100%; max-width: 200px; margin: 0 auto; display: block; overflow: visible;">
           <!-- Development - 40% -->
-          <circle class="pie-slice" data-category="Development" data-percentage="40" cx="100" cy="100" r="80" fill="none" stroke="#66c0f4" stroke-width="40"
+          <circle class="pie-slice" data-category="Development" data-percentage="30" cx="100" cy="100" r="80" fill="none" stroke="#66c0f4" stroke-width="40"
                   stroke-dasharray="201 502" transform="rotate(-90 100 100)" style="cursor: pointer; transition: stroke-width 0.2s;"/>
           <!-- Communication - 25% -->
           <circle class="pie-slice" data-category="Communication" data-percentage="25" cx="100" cy="100" r="80" fill="none" stroke="#f39c12" stroke-width="40"
@@ -149,91 +155,20 @@
         <div class="pie-legend">
           <div class="legend-item">
             <span class="legend-color" style="background: #66c0f4;"></span>
-            <span class="legend-text">Development (40%)</span>
+            <span class="legend-text">Development (0%)</span>
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #f39c12;"></span>
-            <span class="legend-text">Communication (25%)</span>
+            <span class="legend-text">Communication (0%)</span>
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #e74c3c;"></span>
-            <span class="legend-text">Entertainment (20%)</span>
+            <span class="legend-text">Entertainment (0%)</span>
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #9b59b6;"></span>
-            <span class="legend-text">Other (15%)</span>
+            <span class="legend-text">Other (0%)</span>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Productivity Heatmap -->
-  <h3 class="section-header">
-    Productivity Heatmap
-    <span class="section-subtitle">Hour-by-hour productivity breakdown</span>
-  </h3>
-  <div class="productivity-heatmap-container">
-    <div class="heatmap-grid" id="productivityHeatmap">
-      <!-- Time labels (hours) -->
-      <div class="heatmap-time-labels">
-        <div class="time-label">12 AM</div>
-        <div class="time-label">3 AM</div>
-        <div class="time-label">6 AM</div>
-        <div class="time-label">9 AM</div>
-        <div class="time-label">12 PM</div>
-        <div class="time-label">3 PM</div>
-        <div class="time-label">6 PM</div>
-        <div class="time-label">9 PM</div>
-      </div>
-
-      <!-- Heatmap rows (days) -->
-      <div class="heatmap-rows">
-        <!-- Monday -->
-        <div class="heatmap-row">
-          <div class="day-label">Mon</div>
-          <div class="heatmap-cells">
-            <div class="heatmap-cell" data-productivity="neutral" title="12 AM - 15 min"></div>
-            <div class="heatmap-cell" data-productivity="neutral" title="1 AM - 0 min"></div>
-            <div class="heatmap-cell" data-productivity="neutral" title="2 AM - 0 min"></div>
-            <div class="heatmap-cell" data-productivity="neutral" title="3 AM - 0 min"></div>
-            <div class="heatmap-cell" data-productivity="neutral" title="4 AM - 0 min"></div>
-            <div class="heatmap-cell" data-productivity="neutral" title="5 AM - 0 min"></div>
-            <div class="heatmap-cell" data-productivity="neutral" title="6 AM - 0 min"></div>
-            <div class="heatmap-cell" data-productivity="neutral" title="7 AM - 0 min"></div>
-            <div class="heatmap-cell" data-productivity="neutral" title="8 AM - 30 min"></div>
-            <div class="heatmap-cell" data-productivity="productive" title="9 AM - 2h 15m"></div>
-            <div class="heatmap-cell" data-productivity="productive" title="10 AM - 2h 30m"></div>
-            <div class="heatmap-cell" data-productivity="productive" title="11 AM - 2h 45m"></div>
-            <div class="heatmap-cell" data-productivity="neutral" title="12 PM - 45 min"></div>
-            <div class="heatmap-cell" data-productivity="productive" title="1 PM - 2h"></div>
-            <div class="heatmap-cell" data-productivity="productive" title="2 PM - 3h"></div>
-            <div class="heatmap-cell" data-productivity="productive" title="3 PM - 2h 45m"></div>
-            <div class="heatmap-cell" data-productivity="productive" title="4 PM - 2h 30m"></div>
-            <div class="heatmap-cell" data-productivity="neutral" title="5 PM - 1h"></div>
-            <div class="heatmap-cell" data-productivity="neutral" title="6 PM - 30 min"></div>
-            <div class="heatmap-cell" data-productivity="unproductive" title="7 PM - 1h 30m"></div>
-            <div class="heatmap-cell" data-productivity="unproductive" title="8 PM - 2h"></div>
-            <div class="heatmap-cell" data-productivity="unproductive" title="9 PM - 1h 45m"></div>
-            <div class="heatmap-cell" data-productivity="neutral" title="10 PM - 45 min"></div>
-            <div class="heatmap-cell" data-productivity="neutral" title="11 PM - 30 min"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Legend -->
-      <div class="heatmap-legend">
-        <div class="legend-item">
-          <div class="legend-box productive"></div>
-          <span>Productive</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-box neutral"></div>
-          <span>Neutral</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-box unproductive"></div>
-          <span>Unproductive</span>
         </div>
       </div>
     </div>
@@ -253,11 +188,11 @@
       </div>
       <div class="goal-progress">
         <div class="progress-bar">
-          <div class="progress-fill" style="width: 110%;"></div>
+          <div class="progress-fill" style="width: 0%;"></div>
         </div>
         <div class="progress-text">
-          <span>5h 30m / 5h</span>
-          <span>110%</span>
+          <span>0h / 5h</span>
+          <span>0%</span>
         </div>
       </div>
     </div>
@@ -270,11 +205,11 @@
       </div>
       <div class="goal-progress">
         <div class="progress-bar">
-          <div class="progress-fill warning" style="width: 95%;"></div>
+          <div class="progress-fill warning" style="width: 0%;"></div>
         </div>
         <div class="progress-text">
-          <span>1h 54m / 2h</span>
-          <span>95%</span>
+          <span>0h / 2h</span>
+          <span>0%</span>
         </div>
       </div>
     </div>
@@ -287,11 +222,11 @@
       </div>
       <div class="goal-progress">
         <div class="progress-bar">
-          <div class="progress-fill" style="width: 60%;"></div>
+          <div class="progress-fill" style="width: 0%;"></div>
         </div>
         <div class="progress-text">
-          <span>1h 12m / 2h</span>
-          <span>60%</span>
+          <span>0h / 2h</span>
+          <span>0%</span>
         </div>
       </div>
     </div>
@@ -300,15 +235,15 @@
       <div class="goal-header">
         <span class="goal-icon">🔥</span>
         <span class="goal-title">Productivity Streak</span>
-        <span class="goal-status achieved">5 Days</span>
+        <span class="goal-status achieved">0 Days</span>
       </div>
       <div class="goal-progress">
         <div class="progress-bar">
-          <div class="progress-fill" style="width: 71%;"></div>
+          <div class="progress-fill" style="width: 0%;"></div>
         </div>
         <div class="progress-text">
-          <span>5 / 7 days goal</span>
-          <span>71%</span>
+          <span>0 / 7 days goal</span>
+          <span>0%</span>
         </div>
       </div>
     </div>
@@ -316,38 +251,8 @@
 
   <!-- Insights & Recommendations -->
   <h3 class="section-header">Insights & Recommendations</h3>
-  <div class="insights-grid">
-    <div class="insight-card">
-      <div class="insight-icon">💡</div>
-      <div class="insight-content">
-        <div class="insight-title">Peak Performance</div>
-        <div class="insight-text">Your productivity peaks between 2 PM - 5 PM. Schedule important tasks during this window.</div>
-      </div>
-    </div>
-
-    <div class="insight-card">
-      <div class="insight-icon">⚠️</div>
-      <div class="insight-content">
-        <div class="insight-title">Context Switching</div>
-        <div class="insight-text">You're switching apps 5 times per hour. Try batching similar tasks to reduce interruptions.</div>
-      </div>
-    </div>
-
-    <div class="insight-card">
-      <div class="insight-icon">🌟</div>
-      <div class="insight-content">
-        <div class="insight-title">Great Progress</div>
-        <div class="insight-text">Focus time increased by 12% this week. Keep up the good work!</div>
-      </div>
-    </div>
-
-    <div class="insight-card">
-      <div class="insight-icon">📈</div>
-      <div class="insight-content">
-        <div class="insight-title">Productivity Trend</div>
-        <div class="insight-text">Your productivity score has been consistently above 70 for 5 days straight.</div>
-      </div>
-    </div>
+  <div class="insights-grid" id="insightsContainer">
+    <!-- Insights will be dynamically generated -->
   </div>
 
   <!-- Top Productive & Unproductive Apps -->
@@ -355,135 +260,92 @@
     <div class="app-list-section">
       <h3 class="section-header">Most Productive Apps</h3>
       <div class="app-list">
-        <div class="app-list-item productive">
-          <div class="app-rank">1</div>
-          <div class="app-info">
-            <div class="app-name">Visual Studio Code</div>
-            <div class="app-time">8h 45m</div>
-          </div>
-        </div>
-        <div class="app-list-item productive">
-          <div class="app-rank">2</div>
-          <div class="app-info">
-            <div class="app-name">Terminal</div>
-            <div class="app-time">4h 20m</div>
-          </div>
-        </div>
-        <div class="app-list-item productive">
-          <div class="app-rank">3</div>
-          <div class="app-info">
-            <div class="app-name">Notion</div>
-            <div class="app-time">3h 15m</div>
-          </div>
-        </div>
-        <div class="app-list-item productive">
-          <div class="app-rank">4</div>
-          <div class="app-info">
-            <div class="app-name">Figma</div>
-            <div class="app-time">2h 10m</div>
-          </div>
-        </div>
+
       </div>
     </div>
 
     <div class="app-list-section">
       <h3 class="section-header">Most Distracting Apps</h3>
       <div class="app-list">
-        <div class="app-list-item unproductive">
-          <div class="app-rank">1</div>
-          <div class="app-info">
-            <div class="app-name">YouTube</div>
-            <div class="app-time">2h 30m</div>
-          </div>
-        </div>
-        <div class="app-list-item unproductive">
-          <div class="app-rank">2</div>
-          <div class="app-info">
-            <div class="app-name">Twitter</div>
-            <div class="app-time">1h 15m</div>
-          </div>
-        </div>
-        <div class="app-list-item unproductive">
-          <div class="app-rank">3</div>
-          <div class="app-info">
-            <div class="app-name">Instagram</div>
-            <div class="app-time">30m</div>
-          </div>
-        </div>
-        <div class="app-list-item unproductive">
-          <div class="app-rank">4</div>
-          <div class="app-info">
-            <div class="app-name">Reddit</div>
-            <div class="app-time">15m</div>
-          </div>
-        </div>
+
       </div>
     </div>
   </div>
 
+<!-- Additional Charts -->
+<div class="additional-charts-grid">
+  <div class="chart-card">
+    <h3 class="section-header">Session Length Distribution</h3>
+    <div class="chart-container" style="height: 250px; position: relative;">
+      <canvas id="session-length-canvas" width="400" height="250"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <h3 class="section-header">App Switching Frequency</h3>
+    <div class="chart-container" style="height: 250px; position: relative;">
+      <canvas id="app-switching-canvas" width="400" height="250"></canvas>
+    </div>
+  </div>
 </div>
 
-<!-- Goals Management Modal -->
-<div class="goals-modal" id="goalsModal" style="display: none;">
-  <div class="modal-overlay"></div>
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Manage Goals</h2>
-      <button class="modal-close" id="closeGoalsModal">✕</button>
+<!-- Productivity by Hour -->
+<h3 class="section-header">Productivity by Time of Day</h3>
+<div class="chart-container" style="height: 300px; position: relative; margin-bottom: 20px;">
+  <canvas id="productivity-by-hour-canvas" width="800" height="300"></canvas>
+</div>
+
+<!-- Productivity Heatmap -->
+<h3 class="section-header">
+  Productivity Heatmap
+  <span class="section-subtitle">Hour-by-hour productivity breakdown</span>
+</h3>
+<div class="productivity-heatmap-container">
+  <div class="heatmap-grid" id="productivityHeatmap">
+    <!-- Time labels (hours) -->
+    <div class="heatmap-time-labels">
+      <div class="time-label">12 AM</div>
+      <div class="time-label">3 AM</div>
+      <div class="time-label">6 AM</div>
+      <div class="time-label">9 AM</div>
+      <div class="time-label">12 PM</div>
+      <div class="time-label">3 PM</div>
+      <div class="time-label">6 PM</div>
+      <div class="time-label">9 PM</div>
     </div>
 
-    <div class="modal-body">
-      <div class="goal-form">
-        <h3>Daily Focus Time Goal</h3>
-        <div class="form-group">
-          <label>Target Hours</label>
-          <input type="number" id="focusTimeGoal" min="0" max="24" value="5" step="0.5">
-          <span class="input-suffix">hours</span>
-        </div>
+    <!-- Heatmap rows (days) -->
+    <div class="heatmap-rows">
 
-        <h3>App Time Limits</h3>
-        <div class="form-group">
-          <label>Social Media Limit</label>
-          <input type="number" id="socialMediaLimit" min="0" max="12" value="2" step="0.5">
-          <span class="input-suffix">hours</span>
-        </div>
+    </div>
 
-        <div class="form-group">
-          <label>Entertainment Limit</label>
-          <input type="number" id="entertainmentLimit" min="0" max="12" value="3" step="0.5">
-          <span class="input-suffix">hours</span>
-        </div>
-
-        <h3>Productivity Goals</h3>
-        <div class="form-group">
-          <label>Minimum Productivity Score</label>
-          <input type="number" id="productivityScoreGoal" min="0" max="100" value="70" step="5">
-          <span class="input-suffix">/ 100</span>
-        </div>
-
-        <div class="form-group">
-          <label>Deep Work Sessions per Day</label>
-          <input type="number" id="deepWorkGoal" min="0" max="20" value="3">
-          <span class="input-suffix">sessions</span>
-        </div>
-
-        <div class="form-group">
-          <label>Learning Time Goal</label>
-          <input type="number" id="learningTimeGoal" min="0" max="12" value="2" step="0.5">
-          <span class="input-suffix">hours</span>
-        </div>
+    <!-- Legend -->
+    <div class="heatmap-legend">
+      <div class="legend-item">
+        <div class="legend-box productive"></div>
+        <span>Productive</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-box neutral"></div>
+        <span>Neutral</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-box unproductive"></div>
+        <span>Unproductive</span>
       </div>
     </div>
-
-    <div class="modal-footer">
-      <button class="modal-btn secondary" id="resetGoals">Reset to Defaults</button>
-      <button class="modal-btn primary" id="saveGoals">Save Goals</button>
-    </div>
   </div>
+</div>
 </div>
 
 <script src="./js/utils.js"></script>
-<script src="./js/productivity/productivity.js"></script>
+<script src="./js/productivity/app_switching_chart.js"></script>
+<script src="./js/productivity/heatmap.js"></script>
+<script src="./js/productivity/insights.js"></script>
+<script src="./js/productivity/pie_chart.js"></script>
 <script src="./js/productivity/productivity_trend_usage_chart.js"></script>
+<script src="./js/productivity/productivity.js"></script>
+<script src="./js/productivity/session_lenght_chart.js"></script>
+<script src="./js/productivity/time_of_day_chart.js"></script>
 </body>
 </html>

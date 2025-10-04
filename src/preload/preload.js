@@ -70,5 +70,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setAppProductivityOverride: (appId, level) => ipcRenderer.invoke('set-app-productivity-override', appId, level),
   getAppProductivityLevel: (appId) => ipcRenderer.invoke('get-app-productivity-level', appId),
   setCategoryProductivityLevel: (categoryId, level) => ipcRenderer.invoke('set-category-productivity-level', categoryId, level),
-  getCategoryProductivityLevel: (categoryId) => ipcRenderer.invoke('get-category-productivity-level', categoryId)
+  getCategoryProductivityLevel: (categoryId) => ipcRenderer.invoke('get-category-productivity-level', categoryId),
+  getProductivityStats: (startDate, endDate) => ipcRenderer.invoke('get-productivity-stats', startDate, endDate)
 });

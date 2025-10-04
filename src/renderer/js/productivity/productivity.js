@@ -3,6 +3,18 @@
 let currentDateRange = null;
 let currentPeriod = 'today';
 
+// Listen for data from parent window
+window.addEventListener('message', (event) => {
+  // Verify message comes from parent window
+  if (event.source !== window.parent) {
+    return;
+  }
+  if (event.data.type === 'PRODUCTIVITY_DATA_RESPONSE') {
+    // Received productivity data from parent window
+    updateProductivityUI(event.data.data);
+  }
+});
+
 // Calculate date ranges for different periods
 function getDateRange(period) {
   const now = new Date();
@@ -38,13 +50,27 @@ function getDateRange(period) {
 }
 
 // Load productivity data
-async function loadProductivityData(period, customStartDate, customEndDate) {
-  const { startDate, endDate } = getDateRange(period);
-  currentDateRange = { startDate, endDate, period };
-
+function loadProductivityData(period, customStartDate, customEndDate) {
   try {
-    const data = await window.electronAPI.invoke('get-productivity-stats', startDate, endDate);
-    updateProductivityUI(data);
+    let startDate, endDate;
+
+    if (period === 'custom' && customStartDate && customEndDate) {
+      startDate = customStartDate;
+      endDate = customEndDate;
+    } else {
+      const range = getDateRange(period);
+      startDate = range.startDate;
+      endDate = range.endDate;
+    }
+
+    currentDateRange = { startDate, endDate, period };
+
+    // Request data from parent window (main renderer process)
+    window.parent.postMessage({
+      type: 'REQUEST_PRODUCTIVITY_DATA',
+      startDate: startDate,
+      endDate: endDate
+    }, '*');
   } catch (error) {
     console.error('Error loading productivity data:', error);
   }
@@ -89,14 +115,81 @@ function updateProductivityUI(data) {
 
   // Update key metrics
   const statValues = document.querySelectorAll('.stat-value');
+  const statSubtitles = document.querySelectorAll('.stat-subtitle');
+
   statValues[0].textContent = formatTime(data.breakdown.productive.time); // Focus Time
   statValues[1].textContent = formatTime(data.breakdown.unproductive.time); // Distraction Time
+
+  // Calculate total time and sessions from all productivity levels
+  const totalTime = data.breakdown.productive.time + data.breakdown.neutral.time + data.breakdown.unproductive.time;
+  const totalSessions = data.breakdown.productive.sessions + data.breakdown.neutral.sessions + data.breakdown.unproductive.sessions;
+
+  const totalHours = totalTime / (1000 * 60 * 60);
+  const switchesPerHour = totalHours > 0 ? Math.round(totalSessions / totalHours) : 0;
+
+  statValues[2].textContent = switchesPerHour; // Context Switches
+
+  // Update deep work sessions
+  if (data.deepWorkSessions && statValues[3]) {
+    statValues[3].textContent = data.deepWorkSessions.count;
+    if (statSubtitles[3] && data.deepWorkSessions.count > 0) {
+      const avgMinutes = Math.round(data.deepWorkSessions.avgDuration / (1000 * 60));
+      statSubtitles[3].textContent = `Avg. ${avgMinutes} min per session`;
+    }
+  }
+
+  // Update peak productivity hour
+  if (data.peakProductivityHour && statValues[4]) {
+    const hour = data.peakProductivityHour.hour;
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    statValues[4].textContent = `${displayHour} ${period}`;
+    if (statSubtitles[4]) {
+      statSubtitles[4].textContent = `${data.peakProductivityHour.percentage}% productive`;
+    }
+  }
+
+  // Update most productive day
+  if (data.dailyScores && data.dailyScores.length > 0 && statValues[5]) {
+    const mostProductiveDay = data.dailyScores.reduce((max, day) =>
+      day.score > max.score ? day : max
+    );
+    const date = new Date(mostProductiveDay.date);
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    statValues[5].textContent = dayName;
+    if (statSubtitles[5]) {
+      statSubtitles[5].textContent = `Score: ${mostProductiveDay.score}`;
+    }
+  }
+
+  // Update date info
+  if (data.dailyScores) {
+    const dateInfo = document.querySelector('.date-info');
+    if (dateInfo) {
+      const dayCount = data.dailyScores.length;
+      dateInfo.textContent = `${dayCount} ${dayCount === 1 ? 'day' : 'days'} of data available`;
+    }
+  }
 
   // Update productivity trend chart
   updateTrendChart(data.dailyScores);
 
   // Update top apps lists
   updateTopApps(data.topProductive, data.topUnproductive);
+
+  // Update category pie chart
+  updateCategoryPieChart(data.categoryBreakdown, data.totalTime);
+
+  // Update insights
+  updateInsights(data);
+
+  // Update heatmap
+  updateProductivityHeatmap(data.heatmapData);
+
+  // Update new charts
+  updateSessionLengthChart(data.sessionLengthDistribution);
+  updateAppSwitchingChart(data.appSwitchingFrequency);
+  updateProductivityByHourChart(data.productivityByHour);
 }
 
 // Update top apps lists
@@ -182,7 +275,7 @@ function setupDateRangeControls() {
       const endDate = dateInputs[1].value;
       if (startDate && endDate) {
         currentPeriod = 'custom';
-        loadAnalyticsData('custom', startDate, endDate);
+        loadProductivityData('custom', startDate, endDate);
       }
     });
   });
@@ -194,54 +287,13 @@ function setupDateRangeControls() {
   }
 }
 
-// Setup pie chart tooltips
-function setupPieChartTooltips() {
-  const pieSlices = document.querySelectorAll('.pie-slice');
-  const tooltip = document.getElementById('pie-tooltip');
-  const tooltipText = tooltip.querySelector('.pie-tooltip-text');
-  const pieChart = document.querySelector('.pie-chart');
-
-  pieSlices.forEach(slice => {
-    slice.addEventListener('mouseenter', (e) => {
-      const category = slice.dataset.category;
-      const percentage = slice.dataset.percentage;
-      tooltipText.textContent = `${category}: ${percentage}%`;
-      tooltip.style.display = 'block';
-    });
-
-    slice.addEventListener('mousemove', (e) => {
-      const rect = pieChart.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      tooltip.style.left = x + 'px';
-      tooltip.style.top = (y - 40) + 'px';
-    });
-
-    slice.addEventListener('mouseleave', () => {
-      tooltip.style.display = 'none';
-    });
-  });
-}
-
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   setupDateRangeControls();
   setupPieChartTooltips();
 
-  // Load default data (week view)
-  // loadProductivityData('week');
-
-  // Initialize chart with dummy data for now
-  updateTrendChart([
-    { date: '2024-01-01', score: 68 },
-    { date: '2024-01-02', score: 75 },
-    { date: '2024-01-03', score: 82 },
-    { date: '2024-01-04', score: 58 },
-    { date: '2024-01-05', score: 85 },
-    { date: '2024-01-06', score: 72 },
-    { date: '2024-01-07', score: 78 }
-  ]);
+  // Load default data (today)
+  loadProductivityData(currentPeriod);
 
   // Add smooth scroll behavior
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {

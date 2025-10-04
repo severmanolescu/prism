@@ -1,3 +1,66 @@
+// Render a single-day chart using Canvas
+function renderSingleDayProductivityChart(ctx, width, height, dayData) {
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+
+    // Draw background
+    ctx.fillStyle = '#16202d';
+    ctx.fillRect(0, 0, width, height);
+
+    const padding = { top: 40, right: 50, bottom: 60, left: 50 };
+    const barWidth = 100;
+    const centerX = width / 2;
+
+    // Calculate bar height based on score (0-100)
+    const maxBarHeight = height - padding.top - padding.bottom;
+    const scorePercentage = dayData.score / 100;
+    const barHeight = maxBarHeight * scorePercentage * 0.7;
+    const barY = padding.top + (maxBarHeight - barHeight);
+
+    // Create gradient for bar
+    const gradient = ctx.createLinearGradient(centerX, barY, centerX, barY + barHeight);
+    gradient.addColorStop(0, '#66c0f4');
+    gradient.addColorStop(1, '#417a9b');
+
+    // Draw the bar
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.roundRect(centerX - barWidth / 2, barY, barWidth, barHeight, 4);
+    ctx.fill();
+
+    // Draw top cap
+    ctx.fillStyle = '#66c0f4';
+    ctx.beginPath();
+    ctx.roundRect(centerX - barWidth / 2, barY - 3, barWidth, 6, 3);
+    ctx.fill();
+
+    // Score label on top
+    ctx.fillStyle = '#66c0f4';
+    ctx.font = 'bold 24px "Motiva Sans", Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(dayData.score, centerX, barY - 20);
+
+    // Date label at bottom
+    const date = new Date(dayData.date);
+    ctx.fillStyle = '#8f98a0';
+    ctx.font = '14px "Motiva Sans", Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+    }), centerX, height - padding.bottom + 10);
+
+    // Productivity label
+    ctx.fillStyle = '#66c0f4';
+    ctx.font = '12px "Motiva Sans", Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Productivity Score`, centerX, height - padding.bottom + 30);
+}
+
 // Update trend chart using Canvas (matching analytics chart exactly)
 function updateTrendChart(data) {
     const canvas = document.getElementById('productivity-trend-canvas');
@@ -25,6 +88,15 @@ function updateTrendChart(data) {
         ctx.font = '14px "Motiva Sans", Arial';
         ctx.textAlign = 'center';
         ctx.fillText('No data available for this period', width / 2, height / 2);
+        return;
+    }
+
+    // Special handling for single day
+    if (data.length === 1) {
+        renderSingleDayProductivityChart(ctx, width, height, data[0]);
+        // Remove any existing event listeners
+        canvas.onmousemove = null;
+        canvas.onmouseleave = null;
         return;
     }
 

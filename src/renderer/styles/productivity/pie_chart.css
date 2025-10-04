@@ -1,0 +1,53 @@
+/* Pie Chart */
+.pie-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+}
+
+.pie-slice:hover {
+    stroke-width: 45 !important;
+}
+
+.pie-tooltip {
+    position: absolute;
+    background: rgba(17, 37, 52, 0.98);
+    border: 2px solid #66c0f4;
+    border-radius: 6px;
+    padding: 8px 12px;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.pie-tooltip-text {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.pie-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+}
+
+.legend-text {
+    color: #c6d4df;
+}
