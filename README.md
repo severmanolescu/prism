@@ -31,7 +31,7 @@ Just like a prism breaks white light into a beautiful spectrum of colors, **Pris
 1. Clone the repository
 
 ```bash
-git clone https://github.com/severmanolescu/app-time-tracker
+git clone https://github.com/severmanolescu/prism.git
 cd prism
 ```
 2. Install dependencies
