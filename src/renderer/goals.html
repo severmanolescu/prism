@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goals - Steam Time Tracker</title>
+  <link rel="stylesheet" href="styles/common.css">
+  <link rel="stylesheet" href="styles/goals.css">
+</head>
+<body>
+  <div class="goals-container">
+    <!-- Header -->
+    <div class="page-header">
+      <h1 class="page-title">Goals & Targets</h1>
+      <button class="primary-btn" id="addGoalBtn">
+        <span class="btn-icon">+</span>
+        Add New Goal
+      </button>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="goals-stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-content">
+          <div class="stat-value">8</div>
+          <div class="stat-label">Active Goals</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+          <div class="stat-value">5</div>
+          <div class="stat-label">Achieved Today</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-content">
+          <div class="stat-value">7</div>
+          <div class="stat-label">Day Streak</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <div class="stat-value">63%</div>
+          <div class="stat-label">Success Rate</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Productivity Goals Section -->
+    <section class="goals-section">
+      <h2 class="section-title">
+        <span class="section-icon">📈</span>
+        Productivity Goals
+      </h2>
+
+      <div class="goals-list">
+        <!-- Goal Card 1 -->
+        <div class="goal-card achieved">
+          <div class="goal-header">
+            <div class="goal-info">
+              <div class="goal-icon-large">🎯</div>
+              <div class="goal-details">
+                <h3 class="goal-name">Daily Productivity Score</h3>
+                <p class="goal-description">Maintain a productivity score of 70 or higher</p>
+              </div>
+            </div>
+            <div class="goal-actions">
+              <button class="icon-btn" title="Edit goal">✏️</button>
+              <button class="icon-btn" title="Delete goal">🗑️</button>
+            </div>
+          </div>
+          <div class="goal-progress-section">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill achieved" style="width: 110%;"></div>
+            </div>
+            <div class="progress-info">
+              <span class="progress-current">Score: 77 / 70</span>
+              <span class="progress-status achieved">✓ Achieved</span>
+            </div>
+          </div>
+          <div class="goal-meta">
+            <span class="goal-frequency">📅 Daily</span>
+            <span class="goal-streak">🔥 7 day streak</span>
+          </div>
+        </div>
+
+        <!-- Goal Card 2 -->
+        <div class="goal-card in-progress">
+          <div class="goal-header">
+            <div class="goal-info">
+              <div class="goal-icon-large">⏰</div>
+              <div class="goal-details">
+                <h3 class="goal-name">Focus Time</h3>
+                <p class="goal-description">Spend at least 5 hours on productive apps</p>
+              </div>
+            </div>
+            <div class="goal-actions">
+              <button class="icon-btn" title="Edit goal">✏️</button>
+              <button class="icon-btn" title="Delete goal">🗑️</button>
+            </div>
+          </div>
+          <div class="goal-progress-section">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill in-progress" style="width: 68%;"></div>
+            </div>
+            <div class="progress-info">
+              <span class="progress-current">3h 24m / 5h</span>
+              <span class="progress-status in-progress">68% Complete</span>
+            </div>
+          </div>
+          <div class="goal-meta">
+            <span class="goal-frequency">📅 Daily</span>
+            <span class="goal-streak">🔥 3 day streak</span>
+          </div>
+        </div>
+
+        <!-- Goal Card 3 -->
+        <div class="goal-card achieved">
+          <div class="goal-header">
+            <div class="goal-info">
+              <div class="goal-icon-large">🌟</div>
+              <div class="goal-details">
+                <h3 class="goal-name">Deep Work Sessions</h3>
+                <p class="goal-description">Complete at least 3 deep work sessions (25+ min)</p>
+              </div>
+            </div>
+            <div class="goal-actions">
+              <button class="icon-btn" title="Edit goal">✏️</button>
+              <button class="icon-btn" title="Delete goal">🗑️</button>
+            </div>
+          </div>
+          <div class="goal-progress-section">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill achieved" style="width: 133%;"></div>
+            </div>
+            <div class="progress-info">
+              <span class="progress-current">4 / 3 sessions</span>
+              <span class="progress-status achieved">✓ Achieved</span>
+            </div>
+          </div>
+          <div class="goal-meta">
+            <span class="goal-frequency">📅 Daily</span>
+            <span class="goal-streak">🔥 2 day streak</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- App-Specific Goals Section -->
+    <section class="goals-section">
+      <h2 class="section-title">
+        <span class="section-icon">💻</span>
+        App-Specific Goals
+      </h2>
+
+      <div class="goals-list">
+        <!-- App Goal 1 -->
+        <div class="goal-card achieved">
+          <div class="goal-header">
+            <div class="goal-info">
+              <div class="goal-icon-large">💻</div>
+              <div class="goal-details">
+                <h3 class="goal-name">Visual Studio Code</h3>
+                <p class="goal-description">Code for at least 4 hours per day</p>
+              </div>
+            </div>
+            <div class="goal-actions">
+              <button class="icon-btn" title="Edit goal">✏️</button>
+              <button class="icon-btn" title="Delete goal">🗑️</button>
+            </div>
+          </div>
+          <div class="goal-progress-section">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill achieved" style="width: 118%;"></div>
+            </div>
+            <div class="progress-info">
+              <span class="progress-current">4h 43m / 4h</span>
+              <span class="progress-status achieved">✓ Achieved</span>
+            </div>
+          </div>
+          <div class="goal-meta">
+            <span class="goal-frequency">📅 Daily</span>
+            <span class="goal-category" style="background: #66c0f4;">Development</span>
+          </div>
+        </div>
+
+        <!-- App Goal 2 -->
+        <div class="goal-card warning">
+          <div class="goal-header">
+            <div class="goal-info">
+              <div class="goal-icon-large">🌐</div>
+              <div class="goal-details">
+                <h3 class="goal-name">Google Chrome</h3>
+                <p class="goal-description">Limit browsing to maximum 2 hours per day</p>
+              </div>
+            </div>
+            <div class="goal-actions">
+              <button class="icon-btn" title="Edit goal">✏️</button>
+              <button class="icon-btn" title="Delete goal">🗑️</button>
+            </div>
+          </div>
+          <div class="goal-progress-section">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill warning" style="width: 93%;"></div>
+            </div>
+            <div class="progress-info">
+              <span class="progress-current">1h 52m / 2h</span>
+              <span class="progress-status warning">⚠️ Near Limit</span>
+            </div>
+          </div>
+          <div class="goal-meta">
+            <span class="goal-frequency">📅 Daily</span>
+            <span class="goal-category" style="background: #95a5a6;">Uncategorized</span>
+          </div>
+        </div>
+
+        <!-- App Goal 3 -->
+        <div class="goal-card failed">
+          <div class="goal-header">
+            <div class="goal-info">
+              <div class="goal-icon-large">🎮</div>
+              <div class="goal-details">
+                <h3 class="goal-name">YouTube</h3>
+                <p class="goal-description">Keep entertainment under 1 hour per day</p>
+              </div>
+            </div>
+            <div class="goal-actions">
+              <button class="icon-btn" title="Edit goal">✏️</button>
+              <button class="icon-btn" title="Delete goal">🗑️</button>
+            </div>
+          </div>
+          <div class="goal-progress-section">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill failed" style="width: 135%;"></div>
+            </div>
+            <div class="progress-info">
+              <span class="progress-current">1h 21m / 1h</span>
+              <span class="progress-status failed">❌ Exceeded</span>
+            </div>
+          </div>
+          <div class="goal-meta">
+            <span class="goal-frequency">📅 Daily</span>
+            <span class="goal-category" style="background: #e74c3c;">Entertainment</span>
+          </div>
+        </div>
+
+        <!-- App Goal 4 -->
+        <div class="goal-card in-progress">
+          <div class="goal-header">
+            <div class="goal-info">
+              <div class="goal-icon-large">📝</div>
+              <div class="goal-details">
+                <h3 class="goal-name">Notion</h3>
+                <p class="goal-description">Use for at least 1 hour weekly for planning</p>
+              </div>
+            </div>
+            <div class="goal-actions">
+              <button class="icon-btn" title="Edit goal">✏️</button>
+              <button class="icon-btn" title="Delete goal">🗑️</button>
+            </div>
+          </div>
+          <div class="goal-progress-section">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill in-progress" style="width: 45%;"></div>
+            </div>
+            <div class="progress-info">
+              <span class="progress-current">27m / 1h</span>
+              <span class="progress-status in-progress">45% Complete</span>
+            </div>
+          </div>
+          <div class="goal-meta">
+            <span class="goal-frequency">📅 Weekly</span>
+            <span class="goal-category" style="background: #27ae60;">Productivity</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Category Goals Section -->
+    <section class="goals-section">
+      <h2 class="section-title">
+        <span class="section-icon">📁</span>
+        Category Goals
+      </h2>
+
+      <div class="goals-list">
+        <!-- Category Goal 1 -->
+        <div class="goal-card warning">
+          <div class="goal-header">
+            <div class="goal-info">
+              <div class="goal-icon-large">🎭</div>
+              <div class="goal-details">
+                <h3 class="goal-name">Entertainment Category</h3>
+                <p class="goal-description">Limit entertainment apps to 3 hours per day</p>
+              </div>
+            </div>
+            <div class="goal-actions">
+              <button class="icon-btn" title="Edit goal">✏️</button>
+              <button class="icon-btn" title="Delete goal">🗑️</button>
+            </div>
+          </div>
+          <div class="goal-progress-section">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill warning" style="width: 87%;"></div>
+            </div>
+            <div class="progress-info">
+              <span class="progress-current">2h 37m / 3h</span>
+              <span class="progress-status warning">⚠️ Near Limit</span>
+            </div>
+          </div>
+          <div class="goal-meta">
+            <span class="goal-frequency">📅 Daily</span>
+            <span class="goal-apps">4 apps in category</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/goals/goals.js"></script>
+</body>
+</html>
