@@ -60,11 +60,13 @@ prism/
 │       ├── styles/              # Modular CSS files
 │       │   ├── analytics/       # Analytics page styles
 │       │   ├── app-details/     # App details page styles
+│       │   └── goals/           # Goals page styles
 │       │   └── index-page/      # Main page styles
 │       │   └── productivity/    # Productivity page styles
 │       └── js/                  # Frontend JavaScript modules
 │           ├── analytics/       # Analytics page logic
 │           ├── app-details/     # App details page logic
+│           ├── goals/           # Goals page logic
 │           └── index-page/      # Main page logic
 │           └── productivity/    # Productivity page Logic
 ├── assets/                      # Images and icons
