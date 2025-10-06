@@ -2,6 +2,7 @@
 
 let currentDateRange = null;
 let currentPeriod = 'today';
+let currentProductivityData = null;
 
 // Listen for data from parent window
 window.addEventListener('message', (event) => {
@@ -11,6 +12,7 @@ window.addEventListener('message', (event) => {
   }
   if (event.data.type === 'PRODUCTIVITY_DATA_RESPONSE') {
     // Received productivity data from parent window
+    currentProductivityData = event.data.data;
     updateProductivityUI(event.data.data);
   }
 });
@@ -294,6 +296,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load default data (today)
   loadProductivityData(currentPeriod);
+
+  // Setup export button
+  const exportBtn = document.getElementById('exportBtn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', handleExportProductivity);
+  }
 
   // Add smooth scroll behavior
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
