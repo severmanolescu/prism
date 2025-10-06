@@ -50,6 +50,7 @@ npm run build
 ## Project Structure
 ```bash
 prism/
+├── scripts/                    # Useful scripts
 ├── src/
 │   ├── main/                    # Main process (Electron/Node.js)
 │   │   ├── ipc/                 # IPC handlers organized by domain
