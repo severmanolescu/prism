@@ -46,43 +46,42 @@
 }
 
 .primary-btn {
-    background: linear-gradient(90deg, rgba(103, 193, 245, 0.2) 0%, rgba(103, 193, 245, 0.1) 100%);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 3px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #092442 0%, #07417a 80%);
+    border: 1px solid rgba(102, 192, 244, 0.3);
+    color: #ffffff;
+    border-radius: 3px;
+    cursor: pointer;
     transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: 400;
 }
 
 .primary-btn:hover {
-    background: linear-gradient(90deg, #1ac5ff 0%, #3d7fff 100%);
+    background: linear-gradient(135deg, #0a2f5a 0%, #0856a0 80%);
+    border-color: rgba(102, 192, 244, 0.5);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(6, 191, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(102, 192, 244, 0.3);
 }
 
 .secondary-btn {
-    background: #1b2838;
-    color: #c6d4df;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 10px 20px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #8f98a0;
     border-radius: 3px;
     cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
     transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: 400;
 }
 
 .secondary-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: #ffffff;
-    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.08);
+    color: #c6d4df;
 }
 
 #addGoalBtn {
