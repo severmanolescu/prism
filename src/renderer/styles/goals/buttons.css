@@ -46,7 +46,7 @@
 }
 
 .primary-btn {
-    background: linear-gradient(90deg, #06BFFF 0%, #2D73FF 100%);
+    background: linear-gradient(90deg, rgba(103, 193, 245, 0.2) 0%, rgba(103, 193, 245, 0.1) 100%);
     color: white;
     border: none;
     padding: 12px 24px;
@@ -67,7 +67,7 @@
 }
 
 .secondary-btn {
-    background: rgba(255, 255, 255, 0.05);
+    background: #1b2838;
     color: #c6d4df;
     border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 10px 20px;

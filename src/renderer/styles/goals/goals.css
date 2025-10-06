@@ -6,6 +6,11 @@
   margin: 0 auto;
 }
 
+/* Override modal width for goals page */
+.modal-content {
+  max-width: 900px !important;
+}
+
 /* Header */
 .goals-header {
   margin-bottom: 20px;
