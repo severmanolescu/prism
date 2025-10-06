@@ -62,8 +62,6 @@ function createGoalCard(goal, showAppOrCategory = false, isToday = true) {
     const progressText = formatProgressFromGoal(goal);
     const statusText = getStatusText(goal);
 
-    console.log('Goal:', goal.name, 'Progress:', progress, 'Status:', goal.status);
-
     // Determine what to show in meta section
     let metaHtml = `<span class="goal-frequency">📅 ${goal.frequency}</span>`;
 
