@@ -150,6 +150,8 @@ async function handleDeleteGoal(goalCard) {
             await api.deleteGoal(parseInt(goalId));
             // Reload goals for current date
             await loadGoalsForDate(currentDate);
+
+            showFeedback('Goal deleted successfully!', true);
         } catch (error) {
             console.error('Error deleting goal:', error);
             showFeedback(`Failed to delete goal: ${error.message}`, true);

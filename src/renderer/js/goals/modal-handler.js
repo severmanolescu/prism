@@ -381,10 +381,10 @@ async function handleFormSubmit(e) {
         if (isEditMode && editGoalId) {
             // Update existing goal - remove type field as it cannot be changed
             const { type, ...updateData } = formData;
-            const result = await api.updateGoal(parseInt(editGoalId), updateData);
+            await api.updateGoal(parseInt(editGoalId), updateData);
         } else {
             // Create new goal
-            const result = await api.createGoal(formData);
+            await api.createGoal(formData);
         }
 
         closeModal();

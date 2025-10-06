@@ -1,5 +1,5 @@
 .emoji-picker-btn {
-    padding: 8px 12px;
+    padding: 0px 0px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: #ffffff;
@@ -21,8 +21,8 @@
 
 .emoji-picker-popup {
     position: absolute;
-    top: calc(100% + 4px);
-    right: 0;
+    top: -100px;
+    right: 60px;
     background: #1b2838;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 4px;
