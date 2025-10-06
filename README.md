@@ -12,16 +12,81 @@ Just like a prism breaks white light into a beautiful spectrum of colors, **Pris
 
 ## Features
 
+### 📚 Library (Main Page)
 - **Automatic Time Tracking** - Tracks all running applications automatically in the background
 - **Steam-Inspired UI** - Clean, modern interface with familiar navigation patterns
 - **Collections/Categories** - Organize apps into custom collections with colors and icons
 - **Favorites System** - Quick access to your most-used applications
 - **Daily Statistics** - View today's total usage time and app count at a glance
 - **Search & Filter** - Find apps quickly with built-in search
-- **Context Menus** - Right-click any app for quick actions
+- **Context Menus** - Right-click any app for quick actions (launch, favorite, hide, manage collections)
 - **Hidden Apps** - Hide apps from your library while still tracking them
-- **Session History** - Detailed tracking of all usage sessions
 - **Real-time Updates** - Live updates as you use applications
+- **Multiple Views** - Home, Collections, and Hidden apps views
+
+### 📊 Analytics
+- **Daily Usage Charts** - Visualize your app usage over time with interactive charts
+- **Top Applications** - See your most-used apps ranked by time spent
+- **All Apps Overview** - Complete list with usage time, sessions, and last used info
+- **Category Breakdown** - Time distribution across different app categories
+- **AI-Powered Insights** - Smart suggestions based on your usage patterns
+- **Hourly Activity Heatmap** - Hour-by-hour breakdown of which apps you use when
+- **Custom Date Ranges** - View data for today, week, month, year, or custom periods
+- **Export Functionality** - Export analytics data to CSV or JSON
+
+### 🎯 Productivity
+- **Productivity Score** - Overall score (0-100) based on productive, neutral, and unproductive time
+- **Time Breakdown** - Visual breakdown of productive vs neutral vs unproductive time
+- **Key Metrics Dashboard**:
+  - Focus Time tracking
+  - Distraction Time monitoring
+  - Context Switches counter
+  - Deep Work Sessions (25+ min sessions)
+  - Peak Productivity hours
+  - Most Productive Day
+- **Productivity Trend Chart** - Track your score over time
+- **Category Distribution** - See how productive time is distributed across categories
+- **Top Apps Lists** - Most productive and most distracting apps
+- **Session Analytics**:
+  - Session length distribution
+  - App switching frequency
+  - Productivity by time of day
+- **Productivity Heatmap** - Hour-by-hour productivity breakdown
+- **Custom Productivity Levels** - Mark apps as productive, neutral, or unproductive
+- **Export Functionality** - Export productivity data to CSV or JSON
+
+### 🎯 Goals
+- **5 Goal Types**:
+  - **Productivity Score** - Target overall productivity score
+  - **Focus Time** - Track productive/neutral/unproductive time
+  - **Work Sessions** - Count deep work sessions (customizable duration)
+  - **App-Specific** - Track time on specific applications
+  - **Category Goals** - Track time spent on app categories
+- **Flexible Frequencies** - Daily, weekly, or monthly goals
+- **Real-Time Progress** - Live updates as you work towards goals
+- **Goal Status Tracking** - Pending, in progress, achieved, or failed
+- **Streak System** - Track consecutive days of goal achievement
+- **Success Rate Analytics** - 7-day success rate chart and 30-day activity calendar
+- **Goal Templates** - Pre-made templates for common productivity goals
+- **Historical Data** - View goal progress for past dates
+- **Auto-Save & Backfill** - Automatic progress tracking even when app was closed
+- **Export Functionality** - Export goals data to CSV or JSON
+- **Quick Stats** - Active goals, achieved today, current streak, and success rate
+
+### 📱 App Details
+- **Comprehensive Statistics**:
+  - Total time spent
+  - Session count
+  - Average session length
+  - Last used timestamp
+  - First tracked date
+- **Usage Trends** - Visual chart showing usage over time
+- **Calendar Heatmap** - 30-day activity visualization
+- **Productivity Settings** - Override productivity level per app
+- **Recent Sessions** - Detailed list of recent usage sessions with duration
+- **Milestones** - Celebrate usage achievements (10h, 50h, 100h, etc.)
+- **Insights & Recommendations** - Smart analysis of your usage patterns
+- **Quick Actions** - Launch app, manage favorites, change productivity level
 ## Installation
 ### Prerequisites
 - Node.js 16 or higher
@@ -119,12 +184,15 @@ SQLite database provides better performance for queries and analytics while main
 -   `auto-launch` - Auto-start on system boot
 
 ## Roadmap
--   Weekly/Monthly statistics view
--   Export data to CSV/JSON
--   Custom themes
--   Application goals and limits
--   Productivity insights and analytics
--   Cloud sync support
+- ✅ ~~Weekly/Monthly statistics view~~ - Implemented
+- ✅ ~~Export data to CSV/JSON~~ - Implemented for Analytics, Productivity, and Goals
+- ✅ ~~Application goals and limits~~ - Implemented with comprehensive Goals system
+- ✅ ~~Productivity insights and analytics~~ - Implemented with dedicated Productivity page
+- 🚧 Settings page - In progress
+- 📋 Custom themes
+- 📋 Notifications for goal achievements
+- 📋 Desktop widgets for quick stats
+- 📋 Multi-language support
 
 ## Contributing
 Contributions are welcome! Please feel free to submit a Pull Request.
