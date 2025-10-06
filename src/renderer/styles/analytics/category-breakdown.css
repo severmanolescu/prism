@@ -6,23 +6,7 @@
     scroll-behavior: smooth;
   }
 
-  .category-grid::-webkit-scrollbar {
-    height: 8px;
-  }
 
-  .category-grid::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-  }
-
-  .category-grid::-webkit-scrollbar-thumb {
-    background: linear-gradient(to right, #4a5a68, #3c4043);
-    border-radius: 4px;
-  }
-
-  .category-grid::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to right, #66c0f4, #417a9b);
-  }
 
   .category-item {
     background: transparent;

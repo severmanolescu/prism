@@ -60,6 +60,7 @@ prism/
 │       ├── styles/              # Modular CSS files
 │       │   ├── analytics/       # Analytics page styles
 │       │   ├── app-details/     # App details page styles
+│       │   └── global/          # Global page styles
 │       │   └── goals/           # Goals page styles
 │       │   └── index-page/      # Main page styles
 │       │   └── productivity/    # Productivity page styles
@@ -105,7 +106,7 @@ SQLite database provides better performance for queries and analytics while main
 ### Key Dependencies
 -   `electron` - Desktop application framework
 -   `active-win` - Get active window information (Windows/macOS/Linux)
--   `sqlite3` - SQLite database for data persistence
+-   `better-sqlite3` - Better SQLite database for data persistence
 -   `auto-launch` - Auto-start on system boot
 
 ## Roadmap

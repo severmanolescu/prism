@@ -5,12 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Goals - Steam Time Tracker</title>
   <link rel="stylesheet" href="styles/goals/goals.css">
+  <link rel="stylesheet" href="styles/global/scrollbar.css">
 </head>
 <body>
   <div class="goals-container">
     <!-- Header -->
-    <div class="page-header">
-      <h1 class="page-title">Goals & Targets</h1>
+    <div class="goals-header">
+      <div class="date-range-controls">
+        <div class="time-range-selector">
+          <button class="time-range-btn active" data-period="today">Today</button>
+          <button class="time-range-btn" data-period="yesterday">Yesterday</button>
+          <button class="time-range-btn" data-period="2days">2 Days Ago</button>
+          <button class="time-range-btn" data-period="3days">3 Days Ago</button>
+        </div>
+
+        <div class="custom-date-picker">
+          <span>Custom: </span>
+          <input type="date" id="goalDatePicker" />
+        </div>
+
+        <div class="date-info" id="dateInfo">
+          Viewing today's goals
+        </div>
+      </div>
+
       <button class="primary-btn" id="addGoalBtn">
         <span class="btn-icon">+</span>
         Add New Goal
@@ -22,39 +40,36 @@
       <div class="stat-card">
         <div class="stat-icon">🎯</div>
         <div class="stat-content">
-          <div class="stat-value">8</div>
+          <div class="stat-value">0</div>
           <div class="stat-label">Active Goals</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon">✅</div>
         <div class="stat-content">
-          <div class="stat-value">5</div>
+          <div class="stat-value">0</div>
           <div class="stat-label">Achieved Today</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon">🔥</div>
         <div class="stat-content">
-          <div class="stat-value">7</div>
+          <div class="stat-value">0</div>
           <div class="stat-label">Day Streak</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon">📊</div>
         <div class="stat-content">
-          <div class="stat-value">63%</div>
+          <div class="stat-value">0%</div>
           <div class="stat-label">Success Rate</div>
         </div>
       </div>
     </div>
 
     <!-- Productivity Goals Section -->
+    <h3 class="section-header">Productivity Goals</h3>
     <section class="goals-section">
-      <h2 class="section-title">
-        <span class="section-icon">📈</span>
-        Productivity Goals
-      </h2>
 
       <div class="goals-list">
         <!-- Goal Card 1 -->
@@ -150,11 +165,8 @@
     </section>
 
     <!-- App-Specific Goals Section -->
+    <h3 class="section-header">App-Specific Goals</h3>
     <section class="goals-section">
-      <h2 class="section-title">
-        <span class="section-icon">💻</span>
-        App-Specific Goals
-      </h2>
 
       <div class="goals-list">
         <!-- App Goal 1 -->
@@ -280,11 +292,8 @@
     </section>
 
     <!-- Category Goals Section -->
+    <h3 class="section-header">Category Goals</h3>
     <section class="goals-section">
-      <h2 class="section-title">
-        <span class="section-icon">📁</span>
-        Category Goals
-      </h2>
 
       <div class="goals-list">
         <!-- Category Goal 1 -->
@@ -318,6 +327,118 @@
         </div>
       </div>
     </section>
+  </div>
+
+  <!-- Add Goal Modal -->
+  <div class="modal" id="addGoalModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Add New Goal</h2>
+        <button class="modal-close" id="closeModalBtn">&times;</button>
+      </div>
+
+      <form id="addGoalForm" class="modal-body">
+        <!-- Goal Type Selection -->
+        <div class="form-section">
+          <label class="form-label">Goal Type</label>
+          <div class="goal-type-selector">
+            <button type="button" class="goal-type-btn active" data-type="productivity_score">
+              <span class="goal-type-icon">🎯</span>
+              <span class="goal-type-label">Productivity Score</span>
+            </button>
+            <button type="button" class="goal-type-btn" data-type="productivity_time">
+              <span class="goal-type-icon">⏰</span>
+              <span class="goal-type-label">Focus Time</span>
+            </button>
+            <button type="button" class="goal-type-btn" data-type="work_sessions">
+              <span class="goal-type-icon">🌟</span>
+              <span class="goal-type-label">Work Sessions</span>
+            </button>
+            <button type="button" class="goal-type-btn" data-type="app">
+              <span class="goal-type-icon">💻</span>
+              <span class="goal-type-label">App Specific</span>
+            </button>
+            <button type="button" class="goal-type-btn" data-type="category">
+              <span class="goal-type-icon">📁</span>
+              <span class="goal-type-label">Category</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Basic Information -->
+        <div class="form-section">
+          <label class="form-label" for="goalName">Goal Name</label>
+          <input type="text" id="goalName" class="form-input" placeholder="e.g., Daily Productivity Score" required>
+        </div>
+
+        <div class="form-section">
+          <label class="form-label" for="goalDescription">Description</label>
+          <textarea id="goalDescription" class="form-input" rows="2" placeholder="Brief description of your goal"></textarea>
+        </div>
+
+        <div class="form-section">
+          <label class="form-label" for="goalIcon">Icon (Emoji)</label>
+          <input type="text" id="goalIcon" class="form-input" placeholder="🎯" maxlength="2">
+        </div>
+
+        <!-- Target Configuration -->
+        <div class="form-row">
+          <div class="form-section">
+            <label class="form-label" for="targetValue">Target Value</label>
+            <input type="number" id="targetValue" class="form-input" placeholder="70" required>
+          </div>
+
+          <div class="form-section">
+            <label class="form-label" for="targetUnit">Unit</label>
+            <select id="targetUnit" class="form-input">
+              <option value="score">Score</option>
+              <option value="minutes">Minutes</option>
+              <option value="hours">Hours</option>
+              <option value="sessions">Sessions</option>
+            </select>
+          </div>
+
+          <div class="form-section">
+            <label class="form-label" for="targetType">Type</label>
+            <select id="targetType" class="form-input">
+              <option value="minimum">Minimum (at least)</option>
+              <option value="maximum">Maximum (limit to)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Reference (App/Category) - shown conditionally -->
+        <div class="form-section" id="referenceSection" style="display: none;">
+          <label class="form-label" for="referenceId">Select App/Category</label>
+          <select id="referenceId" class="form-input">
+            <option value="">-- Select --</option>
+            <!-- Will be populated dynamically -->
+          </select>
+        </div>
+
+        <!-- Frequency -->
+        <div class="form-section">
+          <label class="form-label" for="frequency">Frequency</label>
+          <select id="frequency" class="form-input">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+
+        <!-- Additional Config (shown conditionally) -->
+        <div class="form-section" id="sessionDurationSection" style="display: none;">
+          <label class="form-label" for="minSessionDuration">Minimum Session Duration (minutes)</label>
+          <input type="number" id="minSessionDuration" class="form-input" placeholder="25">
+        </div>
+
+        <!-- Form Actions -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Goal</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script src="js/goals/goals.js"></script>

@@ -214,6 +214,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const goalsButton = document.getElementById("goals");
+
+    if (goalsButton) {
+        goalsButton.addEventListener('click', (e) => {
+            showGoalsView();
+        });
+    }
+
     // Initialize the app
     console.log('Steam Time Tracker initialized!');
     displayCurrentTime();

@@ -222,11 +222,13 @@ function showHiddenView() {
     const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
     const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
     const productivityContainer = document.querySelector('.productivity-iframe-wrapper');
+    const goalsContainer = document.querySelector('.goals-iframe-wrapper');
 
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (analyticsContainer) analyticsContainer.style.display = 'none';
     if (detailsContainer) detailsContainer.style.display = 'none';
     if (productivityContainer) productivityContainer.style.display = 'none';
+    if (goalsContainer) goalsContainer.style.display = 'none';
 
     // Reset view state
     toggleView('grid');
@@ -266,11 +268,13 @@ function showHomeView() {
     const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
     const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
     const productivityContainer = document.querySelector('.productivity-iframe-wrapper');
+    const goalsContainer = document.querySelector('.goals-iframe-wrapper');
 
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (analyticsContainer) analyticsContainer.style.display = 'none';
     if (detailsContainer) detailsContainer.style.display = 'none';
     if (productivityContainer) productivityContainer.style.display = 'none';
+    if (goalsContainer) goalsContainer.style.display = 'none';
 
     // Reset view state
     toggleView('grid');
@@ -338,6 +342,7 @@ function showAnalyticsView() {
     const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
     const sidebar = document.querySelector('.sidebar');
     const productivityContainer = document.querySelector('.productivity-iframe-wrapper');
+    const goalsContainer = document.querySelector('.goals-iframe-wrapper');
 
     if (recentSection) recentSection.style.display = 'none';
     if (allAppsSection) allAppsSection.style.display = 'none';
@@ -345,6 +350,7 @@ function showAnalyticsView() {
     if (sidebar) sidebar.style.display = 'none';
     if (detailsContainer) detailsContainer.style.display = 'none';
     if (productivityContainer) productivityContainer.style.display = 'none';
+    if (goalsContainer) goalsContainer.style.display = 'none';
 
     // Adjust main-content
     const mainContent = document.querySelector('.main-content');
@@ -403,6 +409,7 @@ function showProductivityView() {
     const categoryOverview = document.querySelector('.category-overview');
     const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
     const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
+    const goalsContainer = document.querySelector('.goals-iframe-wrapper');
     const sidebar = document.querySelector('.sidebar');
     
     if (recentSection) recentSection.style.display = 'none';
@@ -410,8 +417,8 @@ function showProductivityView() {
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (sidebar) sidebar.style.display = 'none';
     if (detailsContainer) detailsContainer.style.display = 'none';
+    if (goalsContainer) goalsContainer.style.display = 'none';
     if (analyticsContainer) analyticsContainer.style.display = 'none';
-
     
     // Adjust main-content
     const mainContent = document.querySelector('.main-content');
@@ -454,5 +461,68 @@ function showProductivityView() {
     // Update nav tab
     document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
     const analyticsTab = document.querySelector('.nav-tab[data-tab="productivity"]');
+    if (analyticsTab) analyticsTab.classList.add('active');
+}
+
+function showGoalsView(){
+    // Hide current content
+    const recentSection = document.querySelector('.recent-section');
+    const allAppsSection = document.querySelector('.all-apps-section');
+    const categoryOverview = document.querySelector('.category-overview');
+    const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
+    const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
+    const productivityContainer = document.querySelector('.productivity-iframe-wrapper');
+    const sidebar = document.querySelector('.sidebar');
+
+    if (recentSection) recentSection.style.display = 'none';
+    if (allAppsSection) allAppsSection.style.display = 'none';
+    if (categoryOverview) categoryOverview.style.display = 'none';
+    if (sidebar) sidebar.style.display = 'none';
+    if (detailsContainer) detailsContainer.style.display = 'none';
+    if (productivityContainer) productivityContainer.style.display = 'none';
+    if (analyticsContainer) analyticsContainer.style.display = 'none';
+
+
+    // Adjust main-content
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        mainContent.style.marginLeft = '0';
+        mainContent.style.width = '100%';
+    }
+
+    // Create iframe to completely isolate analytics
+    let goalsContainer = document.querySelector('.goals-iframe-wrapper');
+
+    if (!goalsContainer) {
+        goalsContainer = document.createElement('div');
+        goalsContainer.className = 'goals-iframe-wrapper';
+        goalsContainer.style.width = '100%';
+        goalsContainer.style.height = '100%';
+        goalsContainer.style.overflow = 'hidden';
+
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.display = 'block';
+        iframe.src = 'goals.html';
+
+        goalsContainer.appendChild(iframe);
+
+        if (mainContent) {
+            mainContent.appendChild(goalsContainer);
+        }
+    } else {
+        goalsContainer.style.display = 'block';
+    }
+
+    // Clear selections
+    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+    document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
+
+    // Update nav tab
+    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+    const analyticsTab = document.querySelector('.nav-tab[data-tab="goals"]');
     if (analyticsTab) analyticsTab.classList.add('active');
 }
