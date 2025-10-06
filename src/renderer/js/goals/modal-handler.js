@@ -381,21 +381,16 @@ async function handleFormSubmit(e) {
         if (isEditMode && editGoalId) {
             // Update existing goal - remove type field as it cannot be changed
             const { type, ...updateData } = formData;
-            console.log('Sending update data:', updateData);
-            console.log('Update data target_unit:', updateData.target_unit);
             const result = await api.updateGoal(parseInt(editGoalId), updateData);
-            console.log('Goal updated:', result);
         } else {
             // Create new goal
             const result = await api.createGoal(formData);
-            console.log('Goal created:', result);
         }
 
         closeModal();
         // Reload goals for current date
         await loadGoalsForDate(currentDate);
         showFeedback('Goal edited with success!', true);
-        console.log('Goals reloaded after', isEditMode ? 'update' : 'creation');
     } catch (error) {
         console.error(isEditMode ? 'Error updating goal:' : 'Error creating goal:', error);
         alert(`Failed to ${isEditMode ? 'update' : 'create'} goal: ${error.message}`);

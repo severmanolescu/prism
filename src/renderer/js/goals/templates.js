@@ -99,8 +99,6 @@ async function handleAddFromTemplate(templateId) {
         const result = await api.createGoalFromTemplate(templateId);
 
         if (result.success) {
-            console.log('Goal created from template:', result.goal);
-
             // Close templates modal
             closeTemplatesModalFunc();
 
