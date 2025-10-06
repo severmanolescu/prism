@@ -355,25 +355,12 @@ async function handleDrop(e) {
                 await loadAppsByCategory(currentCategory);
             }
             
-            showDragFeedback(`Moved ${draggedApp.name} to ${targetCategory}`, true);
+            showFeedback(`Moved ${draggedApp.name} to ${targetCategory}`, true);
         } else {
-            showDragFeedback('Failed to move app', false);
+            showFeedback('Failed to move app', false);
         }
     } catch (error) {
         console.error('Error moving app:', error);
-        showDragFeedback('Error moving app', false);
+        showFeedback('Error moving app', false);
     }
-}
-
-function showDragFeedback(message, success) {
-    const feedback = document.createElement('div');
-    feedback.className = `drag-feedback ${success ? 'success' : 'error'}`;
-    feedback.textContent = message;
-    document.body.appendChild(feedback);
-    
-    setTimeout(() => feedback.classList.add('show'), 10);
-    setTimeout(() => {
-        feedback.classList.remove('show');
-        setTimeout(() => feedback.remove(), 300);
-    }, 2000);
 }

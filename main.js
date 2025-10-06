@@ -99,6 +99,12 @@ app.whenReady().then(async () => {
     initializeIpcHandlers(window);
     console.log('IPC handlers initialized');
 
+    // Auto-save yesterday's goal progress on startup
+    const { autoSaveYesterdayProgress, scheduleMidnightSave } = require('./src/main/ipc/goals');
+    autoSaveYesterdayProgress();
+    scheduleMidnightSave();
+    console.log('Goal progress auto-save initialized');
+
     const appTracking = require('./src/main/services/app-tracking');
     appTracking.setMainWindow(window);
 

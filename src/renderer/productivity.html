@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="styles/productivity/productivity_score_card.css">
   <link rel="stylesheet" href="styles/productivity/productivity.css">
   <link rel="stylesheet" href="styles/productivity/top_apps.css">
+  <link rel="stylesheet" href="styles/global/scrollbar.css">
 </head>
 <body>
 <div class="productivity-container">
@@ -33,21 +34,18 @@
       <div class="date-info">
         1 days of data available
       </div>
-    </div>
 
-    <!-- Comparison Controls -->
-    <div class="comparison-controls">
+      <!-- Comparison Controls -->
       <label class="comparison-toggle">
         <input type="checkbox" id="enableComparison">
         <span>Compare with</span>
       </label>
-      <select class="comparison-select" id="comparisonPeriod" disabled>
-        <option value="yesterday">Yesterday</option>
-        <option value="last-week">Last Week</option>
-        <option value="last-month">Last Month</option>
-        <option value="last-year">Last Year</option>
-      </select>
+        <div class="custom-date-picker">
+          <input type="date" id="comparisonStartDate" />
+        </div>
     </div>
+
+
   </div>
 
   <!-- Productivity Score Overview -->

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goals - Steam Time Tracker</title>
+  <link rel="stylesheet" href="styles/goals/buttons.css">
+  <link rel="stylesheet" href="styles/goals/emoji-picker.css">
+  <link rel="stylesheet" href="styles/goals/goal-template.css">
+  <link rel="stylesheet" href="styles/goals/goals.css">
+  <link rel="stylesheet" href="styles/goals/insights.css">
+  <link rel="stylesheet" href="styles/goals/modals.css">
+  <link rel="stylesheet" href="styles/index-page/confirmation.css">
+  <link rel="stylesheet" href="styles/index-page/modals.css">
+  <link rel="stylesheet" href="styles/index-page/utilities.css">
+  <link rel="stylesheet" href="styles/global/scrollbar.css">
+</head>
+<body>
+  <div class="goals-container">
+    <!-- Header -->
+    <div class="goals-header">
+      <div class="date-range-controls">
+        <div class="time-range-selector">
+          <button class="time-range-btn active" data-period="today">Today</button>
+          <button class="time-range-btn" data-period="yesterday">Yesterday</button>
+          <button class="time-range-btn" data-period="2days">2 Days Ago</button>
+          <button class="time-range-btn" data-period="3days">3 Days Ago</button>
+        </div>
+
+        <div class="custom-date-picker">
+          <span>Custom: </span>
+          <input type="date" id="goalDatePicker" />
+        </div>
+
+        <div class="date-info" id="dateInfo">
+          Viewing today's goals
+        </div>
+
+        <button class="export-btn" id="exportBtn" title="Export goals data">
+          <span>📥 Export</span>
+        </button>
+      </div>
+
+      <div style="position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; gap: 10px;">
+        <button class="secondary-btn" id="browseTemplatesBtn" title="Browse goal templates">
+          Browse Templates
+        </button>
+        <button class="primary-btn" id="addGoalBtn">
+          <span class="btn-icon">+</span>
+          Add New Goal
+        </button>
+      </div>
+    </div>
+
+    <!-- Insights Section -->
+    <div class="insights-section collapsed" id="insightsSection">
+      <div class="insights-header" id="insightsToggle">
+        <h3 class="insights-title">
+          <span class="insights-icon">📊</span>
+          Insights & Analytics
+        </h3>
+        <button class="insights-toggle-btn">
+          <span class="toggle-icon">▼</span>
+        </button>
+      </div>
+
+      <div class="insights-content" id="insightsContent">
+        <div class="insights-grid">
+          <!-- Success Rate Chart -->
+          <div class="insight-card">
+            <h4 class="insight-card-title">7-Day Success Rate</h4>
+            <div class="success-rate-chart-container">
+              <canvas id="successRateChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Calendar Heatmap -->
+          <div class="insight-card">
+            <h4 class="insight-card-title">30-Day Activity</h4>
+            <div id="calendarHeatmap" class="calendar-heatmap-grid">
+              <!-- Heatmap will be rendered here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="goals-stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-content">
+          <div class="stat-label">Active Goals</div>
+          <div class="stat-value">0</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+          <div class="stat-label">Achieved Today</div>
+          <div class="stat-value">0</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">❌</div>
+        <div class="stat-content">
+          <div class="stat-label">Failed</div>
+          <div class="stat-value">0</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-content">
+          <div class="stat-label">Day Streak</div>
+          <div class="stat-value">0</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <div class="stat-label">Success Rate</div>
+          <div class="stat-value">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Productivity Goals Section -->
+    <h3 class="section-header">Productivity Goals</h3>
+    <section class="goals-section">
+
+      <div class="goals-list">
+
+      </div>
+    </section>
+
+    <!-- App-Specific Goals Section -->
+    <h3 class="section-header">App-Specific Goals</h3>
+    <section class="goals-section">
+
+      <div class="goals-list">
+
+      </div>
+    </section>
+
+    <!-- Category Goals Section -->
+    <h3 class="section-header">Category Goals</h3>
+    <section class="goals-section">
+
+      <div class="goals-list">
+
+      </div>
+    </section>
+  </div>
+
+  <!-- Add Goal Modal -->
+  <div class="modal-overlay" id="addGoalModal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Add New Goal</h3>
+        <button class="modal-close" id="closeModalBtn">&times;</button>
+      </div>
+
+      <form id="addGoalForm" class="modal-body">
+        <!-- Goal Type Selection -->
+        <div class="form-section">
+          <label class="form-label">Goal Type</label>
+          <div class="goal-type-selector">
+            <button type="button" class="goal-type-btn active" data-type="productivity_score"
+                    title="Track your overall productivity score based on productive, neutral, and unproductive time">
+              <span class="goal-type-icon">🎯</span>
+              <span class="goal-type-label">Productivity Score</span>
+            </button>
+            <button type="button" class="goal-type-btn" data-type="productivity_time"
+                    title="Track time spent on productive, neutral, or unproductive apps">
+              <span class="goal-type-icon">⏰</span>
+              <span class="goal-type-label">Focus Time</span>
+            </button>
+            <button type="button" class="goal-type-btn" data-type="work_sessions"
+                    title="Count sessions that meet a minimum duration threshold (e.g., 25+ minute deep work sessions)">
+              <span class="goal-type-icon">🌟</span>
+              <span class="goal-type-label">Work Sessions</span>
+            </button>
+            <button type="button" class="goal-type-btn" data-type="app"
+                    title="Track time spent on a specific application">
+              <span class="goal-type-icon">💻</span>
+              <span class="goal-type-label">App Specific</span>
+            </button>
+            <button type="button" class="goal-type-btn" data-type="category"
+                    title="Track time spent on apps in a specific category">
+              <span class="goal-type-icon">📁</span>
+              <span class="goal-type-label">Category</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Basic Information -->
+        <div class="form-section">
+          <label class="form-label" for="goalName">Goal Name</label>
+          <input type="text" id="goalName" class="form-input" placeholder="e.g., Daily Productivity Score" required>
+        </div>
+
+        <div class="form-section">
+          <label class="form-label" for="goalDescription">Description</label>
+          <textarea id="goalDescription" class="form-input" rows="2" placeholder="Brief description of your goal"></textarea>
+        </div>
+
+        <div class="form-section">
+          <label class="form-label" for="goalIcon">Icon (Emoji)</label>
+          <div style="display: flex; gap: 8px; align-items: center; position: relative;">
+            <input type="text" id="goalIcon" class="form-input" placeholder="🎯" maxlength="2" style="flex: 1;">
+            <button type="button" id="emojiPickerBtn" class="emoji-picker-btn" title="Pick an emoji">😀</button>
+            <div id="emojiPickerPopup" class="emoji-picker-popup" style="display: none;">
+              <div class="emoji-picker-grid">
+                <button type="button" class="emoji-option">🎯</button>
+                <button type="button" class="emoji-option">⭐</button>
+                <button type="button" class="emoji-option">🔥</button>
+                <button type="button" class="emoji-option">💪</button>
+                <button type="button" class="emoji-option">📚</button>
+                <button type="button" class="emoji-option">⏰</button>
+                <button type="button" class="emoji-option">✅</button>
+                <button type="button" class="emoji-option">📊</button>
+                <button type="button" class="emoji-option">💻</button>
+                <button type="button" class="emoji-option">🌟</button>
+                <button type="button" class="emoji-option">🚀</button>
+                <button type="button" class="emoji-option">⚡</button>
+                <button type="button" class="emoji-option">🎨</button>
+                <button type="button" class="emoji-option">🎵</button>
+                <button type="button" class="emoji-option">🎮</button>
+                <button type="button" class="emoji-option">📱</button>
+                <button type="button" class="emoji-option">💡</button>
+                <button type="button" class="emoji-option">🏆</button>
+                <button type="button" class="emoji-option">🎓</button>
+                <button type="button" class="emoji-option">📝</button>
+                <button type="button" class="emoji-option">✏️</button>
+                <button type="button" class="emoji-option">📖</button>
+                <button type="button" class="emoji-option">🔔</button>
+                <button type="button" class="emoji-option">⚙️</button>
+                <button type="button" class="emoji-option">🌈</button>
+                <button type="button" class="emoji-option">🎁</button>
+                <button type="button" class="emoji-option">🏃</button>
+                <button type="button" class="emoji-option">💼</button>
+                <button type="button" class="emoji-option">📈</button>
+                <button type="button" class="emoji-option">📉</button>
+                <button type="button" class="emoji-option">🔍</button>
+                <button type="button" class="emoji-option">🛠️</button>
+                <button type="button" class="emoji-option">⏱️</button>
+                <button type="button" class="emoji-option">📅</button>
+                <button type="button" class="emoji-option">🎤</button>
+                <button type="button" class="emoji-option">🎧</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Target Configuration -->
+        <div class="form-row">
+          <div class="form-section">
+            <label class="form-label" for="targetValue">Target Value</label>
+            <input type="number" id="targetValue" class="form-input" placeholder="70" required>
+          </div>
+
+          <div class="form-section">
+            <label class="form-label" for="targetUnit">Unit</label>
+            <select id="targetUnit" class="form-input">
+              <option value="score">Score</option>
+              <option value="minutes">Minutes</option>
+              <option value="hours">Hours</option>
+              <option value="sessions">Sessions</option>
+            </select>
+          </div>
+
+          <div class="form-section">
+            <label class="form-label" for="targetType">Type</label>
+            <select id="targetType" class="form-input">
+              <option value="minimum">Minimum (at least)</option>
+              <option value="maximum">Maximum (limit to)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Reference (App/Category) - shown conditionally -->
+        <div class="form-section" id="referenceSection" style="display: none;">
+          <label class="form-label" id="referenceLabel" for="referenceId">Select App/Category</label>
+          <select id="referenceId" class="form-input">
+            <option value="">-- Select --</option>
+            <!-- Will be populated dynamically -->
+          </select>
+        </div>
+
+        <!-- Productivity Level (for productivity_time goals) -->
+        <div class="form-section" id="productivityLevelSection" style="display: none;">
+          <label class="form-label" for="productivityLevel">Productivity Level</label>
+          <select id="productivityLevel" class="form-input">
+            <option value="productive">Productive</option>
+            <option value="neutral">Neutral</option>
+            <option value="unproductive">Unproductive</option>
+          </select>
+        </div>
+
+        <!-- Frequency -->
+        <div class="form-section">
+          <label class="form-label" for="frequency">Frequency</label>
+          <select id="frequency" class="form-input">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+
+        <!-- Additional Config (shown conditionally) -->
+        <div class="form-section" id="sessionDurationSection" style="display: none;">
+          <label class="form-label" for="minSessionDuration">Minimum Session Duration (minutes)</label>
+          <input type="number" id="minSessionDuration" class="form-input" placeholder="25">
+        </div>
+
+        <!-- Form Actions -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Goal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Goal Templates Modal -->
+  <div id="templatesModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📋 Goal Templates</h3>
+        <button class="modal-close" id="closeTemplatesModal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="color: #8f98a0; margin-bottom: 20px; font-size: 14px;">
+          Choose from pre-made goal templates to get started quickly. Click any template to add it to your goals.
+        </p>
+
+        <div id="templatesContainer">
+          <!-- Templates will be dynamically loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/index-page/confirmation-dialog.js"></script>
+  <script src="js/goals/delete-edit-buttons.js"></script>
+  <script src="js/goals/export.js"></script>
+  <script src="js/goals/goals-renderers.js"></script>
+  <script src="js/goals/goals.js"></script>
+  <script src="js/goals/modal-handler.js"></script>
+  <script src="js/goals/success-rate-chart.js"></script>
+  <script src="js/goals/templates.js"></script>
+</body>
+</html>

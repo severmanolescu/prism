@@ -91,12 +91,73 @@ async function initDatabase() {
       reason TEXT
     );
 
+    -- Goals Tables
+    CREATE TABLE IF NOT EXISTS goals (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+      -- Basic Info
+      name TEXT NOT NULL,
+      description TEXT,
+      icon TEXT,
+
+      -- Goal Type
+      type TEXT NOT NULL CHECK(type IN (
+        'productivity_score',
+        'productivity_time',
+        'work_sessions',
+        'app',
+        'category'
+      )),
+
+      -- Target Configuration
+      target_value REAL NOT NULL,
+      target_unit TEXT NOT NULL CHECK(target_unit IN ('score', 'minutes', 'hours', 'sessions')),
+      target_type TEXT NOT NULL CHECK(target_type IN ('minimum', 'maximum')),
+
+      -- Reference (for app/category/productivity_time goals)
+      reference_type TEXT CHECK(reference_type IN ('app', 'category', 'productivity_level')),
+      reference_id TEXT,
+
+      -- Additional Config
+      min_session_duration INTEGER,
+
+      -- Frequency
+      frequency TEXT NOT NULL CHECK(frequency IN ('daily', 'weekly', 'monthly')),
+
+      -- Status (soft delete)
+      is_active INTEGER DEFAULT 1,
+      deleted_at INTEGER DEFAULT NULL,
+
+      -- Metadata
+      created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000),
+      updated_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)
+    );
+
+    CREATE TABLE IF NOT EXISTS goal_progress (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      goal_id INTEGER NOT NULL,
+      date TEXT NOT NULL,
+      current_value REAL NOT NULL,
+      target_value REAL NOT NULL,
+      status TEXT CHECK(status IN ('achieved', 'in_progress', 'failed', 'warning')),
+
+      achieved_at INTEGER,
+
+      FOREIGN KEY (goal_id) REFERENCES goals(id) ON DELETE CASCADE,
+      UNIQUE(goal_id, date)
+    );
+
     -- Indexes for performance
     CREATE INDEX IF NOT EXISTS idx_sessions_app_id ON sessions(app_id);
     CREATE INDEX IF NOT EXISTS idx_sessions_start_time ON sessions(start_time);
     CREATE INDEX IF NOT EXISTS idx_sessions_app_date ON sessions(app_id, start_time);
     CREATE INDEX IF NOT EXISTS idx_apps_category ON apps(category);
     CREATE INDEX IF NOT EXISTS idx_apps_hidden ON apps(hidden);
+    CREATE INDEX IF NOT EXISTS idx_goal_progress_date ON goal_progress(date);
+    CREATE INDEX IF NOT EXISTS idx_goal_progress_goal_id ON goal_progress(goal_id);
+    CREATE INDEX IF NOT EXISTS idx_goal_progress_status ON goal_progress(status);
+    CREATE INDEX IF NOT EXISTS idx_goals_type ON goals(type);
+    CREATE INDEX IF NOT EXISTS idx_goals_active ON goals(is_active);
   `);
 
   console.log('Database initialized successfully');

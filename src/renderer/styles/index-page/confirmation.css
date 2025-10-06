@@ -111,6 +111,16 @@
     color: #ffffff;
 }
 
+.btn-danger {
+    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 80%);
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #e53935 0%, #c62828 80%);
+    transform: translateY(-1px);
+}
+
 .app-usage-stats {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);

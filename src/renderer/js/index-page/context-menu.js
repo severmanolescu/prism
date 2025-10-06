@@ -549,7 +549,7 @@ class ContextMenu {
                     }
                     
                     // Show success message
-                    showDragFeedback(`Hidden ${appName} from library`, 'success');
+                    showFeedback(`Hidden ${appName} from library`, 'success');
                 } else {
                     alert(result.error || 'Failed to hide app');
                 }
@@ -565,7 +565,7 @@ class ContextMenu {
             const result = await window.electronAPI.restoreHiddenApp(appId);
             if (result.success) {
                 await loadAppsByCategory("Hidden", true);
-                showDragFeedback(`Restored ${appName} to library`, 'success');
+                showFeedback(`Restored ${appName} to library`, 'success');
             } else {
                 alert(result.error || 'Failed to restore app');
             }
@@ -624,7 +624,7 @@ class ContextMenu {
                         await loadAppsByCategory(currentCategory);
                     }
                     
-                    showDragFeedback(`Removed ${appName} from tracker`, 'success');
+                    showFeedback(`Removed ${appName} from tracker`, 'success');
                 } else {
                     alert(result.error || 'Failed to remove app');
                 }
@@ -680,7 +680,7 @@ class ContextMenu {
                         await loadAppsByCategory(currentCategory);
                     }
                     
-                    showDragFeedback(`Permanently removed ${appName}`, 'success');
+                    showFeedback(`Permanently removed ${appName}`, 'success');
                 } else {
                     alert(result.error || 'Failed to remove app permanently');
                 }
