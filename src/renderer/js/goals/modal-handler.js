@@ -183,7 +183,6 @@ function setupModalListeners() {
 async function handleGoalTypeChange(type) {
     const referenceSection = document.getElementById('referenceSection');
     const referenceLabel = document.getElementById('referenceLabel');
-    const referenceId = document.getElementById('referenceId');
     const productivityLevelSection = document.getElementById('productivityLevelSection');
     const sessionDurationSection = document.getElementById('sessionDurationSection');
     const targetUnit = document.getElementById('targetUnit');
