@@ -71,5 +71,22 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getAppProductivityLevel: (appId) => ipcRenderer.invoke('get-app-productivity-level', appId),
   setCategoryProductivityLevel: (categoryId, level) => ipcRenderer.invoke('set-category-productivity-level', categoryId, level),
   getCategoryProductivityLevel: (categoryId) => ipcRenderer.invoke('get-category-productivity-level', categoryId),
-  getProductivityStats: (startDate, endDate) => ipcRenderer.invoke('get-productivity-stats', startDate, endDate)
+  getProductivityStats: (startDate, endDate) => ipcRenderer.invoke('get-productivity-stats', startDate, endDate),
+
+  // Goals API
+  getAllGoals: () => ipcRenderer.invoke('goals:getAll'),
+  getGoalsForDate: (date) => ipcRenderer.invoke('goals:getForDate', date),
+  createGoal: (goalData) => ipcRenderer.invoke('goals:create', goalData),
+  updateGoal: (goalId, goalData) => ipcRenderer.invoke('goals:update', goalId, goalData),
+  deleteGoal: (goalId) => ipcRenderer.invoke('goals:delete', goalId),
+  saveGoalProgressForDate: (date) => ipcRenderer.invoke('goals:saveProgressForDate', date),
+  saveYesterdayProgress: () => ipcRenderer.invoke('goals:saveYesterdayProgress'),
+
+  // Goal Templates API
+  getGoalTemplates: () => ipcRenderer.invoke('goals:getTemplates'),
+  getGoalTemplatesByCategory: () => ipcRenderer.invoke('goals:getTemplatesByCategory'),
+  createGoalFromTemplate: (templateId, customizations) => ipcRenderer.invoke('goals:createFromTemplate', templateId, customizations),
+
+  // Goal Insights API
+  getGoalInsights: (days) => ipcRenderer.invoke('goals:getInsights', days)
 });

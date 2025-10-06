@@ -1,0 +1,132 @@
+.export-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #092442 0%, #07417a 80%);
+    border: 1px solid rgba(102, 192, 244, 0.3);
+    color: #ffffff;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.export-btn:hover {
+    background: linear-gradient(135deg, #0a2f5a 0%, #0856a0 80%);
+    border-color: rgba(102, 192, 244, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(102, 192, 244, 0.3);
+}
+
+.export-btn:active {
+    transform: translateY(0);
+}
+
+.export-menu-item {
+    padding: 8px 14px;
+    color: #c6d4df;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.export-menu-item:hover {
+    background: rgba(102, 192, 244, 0.1);
+    color: #66c0f4;
+}
+
+.export-menu-item:first-child {
+    border-radius: 3px 3px 0 0;
+}
+
+.export-menu-item:last-child {
+    border-radius: 0 0 3px 3px;
+}
+
+.primary-btn {
+    background: linear-gradient(90deg, #06BFFF 0%, #2D73FF 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.primary-btn:hover {
+    background: linear-gradient(90deg, #1ac5ff 0%, #3d7fff 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(6, 191, 255, 0.3);
+}
+
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.05);
+    color: #c6d4df;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+#addGoalBtn {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+#browseTemplatesBtn {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #06BFFF 0%, #2D73FF 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #1ac5ff 0%, #3d7fff 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(6, 191, 255, 0.3);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #c7d5e0;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}

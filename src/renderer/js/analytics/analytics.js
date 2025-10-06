@@ -317,7 +317,12 @@ function updateCategoryBreakdown(categoryBreakdown) {
 function updateDateInfo(dateRange) {
   const dateInfo = document.querySelector('.date-info');
   if (dateInfo) {
-    dateInfo.textContent = `${dateRange.days} days of data available`;
+    if (dateRange.days === 1){
+        dateInfo.textContent = `${dateRange.days} day of data available`;
+    }
+    else{
+        dateInfo.textContent = `${dateRange.days} days of data available`;
+    }
   }
 }
 

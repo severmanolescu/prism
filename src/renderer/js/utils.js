@@ -214,3 +214,54 @@ function updateCustomDatesForPeriod(period, dateInputs) {
   if (dateInputs[0]) dateInputs[0].value = formatDateForInput(startDate);
   if (dateInputs[1]) dateInputs[1].value = formatDateForInput(endDate);
 }
+
+// Format minutes to hours and minutes
+function formatMinutes(minutes) {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+
+  if (hours > 0) {
+    return `${hours}h ${mins}m`;
+  }
+  return `${mins}m`;
+}
+
+// Format date to YYYY-MM-DD (compatible with date inputs)
+function formatDateString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Format date to long format
+function formatDateLong(date) {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+}
+
+// Get status text
+function getStatusText(goal) {
+  const progress = goal.progress_percentage || 0;
+
+  switch (goal.status) {
+    case 'achieved':
+      return '✓ Achieved';
+    case 'failed':
+      return '✗ Failed';
+    case 'warning':
+      // Different text based on goal type
+      if (goal.target_type === 'minimum') {
+        return '🔥 Almost There!';
+      } else {
+        return '⚠️ Near Limit';
+      }
+    case 'in_progress':
+      return `${progress}% Complete`;
+    default:
+      return 'Pending';
+  }
+}

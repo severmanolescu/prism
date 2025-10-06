@@ -8,7 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setupDateRangeControls();
   setupEventListeners();
   setupModalListeners();
+  setupInsightsSection();
   loadGoalsForDate(currentDate);
+  loadInsights();
 });
 
 // Setup date range controls
@@ -54,7 +56,8 @@ function setupDateRangeControls() {
             break;
         }
 
-        datePicker.valueAsDate = currentDate;
+        // Use value property to avoid timezone issues
+        datePicker.value = formatDateString(currentDate);
         loadGoalsForDate(currentDate);
       } catch (error) {
         console.error('Error loading goals for period:', error);
@@ -76,20 +79,34 @@ function setupDateRangeControls() {
     }
   });
 
-  // Set initial date
-  datePicker.valueAsDate = currentDate;
+  // Set initial date (use value to avoid timezone issues)
+  datePicker.value = formatDateString(currentDate);
 }
 
 // Load goals for specific date
-function loadGoalsForDate(date) {
+async function loadGoalsForDate(date) {
   try {
-    const dateString = formatDate(date);
+    const dateString = formatDateString(date);
 
-    //updateDateDisplay(date);
-    //updateStats(data.stats);
-    //renderGoals(data.goals);
+    // Fetch goals data from database (access through parent for iframe)
+    const api = window.electronAPI || parent.electronAPI;
+    const data = await api.getGoalsForDate(dateString);
+
+    updateDateDisplay(date);
+    updateStats(data.stats);
+    renderGoalsFromDatabase(data.goals, data.isToday);
   } catch (error) {
     console.error('Error loading goals for date:', error);
+
+    // Show empty state on error
+    updateDateDisplay(date);
+    updateStats({
+      activeGoals: 0,
+      achievedToday: 0,
+      dayStreak: 0,
+      successRate: 0
+    });
+    renderGoalsFromDatabase([], false);
   }
 }
 
@@ -141,138 +158,66 @@ function updateStats(stats) {
   }
 }
 
-// Render goals
-function renderGoals(goals) {
-  renderProductivityGoals(goals.productivity);
-  renderAppGoals(goals.apps);
-  renderCategoryGoals(goals.categories);
+// Render goals from database
+function renderGoalsFromDatabase(goals, isToday = true) {
+  // Group goals by type
+  const groupedGoals = {
+    productivity: [],
+    apps: [],
+    categories: []
+  };
+
+  goals.forEach(goal => {
+    if (goal.type === 'productivity_score' || goal.type === 'productivity_time' || goal.type === 'work_sessions') {
+      groupedGoals.productivity.push(goal);
+    } else if (goal.type === 'app') {
+      groupedGoals.apps.push(goal);
+    } else if (goal.type === 'category') {
+      groupedGoals.categories.push(goal);
+    }
+  });
+
+  // Check if we have no goals at all
+  const hasNoGoals = goals.length === 0;
+
+  renderProductivityGoals(groupedGoals.productivity, isToday, hasNoGoals);
+  renderAppGoals(groupedGoals.apps, isToday, hasNoGoals);
+  renderCategoryGoals(groupedGoals.categories, isToday, hasNoGoals);
 }
 
-// Render productivity goals
-function renderProductivityGoals(goals) {
-  const section = document.querySelector('.goals-section:nth-of-type(1) .goals-list');
-  if (!section) return;
-
-  if (!goals || goals.length === 0) {
-    section.innerHTML = '<p style="text-align: center; color: #8f98a0; padding: 20px;">No productivity goals set</p>';
-    return;
-  }
-
-  section.innerHTML = goals.map(goal => createGoalCard(goal)).join('');
-  attachGoalEventListeners(section);
-}
-
-// Render app goals
-function renderAppGoals(goals) {
-  const section = document.querySelector('.goals-section:nth-of-type(2) .goals-list');
-  if (!section) return;
-
-  if (!goals || goals.length === 0) {
-    section.innerHTML = '<p style="text-align: center; color: #8f98a0; padding: 20px;">No app goals set</p>';
-    return;
-  }
-
-  section.innerHTML = goals.map(goal => createGoalCard(goal, true)).join('');
-  attachGoalEventListeners(section);
-}
-
-// Render category goals
-function renderCategoryGoals(goals) {
-  const section = document.querySelector('.goals-section:nth-of-type(3) .goals-list');
-  if (!section) return;
-
-  if (!goals || goals.length === 0) {
-    section.innerHTML = '<p style="text-align: center; color: #8f98a0; padding: 20px;">No category goals set</p>';
-    return;
-  }
-
-  section.innerHTML = goals.map(goal => createCategoryGoalCard(goal)).join('');
-  attachGoalEventListeners(section);
-}
-
-// Create goal card HTML
-function createGoalCard(goal, showCategory = false) {
-  const progress = calculateProgress(goal);
-  const progressText = formatProgress(goal);
-  const statusText = getStatusText(goal);
-
-  return `
-    <div class="goal-card ${goal.status}">
-      <div class="goal-header">
-        <div class="goal-info">
-          <div class="goal-icon-large">${goal.icon}</div>
-          <div class="goal-details">
-            <h3 class="goal-name">${goal.name}</h3>
-            <p class="goal-description">${goal.description}</p>
-          </div>
-        </div>
-        <div class="goal-actions">
-          <button class="icon-btn" title="Edit goal">✏️</button>
-          <button class="icon-btn" title="Delete goal">🗑️</button>
-        </div>
-      </div>
-      <div class="goal-progress-section">
-        <div class="progress-bar-container">
-          <div class="progress-bar-fill ${goal.status}" style="width: ${Math.min(progress, 150)}%;"></div>
-        </div>
-        <div class="progress-info">
-          <span class="progress-current">${progressText}</span>
-          <span class="progress-status ${goal.status}">${statusText}</span>
-        </div>
-      </div>
-      <div class="goal-meta">
-        <span class="goal-frequency">📅 ${goal.frequency}</span>
-        ${goal.streak !== undefined ? `<span class="goal-streak">🔥 ${goal.streak} day streak</span>` : ''}
-        ${showCategory && goal.category ? `<span class="goal-category" style="background: ${getCategoryColor(goal.category)};">${goal.category}</span>` : ''}
-      </div>
-    </div>
-  `;
-}
-
-// Create category goal card HTML
-function createCategoryGoalCard(goal) {
-  const progress = calculateProgress(goal);
-  const progressText = formatProgress(goal);
-  const statusText = getStatusText(goal);
-
-  return `
-    <div class="goal-card ${goal.status}">
-      <div class="goal-header">
-        <div class="goal-info">
-          <div class="goal-icon-large">${goal.icon}</div>
-          <div class="goal-details">
-            <h3 class="goal-name">${goal.name}</h3>
-            <p class="goal-description">${goal.description}</p>
-          </div>
-        </div>
-        <div class="goal-actions">
-          <button class="icon-btn" title="Edit goal">✏️</button>
-          <button class="icon-btn" title="Delete goal">🗑️</button>
-        </div>
-      </div>
-      <div class="goal-progress-section">
-        <div class="progress-bar-container">
-          <div class="progress-bar-fill ${goal.status}" style="width: ${Math.min(progress, 150)}%;"></div>
-        </div>
-        <div class="progress-info">
-          <span class="progress-current">${progressText}</span>
-          <span class="progress-status ${goal.status}">${statusText}</span>
-        </div>
-      </div>
-      <div class="goal-meta">
-        <span class="goal-frequency">📅 ${goal.frequency}</span>
-        <span class="goal-apps">${goal.appCount} apps in category</span>
-      </div>
-    </div>
-  `;
-}
-
-// Calculate progress percentage
+// Calculate progress percentage (legacy)
 function calculateProgress(goal) {
   return Math.round((goal.current / goal.target) * 100);
 }
 
-// Format progress text
+// Format progress text from database goal object
+function formatProgressFromGoal(goal) {
+  const current = goal.current_value || 0;
+  const target = goal.target_value || 0;
+  const unit = goal.target_unit;
+
+  if (unit === 'hours' || unit === 'minutes') {
+    // Convert to milliseconds for formatTime (both are already in their respective units)
+    let currentMs, targetMs;
+
+    if (unit === 'hours') {
+      currentMs = current * 3600000; // hours to milliseconds
+      targetMs = target * 3600000;
+    } else {
+      currentMs = current * 60000; // minutes to milliseconds
+      targetMs = target * 60000;
+    }
+
+    return `${formatTime(currentMs)} / ${formatTime(targetMs)}`;
+  } else if (unit === 'score') {
+    return `Score: ${current} / ${target}`;
+  } else if (unit === 'sessions') {
+    return `${current} / ${target} sessions`;
+  }
+  return `${current} / ${target}`;
+}
+
+// Format progress text (legacy)
 function formatProgress(goal) {
   if (goal.unit === 'minutes') {
     return `${formatMinutes(goal.current)} / ${formatMinutes(goal.target)}`;
@@ -284,68 +229,37 @@ function formatProgress(goal) {
   return `${goal.current} / ${goal.target}`;
 }
 
-// Get status text
-function getStatusText(goal) {
-  const progress = calculateProgress(goal);
-
-  switch (goal.status) {
-    case 'achieved':
-      return '✓ Achieved';
-    case 'failed':
-      return '✗ Failed';
-    case 'warning':
-      return '⚠️ Near Limit';
-    case 'in-progress':
-      return `${progress}% Complete`;
-    default:
-      return 'Pending';
-  }
-}
-
-// Format minutes to hours and minutes
-function formatMinutes(minutes) {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-
-  if (hours > 0) {
-    return `${hours}h ${mins}m`;
-  }
-  return `${mins}m`;
-}
-
-// Get category color
-function getCategoryColor(category) {
-  const colors = {
-    'Development': '#66c0f4',
-    'Productivity': '#27ae60',
-    'Entertainment': '#e74c3c',
-    'Uncategorized': '#95a5a6'
-  };
-  return colors[category] || '#95a5a6';
-}
-
-// Format date to YYYY-MM-DD (compatible with date inputs)
-function formatDate(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-// Format date to long format
-function formatDateLong(date) {
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-}
-
 // Setup event listeners
 function setupEventListeners() {
   const addGoalBtn = document.getElementById('addGoalBtn');
   if (addGoalBtn) {
     addGoalBtn.addEventListener('click', handleAddGoal);
+  }
+
+  // Setup export button
+  const exportBtn = document.getElementById('exportBtn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', handleExportGoals);
+  }
+
+  const browseTemplatesBtn = document.getElementById('browseTemplatesBtn');
+  if (browseTemplatesBtn) {
+    browseTemplatesBtn.addEventListener('click', handleBrowseTemplates);
+  }
+
+  const closeTemplatesModalBtn = document.getElementById('closeTemplatesModal');
+  if (closeTemplatesModalBtn) {
+    closeTemplatesModalBtn.addEventListener('click', closeTemplatesModalFunc);
+  }
+
+  // Close templates modal when clicking outside
+  const templatesModal = document.getElementById('templatesModal');
+  if (templatesModal) {
+    templatesModal.addEventListener('click', (e) => {
+      if (e.target === templatesModal) {
+        closeTemplatesModalFunc();
+      }
+    });
   }
 }
 
@@ -378,172 +292,87 @@ function attachGoalEventListeners(section) {
 function handleAddGoal() {
   const modal = document.getElementById('addGoalModal');
   if (modal) {
-    modal.classList.add('show');
+    modal.style.display = 'flex';
     resetModalForm();
   }
 }
 
-// Reset modal form
-function resetModalForm() {
-  const form = document.getElementById('addGoalForm');
-  if (form) {
-    form.reset();
+// Setup insights section toggle
+function setupInsightsSection() {
+  const insightsToggle = document.getElementById('insightsToggle');
+  const insightsSection = document.getElementById('insightsSection');
 
-    // Reset goal type to first option
-    const goalTypeBtns = document.querySelectorAll('.goal-type-btn');
-    goalTypeBtns.forEach(btn => btn.classList.remove('active'));
-    if (goalTypeBtns[0]) {
-      goalTypeBtns[0].classList.add('active');
-    }
-
-    // Hide conditional sections
-    document.getElementById('referenceSection').style.display = 'none';
-    document.getElementById('sessionDurationSection').style.display = 'none';
-  }
-}
-
-// Close modal
-function closeModal() {
-  const modal = document.getElementById('addGoalModal');
-  if (modal) {
-    modal.classList.remove('show');
-  }
-}
-
-// Setup modal event listeners
-function setupModalListeners() {
-  const modal = document.getElementById('addGoalModal');
-  const closeBtn = document.getElementById('closeModalBtn');
-  const cancelBtn = document.getElementById('cancelModalBtn');
-  const form = document.getElementById('addGoalForm');
-
-  // Close button
-  if (closeBtn) {
-    closeBtn.addEventListener('click', closeModal);
-  }
-
-  // Cancel button
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', closeModal);
-  }
-
-  // Click outside modal to close
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        closeModal();
-      }
+  if (insightsToggle && insightsSection) {
+    insightsToggle.addEventListener('click', () => {
+      insightsSection.classList.toggle('collapsed');
     });
   }
+}
 
-  // ESC key to close
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeModal();
-    }
-  });
+// Load and render insights
+async function loadInsights() {
+  const api = window.electronAPI || parent.electronAPI;
 
-  // Goal type selector
-  const goalTypeBtns = document.querySelectorAll('.goal-type-btn');
-  goalTypeBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
+  try {
+    // Load 30 days of data for heatmap and 7 days for chart
+    const insights = await api.getGoalInsights(30);
 
-      // Remove active from all
-      goalTypeBtns.forEach(b => b.classList.remove('active'));
+    // Render success rate chart (last 7 days)
+    renderSuccessRateChart(insights.dailySuccessRate.slice(-7));
 
-      // Add active to clicked
-      btn.classList.add('active');
-
-      // Show/hide conditional fields
-      const type = btn.dataset.type;
-      handleGoalTypeChange(type);
-    });
-  });
-
-  // Form submit
-  if (form) {
-    form.addEventListener('submit', handleFormSubmit);
+    // Render calendar heatmap (all 30 days)
+    renderCalendarHeatmap(insights.calendarHeatmap);
+  } catch (error) {
+    console.error('Error loading insights:', error);
   }
 }
 
-// Handle goal type change
-function handleGoalTypeChange(type) {
-  const referenceSection = document.getElementById('referenceSection');
-  const sessionDurationSection = document.getElementById('sessionDurationSection');
-  const targetUnit = document.getElementById('targetUnit');
+// Render calendar heatmap
+function renderCalendarHeatmap(data) {
+  const container = document.getElementById('calendarHeatmap');
+  if (!container) return;
 
-  // Reset visibility
-  referenceSection.style.display = 'none';
-  sessionDurationSection.style.display = 'none';
-
-  // Show relevant sections based on type
-  switch (type) {
-    case 'app':
-    case 'category':
-      referenceSection.style.display = 'block';
-      // TODO: Populate with actual apps/categories
-      break;
-    case 'work_sessions':
-      sessionDurationSection.style.display = 'block';
-      targetUnit.value = 'sessions';
-      break;
-    case 'productivity_score':
-      targetUnit.value = 'score';
-      break;
-    case 'productivity_time':
-      targetUnit.value = 'minutes';
-      break;
-  }
-}
-
-// Handle form submit
-function handleFormSubmit(e) {
-  e.preventDefault();
-
-  // Get selected goal type
-  const selectedType = document.querySelector('.goal-type-btn.active');
-  if (!selectedType) {
-    alert('Please select a goal type');
+  if (!data || data.length === 0) {
+    container.innerHTML = '<div style="text-align: center; color: #8f98a0; padding: 20px; grid-column: 1 / -1;">No data available</div>';
     return;
   }
 
-  // Collect form data
-  const formData = {
-    type: selectedType.dataset.type,
-    name: document.getElementById('goalName').value,
-    description: document.getElementById('goalDescription').value,
-    icon: document.getElementById('goalIcon').value || '🎯',
-    target_value: parseFloat(document.getElementById('targetValue').value),
-    target_unit: document.getElementById('targetUnit').value,
-    target_type: document.getElementById('targetType').value,
-    frequency: document.getElementById('frequency').value,
-    reference_id: document.getElementById('referenceId').value || null,
-    min_session_duration: document.getElementById('minSessionDuration').value || null
-  };
+  // Calculate max success rate for intensity
+  const maxRate = 100;
 
-  console.log('Creating goal:', formData);
+  let html = [];
 
-  // TODO: Save to database via IPC
-  // For now, just show success message
-  alert(`Goal "${formData.name}" created successfully!\n\n(Database integration coming soon)`);
+  // Add day labels first
+  const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  dayLabels.forEach(label => {
+    html.push(`<div class="calendar-day-label">${label}</div>`);
+  });
 
-  closeModal();
-}
-
-// Handle edit goal
-function handleEditGoal(goalCard) {
-  const goalName = goalCard.querySelector('.goal-name').textContent;
-  console.log('Edit goal:', goalName);
-  alert(`Edit goal "${goalName}" feature coming soon!`);
-}
-
-// Handle delete goal
-function handleDeleteGoal(goalCard) {
-  const goalName = goalCard.querySelector('.goal-name').textContent;
-  
-  if (confirm(`Are you sure you want to delete the goal "${goalName}"?`)) {
-    console.log('Delete goal:', goalName);
-    alert('Delete goal feature coming soon!');
+  // Add empty cells for alignment to start on correct day
+  const firstDay = new Date(data[0].date).getDay();
+  for (let i = 0; i < firstDay; i++) {
+    html.push('<div class="calendar-day empty"></div>');
   }
+
+  // Add calendar days
+  data.forEach(day => {
+    const successRate = day.successRate !== null && day.total > 0 ? day.successRate : 0;
+    const intensity = successRate > 0 ? 0.2 + (successRate / maxRate) * 0.8 : 0.05;
+    const dayNum = new Date(day.date).getDate();
+    const dateStr = new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    const tooltip = day.total > 0
+      ? `${dateStr}: ${day.successRate}% (${day.achieved}/${day.total})`
+      : `${dateStr}: No goals`;
+
+    html.push(`
+      <div class="calendar-day"
+           style="background: rgba(102, 192, 244, ${intensity});"
+           title="${tooltip}">
+        ${dayNum}
+      </div>
+    `);
+  });
+
+  container.innerHTML = html.join('');
 }

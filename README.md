@@ -92,6 +92,15 @@ Apps can be hidden from the main view while still being tracked:
 -   Right-click an app → More → Hide from Library
 -   Access hidden apps via Library → Hidden in the top menu
 
+### Goals System
+Set and track productivity goals with different frequencies (daily, weekly, monthly):
+- **5 Goal Types**: Productivity score, focus time, work sessions, app-specific, category goals
+- **Smart Tracking**: Real-time progress for current periods, historical data for past periods
+- **Streak System**: Track consecutive days of goal achievement
+- **Auto-Save**: Automatic backfill for missed days when app was closed
+
+📚 **[View Complete Goals System Documentation](src/main/services/GOALS_SYSTEM_README.md)**
+
 ### Data Storage
 The application uses SQLite database for efficient data management
 SQLite database provides better performance for queries and analytics while maintaining data integrity.
