@@ -103,7 +103,7 @@ function showCreateCollectionModal() {
     const name = modal.querySelector('#collectionName').value.trim();
     
     if (!name) {
-      showDragFeedback('Please input a name!', false);
+      showFeedback('Please input a name!', false);
       return;
     }
     
@@ -117,9 +117,9 @@ function showCreateCollectionModal() {
       if (result.success) {
         modal.remove();
         showCategoryOverview();
-        showDragFeedback("Collection created successfully!", true);
+        showFeedback("Collection created successfully!", true);
       } else {
-        showDragFeedback(result.error || 'Failed to create collection, please try again', false);
+        showFeedback(result.error || 'Failed to create collection, please try again', false);
       }
     } catch (error) {
       console.error('Error creating collection:', error);
@@ -291,13 +291,13 @@ class CollectionContextMenu {
                     await createCategoryNavigation(allApps);
 
                     showCategoryOverview(); // Refresh view
-                    showDragFeedback("Collection deleted successfully!", true);
+                  showFeedback("Collection deleted successfully!", true);
                 } else {
-                    showDragFeedback(result.error || 'Failed to delete collection', false);
+                  showFeedback(result.error || 'Failed to delete collection', false);
                 }
             } catch (error) {
                 console.error('Error deleting collection:', error);
-                showDragFeedback('Failed to delete collection');
+              showFeedback('Failed to delete collection');
             }
         }
     }

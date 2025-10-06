@@ -394,6 +394,7 @@ async function handleFormSubmit(e) {
         closeModal();
         // Reload goals for current date
         await loadGoalsForDate(currentDate);
+        showFeedback('Goal edited with success!', true);
         console.log('Goals reloaded after', isEditMode ? 'update' : 'creation');
     } catch (error) {
         console.error(isEditMode ? 'Error updating goal:' : 'Error creating goal:', error);

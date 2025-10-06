@@ -216,9 +216,12 @@
 
 /* Goal Card */
 .goal-card {
-    background: linear-gradient(135deg, #1a3548 0%, #16202d 100%);
-    border-radius: 4px;
-    padding: 24px;
+    background: linear-gradient(135deg, rgba(42, 71, 94, 0.3) 0%, rgba(27, 40, 56, 0.5) 100%);
+        border: 1px solid rgba(0, 0, 0, 0.4);
+            border-top: 1px solid rgba(103, 193, 245, 0.15);
+            border-left: 3px solid rgba(102, 192, 244, 0.7);
+            border-radius: 3px;
+    padding: 14px;
     border: 1px solid rgba(102, 192, 244, 0.1);
     transition: all 0.2s ease;
 }

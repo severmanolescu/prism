@@ -23,7 +23,7 @@ async function handleEditGoal(goalCard) {
         openEditModal(goal);
     } catch (error) {
         console.error('Error loading goal for edit:', error);
-        alert(`Failed to load goal: ${error.message}`);
+        showFeedback(`Failed to load goal: ${error.message}`, false);
     }
 }
 
@@ -147,16 +147,14 @@ async function handleDeleteGoal(goalCard) {
         const api = window.electronAPI || parent.electronAPI;
 
         try {
-            console.log('Deleting goal:', goalId);
             await api.deleteGoal(parseInt(goalId));
-            console.log('Goal deleted successfully:', goalId);
-
+            showFeedback('Goal deleted successfully!', true);
             // Reload goals for current date
             await loadGoalsForDate(currentDate);
             console.log('Goals reloaded after deletion');
         } catch (error) {
             console.error('Error deleting goal:', error);
-            alert(`Failed to delete goal: ${error.message}`);
+            showFeedback(`Failed to delete goal: ${error.message}`, true);
         }
     }
 }

@@ -228,3 +228,22 @@
 .productivity-icon {
   font-size: 20px;
 }
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #66c0f4 0%, #417a9b 80%);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5cb3f0 0%, #5a9bc4 80%);
+  transform: translateY(-1px);
+}

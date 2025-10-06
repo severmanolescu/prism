@@ -265,3 +265,16 @@ function getStatusText(goal) {
       return 'Pending';
   }
 }
+
+function showFeedback(message, success) {
+  const feedback = document.createElement('div');
+  feedback.className = `drag-feedback ${success ? 'success' : 'error'}`;
+  feedback.textContent = message;
+  document.body.appendChild(feedback);
+
+  setTimeout(() => feedback.classList.add('show'), 10);
+  setTimeout(() => {
+    feedback.classList.remove('show');
+    setTimeout(() => feedback.remove(), 300);
+  }, 2000);
+}

@@ -151,10 +151,13 @@ function updateStats(stats) {
     statCards[1].querySelector('.stat-value').textContent = stats.achievedToday;
   }
   if (statCards[2]) {
-    statCards[2].querySelector('.stat-value').textContent = stats.dayStreak;
+    statCards[2].querySelector('.stat-value').textContent = stats.activeGoals - stats.achievedToday;
   }
   if (statCards[3]) {
-    statCards[3].querySelector('.stat-value').textContent = `${stats.successRate}%`;
+    statCards[3].querySelector('.stat-value').textContent = stats.dayStreak;
+  }
+  if (statCards[4]) {
+    statCards[4].querySelector('.stat-value').textContent = `${stats.successRate}%`;
   }
 }
 

@@ -16,7 +16,7 @@ async function handleBrowseTemplates() {
         }
     } catch (error) {
         console.error('Error loading templates:', error);
-        alert('Failed to load templates. Please try again.');
+        showFeedback('Failed to load templates. Please try again.', false);
     }
 }
 
@@ -79,7 +79,7 @@ async function handleAddFromTemplate(templateId) {
         const template = templates.find(t => t.id === templateId);
 
         if (!template) {
-            alert('Template not found.');
+            showFeedback('Template not found.', false);
             return;
         }
 
@@ -108,11 +108,11 @@ async function handleAddFromTemplate(templateId) {
             await loadGoalsForDate(currentDate);
 
             // Show success message
-            alert(`✅ Goal "${template.name}" added successfully!`);
+            showFeedback(`Goal "${template.name}" added successfully!`, true);
         }
     } catch (error) {
         console.error('Error adding goal from template:', error);
-        alert(`Failed to add goal: ${error.message}`);
+        showFeedback(`Failed to add goal: ${error.message}`, false);
     }
 }
 
