@@ -2,6 +2,14 @@ const { ipcMain } = require('electron');
 const { getDb } = require('../services/database');
 const { getAllTemplates, getTemplatesByCategory, createGoalFromTemplate } = require('../utils/goal-templates');
 
+// Helper function to get local date string from Date object
+function getLocalDateString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function initializeGoalHandlers() {
   // Get all goal templates
   ipcMain.handle('goals:getTemplates', async () => {
@@ -87,7 +95,7 @@ function initializeGoalHandlers() {
   ipcMain.handle('goals:getForDate', async (event, date) => {
     try {
       const db = getDb();
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalDateString(new Date());
 
       // Get all active goals with app/category names
       const goals = db.prepare(`
@@ -111,7 +119,7 @@ function initializeGoalHandlers() {
         const { startDate, endDate } = getDateRangeForGoal(goal, date);
 
         // Check if the goal existed on the date we're viewing
-        const goalCreatedDate = new Date(goal.created_at).toISOString().split('T')[0];
+        const goalCreatedDate = getLocalDateString(new Date(goal.created_at));
         if (goalCreatedDate > date) {
           // Goal didn't exist on this date, skip it
           return null;
@@ -384,7 +392,7 @@ function calculateProductivityTime(db, goal, startDate, endDate) {
     FROM sessions s
     JOIN apps a ON s.app_id = a.id
     LEFT JOIN categories c ON a.category = c.name
-    WHERE date(s.start_time/1000, 'unixepoch') BETWEEN ? AND ?
+    WHERE date(s.start_time/1000, 'unixepoch', 'localtime') BETWEEN ? AND ?
       AND COALESCE(a.productivity_level_override, c.productivity_level) = ?
   `).get(startDate, endDate, goal.reference_id);
 
@@ -406,7 +414,7 @@ function calculateWorkSessions(db, goal, startDate, endDate) {
   const result = db.prepare(`
     SELECT COUNT(*) as session_count
     FROM sessions
-    WHERE date(start_time/1000, 'unixepoch') BETWEEN ? AND ?
+    WHERE date(start_time/1000, 'unixepoch', 'localtime') BETWEEN ? AND ?
       AND duration >= ?
   `).get(startDate, endDate, minDuration);
 
@@ -444,7 +452,7 @@ function calculateAppTime(db, goal, startDate, endDate) {
   const result = db.prepare(`
     SELECT SUM(duration) as total_time
     FROM sessions
-    WHERE date(start_time/1000, 'unixepoch') BETWEEN ? AND ?
+    WHERE date(start_time/1000, 'unixepoch', 'localtime') BETWEEN ? AND ?
       AND app_id = ?
   `).get(startDate, endDate, appId);
 
@@ -465,7 +473,7 @@ function calculateCategoryTime(db, goal, startDate, endDate) {
     SELECT SUM(s.duration) as total_time
     FROM sessions s
     JOIN apps a ON s.app_id = a.id
-    WHERE date(s.start_time/1000, 'unixepoch') BETWEEN ? AND ?
+    WHERE date(s.start_time/1000, 'unixepoch', 'localtime') BETWEEN ? AND ?
       AND a.category = ?
   `).get(startDate, endDate, goal.reference_id);
 
@@ -681,7 +689,7 @@ ipcMain.handle('goals:saveYesterdayProgress', async () => {
   try {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayString = yesterday.toISOString().split('T')[0];
+    const yesterdayString = getLocalDateString(yesterday);
 
     return await ipcMain.emit('goals:saveProgressForDate', null, yesterdayString);
   } catch (error) {
@@ -708,7 +716,9 @@ function saveProgressForDate(date, forceUpdate = false) {
 
     goals.forEach(goal => {
       // Check if the goal existed on this date
-      const goalCreatedDate = new Date(goal.created_at).toISOString().split('T')[0];
+      // Convert created_at timestamp to local date string for comparison
+      const createdDate = new Date(goal.created_at);
+      const goalCreatedDate = `${createdDate.getFullYear()}-${String(createdDate.getMonth() + 1).padStart(2, '0')}-${String(createdDate.getDate()).padStart(2, '0')}`;
       if (goalCreatedDate > date) {
         console.log(`  Goal ${goal.name} was created on ${goalCreatedDate}, after ${date}, skipping`);
         skippedCount++;
@@ -790,13 +800,13 @@ function backfillMissingProgress() {
       SELECT MAX(date) as last_date FROM goal_progress
     `).get();
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString(new Date());
 
     if (!lastSaved || !lastSaved.last_date) {
       console.log('No previous progress found. Saving yesterday only.');
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayString = yesterday.toISOString().split('T')[0];
+      const yesterdayString = getLocalDateString(yesterday);
       return saveProgressForDate(yesterdayString);
     }
 
@@ -940,7 +950,7 @@ function scheduleMidnightSave() {
   setTimeout(() => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayString = yesterday.toISOString().split('T')[0];
+    const yesterdayString = getLocalDateString(yesterday);
 
     console.log('Midnight: Saving progress for', yesterdayString);
     saveProgressForDate(yesterdayString);
