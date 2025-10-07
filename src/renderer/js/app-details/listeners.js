@@ -123,31 +123,14 @@ document.getElementById('favorite-btn')?.addEventListener('click', async () => {
 });
 
 // Properties button
-document.getElementById('properties-btn')?.addEventListener('click', () => {
+document.getElementById('properties-btn')?.addEventListener('click', async () => {
   if (!appDetails) return;
 
-  const modal = document.getElementById('properties-modal');
-  if (modal) {
-    // Populate properties
-    document.getElementById('prop-name').textContent = appDetails.app.name;
-    document.getElementById('prop-category').textContent = appDetails.app.category;
-    document.getElementById('prop-executable').textContent = appDetails.app.executable || '-';
-    document.getElementById('prop-path').textContent = appDetails.app.path || '-';
-    document.getElementById('prop-first-added').textContent = appDetails.app.first_used
-      ? new Date(appDetails.app.first_used).toLocaleString()
-      : '-';
-    document.getElementById('prop-last-used').textContent = appDetails.app.last_used
-      ? new Date(appDetails.app.last_used).toLocaleString()
-      : '-';
-    document.getElementById('prop-total-time').textContent = formatTime(appDetails.app.total_time);
-    document.getElementById('prop-launch-count').textContent = appDetails.app.launch_count || 0;
-
-    modal.style.display = 'flex';
-  }
+  await showProperties();
 });
 
 // Close modal
-document.querySelector('.modal-close')?.addEventListener('click', () => {
+document.querySelector('.modal-close')?.addEventListener('click',  () => {
   const modal = document.getElementById('properties-modal');
   if (modal) {
     modal.style.display = 'none';
