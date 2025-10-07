@@ -62,10 +62,7 @@ const ContextMenuActions = {
         if (!this.currentApp) return;
 
         try {
-            const appName = this.currentApp.name || this.currentApp.appName;
-            if (appName) {
-                await loadAppDetails(appName);
-            }
+                await loadAppDetails();
         } catch (error) {
             console.error('Error loading details:', error);
             showFeedback('Failed to load app details', false);
