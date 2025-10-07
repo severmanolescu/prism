@@ -40,11 +40,19 @@ const ContextMenuCore = {
                 <div class="submenu" id="removeFromSubmenu"></div>
             </div>
             <div class="context-menu-separator"></div>
+            <div class="context-menu-item" data-action="properties">
+                <span class="context-menu-icon">📋</span>
+                <span>Properties</span>
+            </div>
             <div class="context-menu-item submenu-item" data-action="more-options">
                 <span class="context-menu-icon">⋯</span>
                 <span>More</span>
                 <span class="submenu-arrow">▶</span>
                 <div class="submenu" id="moreOptionsSubmenu">
+                    <div class="submenu-item-option" data-action="location">
+                        <span class="context-menu-icon">📂</span>
+                        <span>Open App Location</span>
+                    </div>
                     <div class="submenu-item-option hide-restore-item" data-action="hide">
                         <span class="context-menu-icon">👁️</span>
                         <span>Hide from Library</span>
@@ -199,10 +207,13 @@ const ContextMenuCore = {
             appId = element.dataset.appId;
         }
 
+        let appDetails = await window.electronAPI.getAppById(appId);
+
         this.currentApp = {
             id: appId,
             name: appName,
-            element: element
+            element: element,
+            path: appDetails.path
         };
 
         // Position the menu
@@ -255,7 +266,10 @@ const ContextMenuCore = {
         const hideItem = this.menu.querySelector('[data-action="hide"]');
 
         if (this.currentApp && favoriteItem) {
-            const isFavorite = favoritesCache.includes(this.currentApp.id);
+            // Fetch fresh favorites data to ensure accuracy
+            const currentFavorites = await window.electronAPI.getFavorites();
+            const favoriteIds = currentFavorites.map(app => app.id);
+            const isFavorite = favoriteIds.includes(this.currentApp.id);
             const favoriteIcon = favoriteItem.querySelector('.context-menu-icon');
             const favoriteText = favoriteItem.querySelector('span:last-child');
 

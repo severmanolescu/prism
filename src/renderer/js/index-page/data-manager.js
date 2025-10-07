@@ -80,19 +80,22 @@ async function loadAppsByCategory(category, preserveScroll = false) {
 async function loadFavoriteApps() {
     try {
         console.log('Loading favorite apps');
-        
-        // Get current favorites
-        const favoriteIds = await window.electronAPI.getFavorites();
-        console.log('Favorite IDs:', favoriteIds);
-        
+
+        // Get current favorites (returns full app objects)
+        const favorites = await window.electronAPI.getFavorites();
+        console.log('Favorites:', favorites);
+
+        // Extract IDs from favorite objects
+        const favoriteIds = favorites.map(app => app.id);
+
         // Filter from cached apps to get favorite apps
         const favoriteApps = allAppsCache.filter(app => favoriteIds.includes(app.id));
-        
+
         console.log('Filtered favorite apps:', favoriteApps.length);
         console.log('Favorite apps:', favoriteApps.map(app => app.name));
-        
+
         await displayAllApps(favoriteApps);
-        
+
     } catch (error) {
         console.error('Error loading favorite apps:', error);
     }

@@ -39,7 +39,8 @@ async function showCategoryOverview() {
     
     // Add favorites if they exist
     if (favoritesCache.length > 0) {
-        const favoriteApps = allAppsCache.filter(app => favoritesCache.includes(app.id));
+        const favoriteIds = favoritesCache.map(app => app.id);
+        const favoriteApps = allAppsCache.filter(app => favoriteIds.includes(app.id));
         if (favoriteApps.length > 0) {
             appsByCategory['Favorites'] = {
                 apps: favoriteApps,

@@ -12,7 +12,8 @@ async function createCategoryNavigation(apps) {
     
     // Create favorites section first if there are any favorites
     if (favoritesCache.length > 0) {
-        const favoriteApps = apps.filter(app => favoritesCache.includes(app.id));
+        const favoriteIds = favoritesCache.map(app => app.id);
+        const favoriteApps = apps.filter(app => favoriteIds.includes(app.id));
         if (favoriteApps.length > 0) {
             const favoritesSection = createNavSection('Favorites', favoriteApps, true);
             libraryNav.appendChild(favoritesSection);
@@ -185,7 +186,8 @@ async function populateOverlayCollections() {
     
     // Add favorites if they exist
     if (favoritesCache.length > 0) {
-        const favoriteApps = allAppsCache.filter(app => favoritesCache.includes(app.id));
+        const favoriteIds = favoritesCache.map(app => app.id);
+        const favoriteApps = allAppsCache.filter(app => favoriteIds.includes(app.id));
         if (favoriteApps.length > 0) {
             appsByCategory['Favorites'] = {
                 apps: favoriteApps,

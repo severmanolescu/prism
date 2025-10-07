@@ -22,6 +22,9 @@ const ContextMenuActions = {
             case 'favorite':
                 await this.toggleFavorite();
                 break;
+            case 'properties':
+                await this.showProperties();
+                break;
             case 'hide':
                 await this.hideApp();
                 break;
@@ -31,9 +34,28 @@ const ContextMenuActions = {
             case 'remove':
                 await this.removeApp();
                 break;
+            case 'location':
+                await this.openAppLocation();
+                break;
             case 'remove-permanently':
                 await this.removePermanently();
                 break;
+        }
+    },
+
+    async openAppLocation(){
+        if (!this.currentApp) return;
+            const appPath = this.currentApp.path;
+
+            if(appPath){
+                window.electronAPI.openFileLocation(appPath);
+                showFeedback("App location opened!", true);
+            }
+        try{
+
+        } catch(error){
+            console.error('Error opening app location:', error);
+            showFeedback('Failed to open app location', false);
         }
     },
 
@@ -44,9 +66,11 @@ const ContextMenuActions = {
         if (!this.currentApp) return;
 
         try {
+            const appId = this.currentApp.id;
             const appName = this.currentApp.name || this.currentApp.appName;
-            if (appName) {
-                await window.electronAPI.launchApp(appName);
+
+            if (appId) {
+                await window.electronAPI.launchApp(appId);
                 showFeedback(`Launching ${appName}...`, true);
             }
         } catch (error) {
@@ -62,7 +86,10 @@ const ContextMenuActions = {
         if (!this.currentApp) return;
 
         try {
-                await loadAppDetails();
+            const appName = this.currentApp.name || this.currentApp.appName;
+            if (appName) {
+                await showAppDetails(appName);
+            }
         } catch (error) {
             console.error('Error loading details:', error);
             showFeedback('Failed to load app details', false);
@@ -82,7 +109,9 @@ const ContextMenuActions = {
                 return;
             }
 
-            const isFavorite = favoritesCache.some(app => app.id === appId);
+            // favoritesCache is an array of app objects, not IDs
+            const favoriteIds = favoritesCache.map(app => app.id);
+            const isFavorite = favoriteIds.includes(appId);
 
             if (isFavorite) {
                 const result = await window.electronAPI.removeFromFavorites(appId);
@@ -90,7 +119,10 @@ const ContextMenuActions = {
                     favoritesCache = await window.electronAPI.getFavorites();
                     showFeedback('Removed from favorites', true);
 
-                    // Refresh if viewing favorites
+                    // Refresh navigation to update Favorites section
+                    await createCategoryNavigation(allAppsCache);
+
+                    // Refresh current view
                     if (currentCategory === 'Favorites') {
                         await loadFavoriteApps();
                     } else {
@@ -102,6 +134,11 @@ const ContextMenuActions = {
                 if (result.success) {
                     favoritesCache = await window.electronAPI.getFavorites();
                     showFeedback('Added to favorites', true);
+
+                    // Refresh navigation to update Favorites section
+                    await createCategoryNavigation(allAppsCache);
+
+                    // Refresh current view
                     displayAllApps(allAppsCache);
                 }
             }
@@ -124,15 +161,15 @@ const ContextMenuActions = {
                 return;
             }
 
-            const result = await window.electronAPI.hideApp(appId);
+            const result = await window.electronAPI.hideAppFromLibrary(appId);
             if (result.success) {
                 showFeedback('App hidden from library', true);
 
-                // Update the app in cache
-                const app = allAppsCache.find(app => app.id === appId);
-                if (app) {
-                    app.is_hidden = 1;
-                }
+                // Reload all apps from database (this excludes hidden apps)
+                allAppsCache = await window.electronAPI.getAllApps();
+
+                // Refresh navigation to update sidebar
+                await createCategoryNavigation(allAppsCache);
 
                 // Refresh the current view
                 if (currentCategory === 'Favorites') {
@@ -162,15 +199,15 @@ const ContextMenuActions = {
                 return;
             }
 
-            const result = await window.electronAPI.restoreApp(appId);
+            const result = await window.electronAPI.restoreHiddenApp(appId);
             if (result.success) {
                 showFeedback('App restored to library', true);
 
-                // Update the app in cache
-                const app = allAppsCache.find(app => app.id === appId);
-                if (app) {
-                    app.is_hidden = 0;
-                }
+                // Reload all apps from database (now includes restored app)
+                allAppsCache = await window.electronAPI.getAllApps();
+
+                // Refresh navigation to update sidebar
+                await createCategoryNavigation(allAppsCache);
 
                 // Refresh the current view
                 if (currentCategory === 'Favorites') {
@@ -193,23 +230,48 @@ const ContextMenuActions = {
     async removeApp() {
         if (!this.currentApp) return;
 
+        // Store app info before showing dialog (currentApp will be null after menu closes)
+        const appId = this.currentApp.id;
         const appName = this.currentApp.name || this.currentApp.appName;
-        const confirmed = await showConfirmationDialog(
-            'Remove from Tracker',
-            `Are you sure you want to stop tracking "${appName}"? This will keep your existing data.`
-        );
+
+        if (!appId) {
+            console.error('App ID is missing');
+            return;
+        }
+
+        const confirmed = await window.confirmationDialog.show({
+            title: 'Remove from Tracker',
+            message: `Are you sure you want to stop tracking "${appName}"? This will keep your existing data.`,
+            icon: '❌',
+            iconColor: '#e74c3c',
+            confirmText: 'Remove',
+            cancelText: 'Cancel',
+            dangerMode: false
+        });
 
         if (!confirmed) return;
 
         try {
-            const appId = this.currentApp.id;
-            if (!appId) {
-                console.error('App ID is missing');
-                return;
-            }
 
-            // Implementation would go here
-            showFeedback('App removed from tracker', true);
+            const result = await window.electronAPI.removeAppFromTracker(appId);
+            if (result.success) {
+                showFeedback('App removed from tracker', true);
+
+                // Reload all apps from database
+                allAppsCache = await window.electronAPI.getAllApps();
+
+                // Refresh navigation to update sidebar
+                await createCategoryNavigation(allAppsCache);
+
+                // Refresh the current view
+                if (currentCategory === 'Favorites') {
+                    await loadFavoriteApps();
+                } else if (currentCategory !== 'All Apps') {
+                    await loadAppsByCategory(currentCategory);
+                } else {
+                    displayAllApps(allAppsCache);
+                }
+            }
         } catch (error) {
             console.error('Error removing app:', error);
             showFeedback('Failed to remove app', false);
@@ -222,23 +284,48 @@ const ContextMenuActions = {
     async removePermanently() {
         if (!this.currentApp) return;
 
+        // Store app info before showing dialog (currentApp will be null after menu closes)
+        const appId = this.currentApp.id;
         const appName = this.currentApp.name || this.currentApp.appName;
-        const confirmed = await showConfirmationDialog(
-            'Permanently Delete',
-            `Are you sure you want to permanently delete "${appName}" and ALL its data? This cannot be undone.`
-        );
+
+        if (!appId) {
+            console.error('App ID is missing');
+            return;
+        }
+
+        const confirmed = await window.confirmationDialog.show({
+            title: 'Permanently Delete',
+            message: `Are you sure you want to permanently delete "${appName}" and ALL its data? This cannot be undone.`,
+            icon: '🗑️',
+            iconColor: '#c0392b',
+            confirmText: 'Delete Permanently',
+            cancelText: 'Cancel',
+            dangerMode: true
+        });
 
         if (!confirmed) return;
 
         try {
-            const appId = this.currentApp.id;
-            if (!appId) {
-                console.error('App ID is missing');
-                return;
-            }
 
-            // Implementation would go here
-            showFeedback('App permanently deleted', true);
+            const result = await window.electronAPI.removeAppPermanently(appId);
+            if (result.success) {
+                showFeedback('App permanently deleted', true);
+
+                // Reload all apps from database
+                allAppsCache = await window.electronAPI.getAllApps();
+
+                // Refresh navigation to update sidebar
+                await createCategoryNavigation(allAppsCache);
+
+                // Refresh the current view
+                if (currentCategory === 'Favorites') {
+                    await loadFavoriteApps();
+                } else if (currentCategory !== 'All Apps') {
+                    await loadAppsByCategory(currentCategory);
+                } else {
+                    displayAllApps(allAppsCache);
+                }
+            }
         } catch (error) {
             console.error('Error deleting app:', error);
             showFeedback('Failed to delete app', false);
@@ -367,5 +454,146 @@ const ContextMenuActions = {
             this.moveAppToCategory('Uncategorized');
             this.hide();
         });
+    },
+
+    /**
+     * Show properties modal
+     */
+    async showProperties() {
+        if (!this.currentApp) return;
+
+        try {
+            const appId = this.currentApp.id;
+            if (!appId) {
+                console.error('App ID is missing');
+                return;
+            }
+
+            // Fetch app details
+            const details = await window.electronAPI.getAppDetails(appId);
+            const categoryColor = await getCategoryColor(details.app.category);
+
+            console.log(details);
+
+            // Create properties modal
+            const modal = document.createElement('div');
+            modal.className = 'properties-modal-overlay';
+            modal.innerHTML = `
+                <div class="properties-modal">
+                    <div class="properties-header" style="background: linear-gradient(135deg, ${categoryColor} 0%, ${adjustBrightness(categoryColor, -20)} 100%);">
+                        <div class="properties-app-icon">
+                            ${details.app.icon_path ?
+                                `<img src="app-icon://${details.app.icon_path.replace(/^.*[\\\/]/, '').replace('icons/', '')}" alt="${escapeHtml(details.app.name)}">` :
+                                `<span class="app-icon-placeholder">${getAppIcon(details.app.name, details.app.category)}</span>`
+                            }
+                        </div>
+                        <div class="properties-app-info">
+                            <h2>${escapeHtml(details.app.name)}</h2>
+                            <p class="properties-category">${getCategoryIcon(details.app.category)} ${escapeHtml(details.app.category)}</p>
+                        </div>
+                        <button class="properties-close-btn" id="closePropertiesModal">✕</button>
+                    </div>
+                    <div class="properties-body">
+                        <div class="properties-section">
+                            <h3>📊 Statistics</h3>
+                            <div class="properties-stats-grid">
+                                <div class="property-item">
+                                    <span class="property-label">Total Time:</span>
+                                    <span class="property-value">${formatTime(details.stats.totalTime)}</span>
+                                </div>
+                                <div class="property-item">
+                                    <span class="property-label">Total Sessions:</span>
+                                    <span class="property-value">${details.stats.sessionCount || 0}</span>
+                                </div>
+                                <div class="property-item">
+                                    <span class="property-label">This Week:</span>
+                                    <span class="property-value">${formatTime(details.stats.thisWeek || 0)}</span>
+                                </div>
+                                <div class="property-item">
+                                    <span class="property-label">Longest Session:</span>
+                                    <span class="property-value">${formatTime(details.stats.longestSession || 0)}</span>
+                                </div>
+                                <div class="property-item">
+                                    <span class="property-label">Average Session:</span>
+                                    <span class="property-value">${formatTime(details.stats.avgSession || 0)}</span>
+                                </div>
+                                <div class="property-item">
+                                    <span class="property-label">First used:</span>
+                                    <span class="property-value">${details.stats.firstUsed ? new Date(details.stats.firstUsed).toLocaleDateString() : 'Never'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="properties-section">
+                            <h3>🔧 Details</h3>
+                            <div class="property-item">
+                                <span class="property-label">Executable Path:</span>
+                                <span class="property-value property-path">${escapeHtml(details.app.path || 'Unknown')}</span>
+                            </div>
+                            <div class="property-item">
+                                <span class="property-label">Category:</span>
+                                <span class="property-value">${escapeHtml(details.app.category)}</span>
+                            </div>
+                            <div class="property-item">
+                                <span class="property-label">Productivity:</span>
+                                <span class="property-value">${details.app.productivity_level || 'Use Category Default'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="properties-footer">
+                        <button class="properties-btn btn-secondary" id="openAppLocation">Open App Location</button>
+                        <button class="properties-btn btn-secondary" id="propertiesViewDetails">View Full Details</button>
+                        <button class="properties-btn btn-primary" id="propertiesClose">Close</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Add event listeners
+            const closeBtn = modal.querySelector('#closePropertiesModal');
+            const closeFooterBtn = modal.querySelector('#propertiesClose');
+            const viewDetailsBtn = modal.querySelector('#propertiesViewDetails');
+            const openAppLocationBtn = modal.querySelector('#openAppLocation');
+
+            const closeModal = () => {
+                modal.classList.remove('show');
+                setTimeout(() => modal.remove(), 300);
+            };
+
+            closeBtn.addEventListener('click', closeModal);
+            closeFooterBtn.addEventListener('click', closeModal);
+            viewDetailsBtn.addEventListener('click', () => {
+                closeModal();
+                showAppDetails(details.app.name);
+            });
+
+            openAppLocationBtn.addEventListener('click', () => {
+                window.electronAPI.openFileLocation(details.app.path);
+            });
+
+            // Close on overlay click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // Close on Escape key
+            const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                    document.removeEventListener('keydown', handleEscape);
+                    closeModal();
+                }
+            };
+            document.addEventListener('keydown', handleEscape);
+
+            // Show with animation
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+            });
+
+        } catch (error) {
+            console.error('Error showing properties:', error);
+            showFeedback('Failed to load properties', false);
+        }
     }
 };

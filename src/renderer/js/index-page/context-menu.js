@@ -41,10 +41,15 @@ class ContextMenu {
             }
         });
 
-        // Handle menu item clicks
+        // Handle menu item clicks (only for non-submenu items)
         this.menu.addEventListener('click', (e) => {
+            // Don't handle if click is on submenu content
+            if (e.target.closest('.submenu')) {
+                return;
+            }
+
             const menuItem = e.target.closest('.context-menu-item');
-            if (menuItem && !menuItem.classList.contains('disabled')) {
+            if (menuItem && !menuItem.classList.contains('disabled') && !menuItem.classList.contains('submenu-item')) {
                 const action = menuItem.dataset.action;
                 this.handleAction(action);
                 this.hide();
