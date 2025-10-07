@@ -473,8 +473,6 @@ const ContextMenuActions = {
             const details = await window.electronAPI.getAppDetails(appId);
             const categoryColor = await getCategoryColor(details.app.category);
 
-            console.log(details);
-
             // Create properties modal
             const modal = document.createElement('div');
             modal.className = 'properties-modal-overlay';
