@@ -57,27 +57,26 @@
 .worst-days-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  overflow: hidden;
 }
 
 .day-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
-  background: linear-gradient(135deg, rgba(42, 71, 94, 0.3) 0%, rgba(27, 40, 56, 0.5) 100%);
-  border: 1px solid rgba(0, 0, 0, 0.4);
-  border-top: 1px solid rgba(103, 193, 245, 0.15);
-  border-radius: 3px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
   transition: all 0.2s ease;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  border-left: 3px solid;
+  border-left-color: #66c0f4;
 }
 
 .day-item:hover {
-  background: linear-gradient(135deg, rgba(52, 81, 104, 0.4) 0%, rgba(37, 50, 66, 0.6) 100%);
-  border-top-color: rgba(103, 193, 245, 0.3);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(4px);
 }
 
 .day-item-date {
@@ -96,26 +95,25 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow: hidden;
 }
 
 .streak-item {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
-  background: linear-gradient(135deg, rgba(42, 71, 94, 0.3) 0%, rgba(27, 40, 56, 0.5) 100%);
-  border: 1px solid rgba(0, 0, 0, 0.4);
-  border-top: 1px solid rgba(103, 193, 245, 0.15);
-  border-radius: 3px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
   transition: all 0.2s ease;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  border-left: 3px solid;
+  border-left-color: #66c0f4;
 }
 
 .streak-item:hover {
-  background: linear-gradient(135deg, rgba(52, 81, 104, 0.4) 0%, rgba(37, 50, 66, 0.6) 100%);
-  border-top-color: rgba(103, 193, 245, 0.3);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(4px);
 }
 
 .streak-rank {
