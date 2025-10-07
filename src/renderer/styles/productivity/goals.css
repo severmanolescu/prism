@@ -19,6 +19,12 @@
     border-color: rgba(102, 192, 244, 0.3);
 }
 
+.goal-card.keyboard-selected {
+    background: rgba(102, 192, 244, 0.1);
+    border-color: #66c0f4;
+    box-shadow: 0 0 0 2px rgba(102, 192, 244, 0.3);
+}
+
 .goal-header {
     display: flex;
     align-items: center;

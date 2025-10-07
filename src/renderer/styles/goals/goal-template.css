@@ -231,6 +231,13 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+.goal-card.keyboard-selected {
+    background: linear-gradient(135deg, rgba(102, 192, 244, 0.15) 0%, rgba(42, 71, 94, 0.4) 100%);
+    border-color: #66c0f4;
+    border-left-color: #66c0f4;
+    box-shadow: 0 0 0 2px rgba(102, 192, 244, 0.4), 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
 /* Goal status-based border colors */
 .goal-card.achieved {
     border-left: 4px solid #27ae60;

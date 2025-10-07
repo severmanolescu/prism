@@ -466,3 +466,38 @@ function hideInheritedInfo() {
 
   inheritedInfo.style.display = 'none';
 }
+
+// Setup keyboard shortcuts for chart period switching
+document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('keydown', (e) => {
+    // Skip if typing in input field
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+      return;
+    }
+
+    const key = e.key.toLowerCase();
+    let period = null;
+
+    switch(key) {
+      case 'd':
+        period = 'daily';
+        break;
+      case 'w':
+        period = 'weekly';
+        break;
+      case 'm':
+        period = 'monthly';
+        break;
+    }
+
+    if (period) {
+      e.preventDefault();
+      // Find and click the corresponding chart tab
+      const tabs = document.querySelectorAll('.chart-tab');
+      const tab = Array.from(tabs).find(t => t.dataset.period === period);
+      if (tab) {
+        tab.click();
+      }
+    }
+  });
+});

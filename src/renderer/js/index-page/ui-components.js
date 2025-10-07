@@ -390,16 +390,24 @@ function showAnalyticsView() {
     } else {
         analyticsContainer.style.display = 'block';
     }
-    
+
     // Clear selections
     document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
     document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
     document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
-    
+
     // Update nav tab
     document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
     const analyticsTab = document.querySelector('.nav-tab[data-tab="analytics"]');
     if (analyticsTab) analyticsTab.classList.add('active');
+
+    // Focus iframe for keyboard shortcuts
+    setTimeout(() => {
+        const iframe = analyticsContainer.querySelector('iframe');
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.focus();
+        }
+    }, 100);
 }
 
 function showProductivityView() {
@@ -452,16 +460,24 @@ function showProductivityView() {
     } else {
         productivityContainer.style.display = 'block';
     }
-    
+
     // Clear selections
     document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
     document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
     document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
-    
+
     // Update nav tab
     document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
     const analyticsTab = document.querySelector('.nav-tab[data-tab="productivity"]');
     if (analyticsTab) analyticsTab.classList.add('active');
+
+    // Focus iframe for keyboard shortcuts
+    setTimeout(() => {
+        const iframe = productivityContainer.querySelector('iframe');
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.focus();
+        }
+    }, 100);
 }
 
 function showGoalsView(){
@@ -525,4 +541,12 @@ function showGoalsView(){
     document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
     const analyticsTab = document.querySelector('.nav-tab[data-tab="goals"]');
     if (analyticsTab) analyticsTab.classList.add('active');
+
+    // Focus iframe for keyboard shortcuts
+    setTimeout(() => {
+        const iframe = goalsContainer.querySelector('iframe');
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.focus();
+        }
+    }, 100);
 }

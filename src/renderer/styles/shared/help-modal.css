@@ -1,0 +1,178 @@
+/* Keyboard Help Modal */
+.keyboard-help-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.keyboard-help-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+}
+
+.keyboard-help-content {
+    position: relative;
+    background: linear-gradient(135deg, #1b2838 0%, #2a475e 100%);
+    border: 1px solid rgba(102, 192, 244, 0.3);
+    border-radius: 8px;
+    max-width: 900px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+.keyboard-help-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 30px;
+    border-bottom: 1px solid rgba(102, 192, 244, 0.2);
+    position: sticky;
+    top: 0;
+    background: linear-gradient(135deg, #1b2838 0%, #2a475e 100%);
+    z-index: 2;
+}
+
+.keyboard-help-header h2 {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.keyboard-help-close {
+    background: none;
+    border: none;
+    color: #8f98a0;
+    font-size: 32px;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.keyboard-help-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.keyboard-help-body {
+    padding: 24px 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.shortcut-section h3 {
+    color: #66c0f4;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(102, 192, 244, 0.2);
+}
+
+.shortcut-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.shortcut-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+.shortcut-item:hover {
+    background: rgba(102, 192, 244, 0.1);
+    border-color: rgba(102, 192, 244, 0.3);
+}
+
+.shortcut-item kbd {
+    background: linear-gradient(135deg, #16202d 0%, #1e2d3d 100%);
+    border: 1px solid rgba(102, 192, 244, 0.3);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: #66c0f4;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+    min-width: 24px;
+    text-align: center;
+    display: inline-block;
+}
+
+.shortcut-item > span {
+    color: #c6d4df;
+    font-size: 13px;
+    margin-left: auto;
+    padding-left: 12px;
+}
+
+/* Scrollbar for help modal */
+.keyboard-help-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.keyboard-help-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.keyboard-help-content::-webkit-scrollbar-thumb {
+    background: rgba(102, 192, 244, 0.3);
+    border-radius: 4px;
+}
+
+.keyboard-help-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(102, 192, 244, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .keyboard-help-body {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .keyboard-help-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .keyboard-help-header {
+        padding: 16px 20px;
+    }
+
+    .keyboard-help-header h2 {
+        font-size: 20px;
+    }
+
+    .keyboard-help-body {
+        padding: 16px 20px;
+    }
+}

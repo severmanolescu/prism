@@ -179,12 +179,67 @@ document.addEventListener('DOMContentLoaded', () => {
             const searchTerm = e.target.value.trim().toLowerCase();
             filterNavigation(searchTerm);
         });
-        
-        // Handle search clear (Escape key)
+
+        // Handle search navigation with arrow keys
         searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                e.target.value = '';
-                filterNavigation('');
+                if (e.target.value.trim() === '') {
+                    // If empty, unfocus the search input
+                    e.target.blur();
+                } else {
+                    // If has text, clear it
+                    e.target.value = '';
+                    filterNavigation('');
+                }
+                return;
+            }
+
+            // Arrow key navigation through visible nav items
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+
+                // Get all visible nav items (not categories, not hidden)
+                const visibleItems = Array.from(document.querySelectorAll('.nav-subitems .nav-item'))
+                    .filter(item => {
+                        const parent = item.closest('.nav-section');
+                        return item.offsetParent !== null && // is visible
+                               parent && !parent.classList.contains('collapsed'); // parent not collapsed
+                    });
+
+                if (visibleItems.length === 0) return;
+
+                // Find currently active item
+                const currentActive = visibleItems.findIndex(item => item.classList.contains('active'));
+                let nextIndex;
+
+                if (e.key === 'ArrowDown') {
+                    // Move down (or select first if none active)
+                    nextIndex = currentActive === -1 ? 0 : Math.min(currentActive + 1, visibleItems.length - 1);
+                } else {
+                    // Move up
+                    nextIndex = currentActive === -1 ? 0 : Math.max(currentActive - 1, 0);
+                }
+
+                // Remove active from all and add to selected
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                visibleItems[nextIndex].classList.add('active');
+
+                // Scroll into view
+                visibleItems[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // Enter key to open selected app
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const activeItem = document.querySelector('.nav-subitems .nav-item.active');
+                if (activeItem) {
+                    const appName = activeItem.dataset.appName;
+                    if (appName) {
+                        showAppDetails(appName);
+                        // Blur search input
+                        searchInput.blur();
+                    }
+                }
             }
         });
     }
@@ -224,6 +279,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Keyboard shortcuts for top navigation
     document.addEventListener('keydown', (e) => {
+        // Skip if typing in input/textarea (except for special keys)
+        const isInputField = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT';
+
         // Check if Ctrl (or Cmd on Mac) is pressed
         if (e.ctrlKey || e.metaKey) {
             switch(e.key) {
@@ -258,7 +316,91 @@ document.addEventListener('DOMContentLoaded', () => {
                         searchInput.select();
                     }
                     break;
+                case 'c':
+                    e.preventDefault();
+                    showCollectionsView();
+                    break;
+                case 'h':
+                    e.preventDefault();
+                    showHomeView();
+                    break;
             }
+            return;
+        }
+
+        // Non-modifier key shortcuts (skip if in input field)
+        if (isInputField && e.key !== '/') return;
+
+        switch(e.key) {
+            case 'G':
+                // Shift+G - Jump to bottom
+                if (e.shiftKey) {
+                    e.preventDefault();
+                    const scrollContainer = document.querySelector('.library-nav') ||
+                                          document.querySelector('.main-content') ||
+                                          document.querySelector('.content-area');
+                    if (scrollContainer) {
+                        scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
+                    }
+                }
+                break;
+            case 'g':
+                // g - Jump to top
+                e.preventDefault();
+                const scrollContainer = document.querySelector('.library-nav') ||
+                                      document.querySelector('.main-content') ||
+                                      document.querySelector('.content-area');
+                if (scrollContainer) {
+                    scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                break;
+            case '/':
+                // / - Focus search
+                if (!isInputField) {
+                    e.preventDefault();
+                    const searchInput = document.querySelector('.search-input');
+                    if (searchInput) {
+                        searchInput.focus();
+                        searchInput.select();
+                    }
+                }
+                break;
+            case 'x':
+            case 'X':
+                // X - Expand/collapse all categories
+                if (!isInputField) {
+                    e.preventDefault();
+                    const navSections = document.querySelectorAll('.nav-section');
+                    const allCollapsed = Array.from(navSections).every(section =>
+                        section.classList.contains('collapsed')
+                    );
+
+                    navSections.forEach(section => {
+                        const subitemsContainer = section.querySelector('.nav-subitems');
+                        const toggleButton = section.querySelector('.category-toggle');
+
+                        if (allCollapsed) {
+                            // Expand all
+                            section.classList.remove('collapsed');
+                            if (subitemsContainer) {
+                                subitemsContainer.style.maxHeight = subitemsContainer.scrollHeight + 'px';
+                            }
+                            if (toggleButton) {
+                                toggleButton.classList.remove('collapsed');
+                            }
+                        } else {
+                            // Collapse all
+                            section.classList.add('collapsed');
+                            if (subitemsContainer) {
+                                subitemsContainer.style.maxHeight = '0';
+                            }
+                            if (toggleButton) {
+                                toggleButton.classList.add('collapsed');
+                            }
+                        }
+                    });
+                }
+                break;
         }
     });
 
@@ -300,6 +442,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (searchInput) {
                         searchInput.focus();
                         searchInput.select();
+                    }
+                    break;
+                case 'c':
+                    const collectionBtn = document.querySelector('.library-submenu-item[data-submenu="collections"')
+                    if(collectionBtn){
+                        showCollectionsView();
+                    }
+                    break;
+                case 'h':
+                    const homeBtn = document.querySelector('.library-submenu-item[data-submenu="home"')
+                    if (collectionBtn) {
+                        showHomeView();
                     }
                     break;
             }
