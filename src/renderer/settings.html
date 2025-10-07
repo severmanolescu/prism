@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Time Tracker</title>
+  <link rel="stylesheet" href="styles/settings.css">
+</head>
+<body>
+  <div class="settings-container">
+    <!-- Settings Header -->
+    <div class="settings-header">
+      <h1>Settings</h1>
+      <p class="settings-subtitle">Customize your Time Tracker experience</p>
+    </div>
+
+    <!-- General Settings Section -->
+    <div class="settings-section">
+      <h3 class="section-header">General</h3>
+      <div class="settings-group">
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Launch at Startup</div>
+            <div class="setting-description">Automatically start Time Tracker when you log in</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="launchAtStartup">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Start Minimized</div>
+            <div class="setting-description">Start the application in the system tray</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="startMinimized">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Theme</div>
+            <div class="setting-description">Choose your preferred color theme</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select" id="theme">
+              <option value="dark">Dark (Steam)</option>
+              <option value="light">Light</option>
+              <option value="custom">Custom</option>
+              <option value="auto">Auto (System)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Language</div>
+            <div class="setting-description">Select your preferred language</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select" id="language">
+              <option value="en">English</option>
+              <option value="ro">Română</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+              <option value="pt">Português</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Custom Theme Section -->
+    <div class="settings-section theme-customization" id="customThemeSection" style="display: none;">
+      <h3 class="section-header">Custom Theme</h3>
+
+      <div class="theme-editor">
+        <!-- Color Pickers -->
+        <div class="color-pickers-grid">
+
+          <div class="color-picker-item">
+            <label class="color-label">Background Color</label>
+            <div class="color-input-wrapper">
+              <input type="color" id="bgColor" class="color-input" value="#1b2838">
+              <input type="text" class="color-text" value="#1b2838" readonly>
+            </div>
+          </div>
+
+          <div class="color-picker-item">
+            <label class="color-label">Secondary Background</label>
+            <div class="color-input-wrapper">
+              <input type="color" id="secondaryBgColor" class="color-input" value="#2a475e">
+              <input type="text" class="color-text" value="#2a475e" readonly>
+            </div>
+          </div>
+
+          <div class="color-picker-item">
+            <label class="color-label">Primary Accent</label>
+            <div class="color-input-wrapper">
+              <input type="color" id="accentColor" class="color-input" value="#66c0f4">
+              <input type="text" class="color-text" value="#66c0f4" readonly>
+            </div>
+          </div>
+
+          <div class="color-picker-item">
+            <label class="color-label">Secondary Accent</label>
+            <div class="color-input-wrapper">
+              <input type="color" id="secondaryAccentColor" class="color-input" value="#417a9b">
+              <input type="text" class="color-text" value="#417a9b" readonly>
+            </div>
+          </div>
+
+          <div class="color-picker-item">
+            <label class="color-label">Text Color</label>
+            <div class="color-input-wrapper">
+              <input type="color" id="textColor" class="color-input" value="#acb2b8">
+              <input type="text" class="color-text" value="#acb2b8" readonly>
+            </div>
+          </div>
+
+          <div class="color-picker-item">
+            <label class="color-label">Border Color</label>
+            <div class="color-input-wrapper">
+              <input type="color" id="borderColor" class="color-input" value="#2a3f5f">
+              <input type="text" class="color-text" value="#2a3f5f" readonly>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Live Preview -->
+        <div class="theme-preview">
+          <div class="preview-label">Live Preview</div>
+
+          <div class="preview-window" id="themePreview">
+            <!-- Mini UI Preview -->
+            <div class="preview-header">
+              <div class="preview-title">Time Tracker</div>
+              <div class="preview-controls">
+                <span class="preview-dot"></span>
+                <span class="preview-dot"></span>
+                <span class="preview-dot"></span>
+              </div>
+            </div>
+
+            <div class="preview-content">
+              <div class="preview-sidebar">
+                <div class="preview-nav-item active">Home</div>
+                <div class="preview-nav-item">Analytics</div>
+                <div class="preview-nav-item">Settings</div>
+              </div>
+
+              <div class="preview-main">
+                <div class="preview-card">
+                  <div class="preview-card-title">Sample Card</div>
+                  <div class="preview-card-content">
+                    <div class="preview-stat">
+                      <span class="preview-stat-label">Total Time</span>
+                      <span class="preview-stat-value">24h 30m</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="preview-button-group">
+                  <button class="preview-button primary">Primary Button</button>
+                  <button class="preview-button secondary">Secondary</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Theme Actions -->
+        <div class="theme-actions">
+          <button class="setting-button" id="resetTheme">Reset to Default</button>
+          <button class="setting-button" id="saveTheme">Save Theme</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Tracking Settings Section -->
+    <div class="settings-section">
+      <h3 class="section-header">Tracking</h3>
+      <div class="settings-group">
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Auto-Track Applications</div>
+            <div class="setting-description">Automatically track time spent in applications</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="autoTrack" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Idle Detection</div>
+            <div class="setting-description">Pause tracking when you're away from your computer</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="idleDetection" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Idle Timeout</div>
+            <div class="setting-description">Time of inactivity before pausing tracking</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select" id="idleTimeout">
+              <option value="1">1 minute</option>
+              <option value="5" selected>5 minutes</option>
+              <option value="10">10 minutes</option>
+              <option value="15">15 minutes</option>
+              <option value="30">30 minutes</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Minimum Session Duration</div>
+            <div class="setting-description">Don't track sessions shorter than this duration</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select" id="minSessionDuration">
+              <option value="0">No minimum</option>
+              <option value="5">5 seconds</option>
+              <option value="10" selected>10 seconds</option>
+              <option value="30">30 seconds</option>
+              <option value="60">1 minute</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Privacy Settings Section -->
+    <div class="settings-section">
+      <h3 class="section-header">Privacy</h3>
+      <div class="settings-group">
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Track Window Titles</div>
+            <div class="setting-description">Record specific window titles (may contain sensitive information)</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="trackWindowTitles">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Analytics & Telemetry</div>
+            <div class="setting-description">Help improve Time Tracker by sending anonymous usage data</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="telemetry">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Notifications Settings Section -->
+    <div class="settings-section">
+      <h3 class="section-header">Notifications</h3>
+      <div class="settings-group">
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Enable Notifications</div>
+            <div class="setting-description">Show desktop notifications for important events</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="enableNotifications" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Daily Summary</div>
+            <div class="setting-description">Receive a daily summary of your activity</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="dailySummary" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Goal Achievements</div>
+            <div class="setting-description">Get notified when you reach your productivity goals</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="goalNotifications" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Productivity Alerts</div>
+            <div class="setting-description">Alert when spending too much time on unproductive apps</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="productivityAlerts">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Data Management Section -->
+    <div class="settings-section">
+      <h3 class="section-header">Data Management</h3>
+      <div class="settings-group">
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Data Retention</div>
+            <div class="setting-description">How long to keep tracking data</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select" id="dataRetention">
+              <option value="30">30 days</option>
+              <option value="90">90 days</option>
+              <option value="180">6 months</option>
+              <option value="365" selected>1 year</option>
+              <option value="-1">Forever</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Export Data</div>
+            <div class="setting-description">Export all your tracking data to a file</div>
+          </div>
+          <div class="setting-control">
+            <button class="setting-button">Export</button>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Import Data</div>
+            <div class="setting-description">Import tracking data from a backup file</div>
+          </div>
+          <div class="setting-control">
+            <button class="setting-button">Import</button>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Database Location</div>
+            <div class="setting-description">Where your tracking data is stored</div>
+          </div>
+          <div class="setting-control">
+            <button class="setting-button">Open Folder</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Advanced Settings Section -->
+    <div class="settings-section">
+      <h3 class="section-header">Advanced</h3>
+      <div class="settings-group">
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Hardware Acceleration</div>
+            <div class="setting-description">Use GPU for better performance (requires restart)</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="hardwareAcceleration" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Debug Mode</div>
+            <div class="setting-description">Enable debug logging for troubleshooting</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="debugMode">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Open DevTools</div>
+            <div class="setting-description">Open developer tools for debugging</div>
+          </div>
+          <div class="setting-control">
+            <button class="setting-button">Open</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="settings-section danger-zone">
+      <h3 class="section-header">Danger Zone</h3>
+      <div class="settings-group">
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Clear All Data</div>
+            <div class="setting-description">Delete all tracking data permanently (cannot be undone)</div>
+          </div>
+          <div class="setting-control">
+            <button class="setting-button danger">Clear Data</button>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Reset Settings</div>
+            <div class="setting-description">Reset all settings to default values</div>
+          </div>
+          <div class="setting-control">
+            <button class="setting-button danger">Reset</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- About Section -->
+    <div class="settings-section">
+      <h3 class="section-header">About</h3>
+      <div class="settings-group">
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Version</div>
+            <div class="setting-description" id="appVersion">1.0.0</div>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Check for Updates</div>
+            <div class="setting-description">Check if a newer version is available</div>
+          </div>
+          <div class="setting-control">
+            <button class="setting-button">Check Now</button>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">License</div>
+            <div class="setting-description">View license information</div>
+          </div>
+          <div class="setting-control">
+            <button class="setting-button">View License</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script src="./js/utils.js"></script>
+  <script src="./js/settings/settings.js"></script>
+</body>
+</html>

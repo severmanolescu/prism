@@ -2,6 +2,14 @@
 <html lang="en">
 
 <head>
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="styles/shared/base.css">
+  <link rel="stylesheet" href="styles/shared/section-headers.css">
+  <link rel="stylesheet" href="styles/shared/buttons.css">
+  <link rel="stylesheet" href="styles/shared/date-controls.css">
+  <link rel="stylesheet" href="styles/shared/stats.css">
+
+  <!-- Page-Specific Styles -->
   <link rel="stylesheet" href="styles/productivity/goals.css">
   <link rel="stylesheet" href="styles/productivity/heatmap.css">
   <link rel="stylesheet" href="styles/productivity/insights.css">
@@ -330,7 +338,12 @@
 </div>
 </div>
 
+<!-- Shared Utilities -->
 <script src="./js/utils.js"></script>
+<script src="./js/shared/date-range.js"></script>
+<script src="./js/shared/export.js"></script>
+
+<!-- Page-Specific Scripts -->
 <script src="./js/productivity/app_switching_chart.js"></script>
 <script src="./js/productivity/export-handler.js"></script>
 <script src="./js/productivity/heatmap.js"></script>

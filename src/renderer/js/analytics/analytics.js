@@ -1,46 +1,5 @@
 let topAppsListCount = 8;
 
-function setupDateRangeControls() {
-  const tabs = document.querySelectorAll('.time-range-btn');
-  const dateInputs = document.querySelectorAll('.custom-date-picker input[type="date"]');
-
-  tabs.forEach((tab, index) => {
-    // Set data-period based on button text
-    const periods = ['today', 'week', 'month', 'year', 'alltime'];
-    tab.dataset.period = periods[index];
-
-    tab.addEventListener('click', () => {
-      // Remove active class from all tabs
-      tabs.forEach(t => t.classList.remove('active'));
-      // Add active class to clicked tab
-      tab.classList.add('active');
-      // Update the analytics view based on selected period
-      currentPeriod = tab.dataset.period;
-
-      // Update custom date inputs based on selected period
-      updateCustomDatesForPeriod(tab.dataset.period, dateInputs);
-
-      loadAnalyticsData(currentPeriod);
-    });
-  });
-
-  // Setup custom date picker
-  dateInputs.forEach(input => {
-    input.addEventListener('change', () => {
-      // When custom dates are changed, deactivate all buttons
-      tabs.forEach(t => t.classList.remove('active'));
-
-      // Load data for custom range
-      const startDate = dateInputs[0].value;
-      const endDate = dateInputs[1].value;
-      if (startDate && endDate) {
-        currentPeriod = 'custom';
-        loadAnalyticsData('custom', startDate, endDate);
-      }
-    });
-  });
-}
-
 // Listen for data from parent window
 window.addEventListener('message', (event) => {
   // Verify message comes from parent window
@@ -73,38 +32,7 @@ let categoriesCache = new Map(); // Cache for category colors
 let heatmapAppCount = 5; // Default to top 5 apps
 let currentAnalyticsData = null; // Cache analytics data for heatmap updates
 
-// Calculate date range based on period
-function calculateDateRange(period) {
-  const today = new Date();
-  let startDate, endDate;
-
-  switch(period) {
-    case 'today':
-      startDate = endDate = today;
-      break;
-    case 'week':
-      startDate = new Date(today);
-      startDate.setDate(today.getDate() - 7);
-      endDate = today;
-      break;
-    case 'month':
-      startDate = new Date(today);
-      startDate.setMonth(today.getMonth() - 1);
-      endDate = today;
-      break;
-    case 'year':
-      startDate = new Date(today);
-      startDate.setFullYear(today.getFullYear() - 1);
-      endDate = today;
-      break;
-    case 'alltime':
-      startDate = new Date(2025, 7, 1); 
-      endDate = today;
-      break;
-  }
-
-  return { startDate, endDate };
-}
+// calculateDateRange now provided by shared/date-range.js
 
 // Load analytics data for the selected period
 async function loadAnalyticsData(period, customStartDate, customEndDate) {
@@ -116,8 +44,8 @@ async function loadAnalyticsData(period, customStartDate, customEndDate) {
       endDate = customEndDate;
     } else {
       const range = calculateDateRange(period);
-      startDate = formatDateForInput(range.startDate);
-      endDate = formatDateForInput(range.endDate);
+      startDate = range.startDate;
+      endDate = range.endDate;
     }
 
     // Request data from parent window (main renderer process)
@@ -328,7 +256,18 @@ function updateDateInfo(dateRange) {
 
 // Initialize analytics
 function initAnalytics() {
-  setupDateRangeControls();
+  // Setup date range controls using shared utility
+  setupDateRangeControls({
+    onPeriodChange: (period, startDate, endDate) => {
+      currentPeriod = period;
+      loadAnalyticsData(period, startDate, endDate);
+    },
+    onCustomDateChange: (startDate, endDate) => {
+      currentPeriod = 'custom';
+      loadAnalyticsData('custom', startDate, endDate);
+    }
+  });
+
   setupHeatmapControls();
   // Request categories from parent window
   window.parent.postMessage({
