@@ -111,13 +111,14 @@ window.addEventListener('message', async (event) => {
         }
     } else if (event.data.type === 'TOGGLE_FAVORITE') {
         try {
-            const isFavorite = favoritesCache.includes(event.data.appId);
+            const favoriteIds = favoritesCache.map(app => app.id);
+            const isFavorite = favoriteIds.includes(event.data.appId);
             if (isFavorite) {
                 await window.electronAPI.removeFromFavorites(event.data.appId);
-                favoritesCache = favoritesCache.filter(id => id !== event.data.appId);
+                favoritesCache = await window.electronAPI.getFavorites();
             } else {
                 await window.electronAPI.addToFavorites(event.data.appId);
-                favoritesCache.push(event.data.appId);
+                favoritesCache = await window.electronAPI.getFavorites();
             }
 
             // Update button text in iframe
@@ -136,7 +137,8 @@ window.addEventListener('message', async (event) => {
         }
     } else if (event.data.type === 'CHECK_FAVORITE') {
         // Check if app is in favorites and send back result
-        const isFavorite = favoritesCache.includes(event.data.appId);
+        const favoriteIds = favoritesCache.map(app => app.id);
+        const isFavorite = favoriteIds.includes(event.data.appId);
         const iframe = document.querySelector('#app-details-iframe');
         if (iframe) {
             iframe.contentWindow.postMessage({

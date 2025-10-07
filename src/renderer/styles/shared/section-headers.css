@@ -1,0 +1,70 @@
+/* Shared Section Headers - Used across all pages */
+
+.section-header {
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: 500;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+}
+
+.section-header::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, #66c0f4, transparent);
+  margin-left: 12px;
+}
+
+/* Section header with subtitle */
+.section-subtitle {
+  font-size: 11px;
+  color: #8f98a0;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-left: 8px;
+}
+
+/* Section title (used in app-details) */
+.section-title {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, #66c0f4, transparent);
+  margin-left: 12px;
+}
+
+/* Full-width sections */
+.full-width-section {
+  margin-bottom: 20px;
+}
+
+/* Content sections */
+.content-section {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.content-section-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

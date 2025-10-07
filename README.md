@@ -129,12 +129,14 @@ prism/
 │       │   └── goals/           # Goals page styles
 │       │   └── index-page/      # Main page styles
 │       │   └── productivity/    # Productivity page styles
+│       │   └── shared/          # Shared page styles
 │       └── js/                  # Frontend JavaScript modules
 │           ├── analytics/       # Analytics page logic
 │           ├── app-details/     # App details page logic
 │           ├── goals/           # Goals page logic
 │           └── index-page/      # Main page logic
 │           └── productivity/    # Productivity page Logic
+│           └── shared/          # Shared src 
 ├── assets/                      # Images and icons
 └── main.js                      # Main Electron entry point
 ```

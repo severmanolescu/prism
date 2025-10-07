@@ -1,0 +1,137 @@
+/* Shared Button Styles */
+
+/* Export Button - Used in Analytics, Productivity, Goals */
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #092442 0%, #07417a 80%);
+  border: 1px solid rgba(102, 192, 244, 0.3);
+  color: #ffffff;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.export-btn:hover {
+  background: linear-gradient(135deg, #0a2f5a 0%, #0856a0 80%);
+  border-color: rgba(102, 192, 244, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 192, 244, 0.3);
+}
+
+.export-btn:active {
+  transform: translateY(0);
+}
+
+/* Export Menu Items */
+.export-menu-item {
+  padding: 8px 14px;
+  color: #c6d4df;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-menu-item:hover {
+  background: rgba(102, 192, 244, 0.1);
+  color: #66c0f4;
+}
+
+.export-menu-item:first-child {
+  border-radius: 3px 3px 0 0;
+}
+
+.export-menu-item:last-child {
+  border-radius: 0 0 3px 3px;
+}
+
+/* Primary Action Button */
+.btn-primary {
+  background: linear-gradient(to bottom, #5c7e10 5%, #4e6b0f 95%);
+  border: none;
+  color: #d2e885;
+  padding: 8px 24px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(to bottom, #6d9114 5%, #5c7e10 95%);
+  color: #e7f5a4;
+}
+
+/* Secondary Action Button */
+.btn-secondary {
+  background: rgba(103, 193, 245, 0.2);
+  border: 1px solid rgba(103, 193, 245, 0.4);
+  color: #66c0f4;
+  padding: 8px 18px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(103, 193, 245, 0.3);
+  border-color: #66c0f4;
+  color: #ffffff;
+}
+
+/* Section Action Button - Used in headers */
+.section-action-btn {
+  padding: 6px 12px;
+  background: linear-gradient(to bottom, #67c1f5 5%, #417a9b 100%);
+  border: 1px solid #417a9b;
+  border-radius: 3px;
+  color: #ffffff;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.section-action-btn:hover {
+  background: linear-gradient(to bottom, #76c9f7 5%, #4e8ab1 100%);
+}
+
+/* Back Button */
+.back-button {
+  background: rgba(103, 193, 245, 0.1);
+  border: 1px solid rgba(103, 193, 245, 0.2);
+  color: #66c0f4;
+  padding: 6px 14px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 11px;
+  margin-bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: rgba(103, 193, 245, 0.2);
+  border-color: #66c0f4;
+  color: #ffffff;
+}
+
+/* Button Icon */
+.btn-icon {
+  font-size: 14px;
+}

@@ -1,59 +1,20 @@
-// Export analytics data
+// Export analytics data using shared export utilities
+
 function exportAnalytics() {
   if (!currentAnalyticsData) {
     alert('No data to export');
     return;
   }
 
-  // Create export options menu
-  const exportOptions = document.createElement('div');
-  exportOptions.className = 'export-menu';
-  exportOptions.innerHTML = `
-    <div class="export-menu-item" data-format="csv">Export as CSV</div>
-    <div class="export-menu-item" data-format="json">Export as JSON</div>
-  `;
-  exportOptions.style.cssText = `
-    position: absolute;
-    right: 0;
-    top: 100%;
-    margin-top: 4px;
-    background: #16202d;
-    border: 1px solid rgba(102, 192, 244, 0.3);
-    border-radius: 3px;
-    min-width: 150px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-  `;
-
-  const exportBtn = document.querySelector('.export-btn');
-  exportBtn.style.position = 'relative';
-  exportBtn.appendChild(exportOptions);
-
-  // Handle export format selection
-  exportOptions.addEventListener('click', (e) => {
-    const format = e.target.dataset.format;
-    if (format) {
-      if (format === 'csv') {
-        exportAsCSV();
-      } else if (format === 'json') {
-        exportAsJSON();
-      }
-      exportOptions.remove();
-    }
+  // Setup export menu using shared utility
+  setupExportMenu({
+    triggerSelector: '.export-btn',
+    onCSVExport: exportAnalyticsAsCSV,
+    onJSONExport: exportAnalyticsAsJSON
   });
-
-  // Close menu when clicking outside
-  setTimeout(() => {
-    document.addEventListener('click', function closeMenu(e) {
-      if (!exportBtn.contains(e.target)) {
-        exportOptions.remove();
-        document.removeEventListener('click', closeMenu);
-      }
-    });
-  }, 0);
 }
 
-function exportAsCSV() {
+function exportAnalyticsAsCSV() {
   const data = currentAnalyticsData;
   const dateRange = `${data.dateRange.start}_to_${data.dateRange.end}`;
 
@@ -80,17 +41,11 @@ function exportAsCSV() {
     csv += `"${cat.category}",${formatTime(cat.total_time)},${cat.app_count},${cat.session_count}\n`;
   });
 
-  // Download CSV
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `analytics_${dateRange}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+  // Use shared export utility
+  exportAsCSV(`analytics_${dateRange}`, csv);
 }
 
-function exportAsJSON() {
+function exportAnalyticsAsJSON() {
   const data = currentAnalyticsData;
   const dateRange = `${data.dateRange.start}_to_${data.dateRange.end}`;
 
@@ -136,12 +91,6 @@ function exportAsJSON() {
     longestSession: data.longestSession
   };
 
-  // Download JSON
-  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `analytics_${dateRange}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+  // Use shared export utility
+  exportAsJSON(`analytics_${dateRange}`, exportData);
 }

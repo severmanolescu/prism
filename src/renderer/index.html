@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Time Tracker</title>
   <link rel="stylesheet" href="styles/index-page/main.css">
+  <link rel="stylesheet" href="styles/index-page/properties-modal.css">
   <link rel="stylesheet" href="styles/global/scrollbar.css">
 </head>
 <body>
@@ -130,51 +131,7 @@
 
   <!-- Context Menu -->
   <div class="context-menu" id="contextMenu">
-    <div class="context-menu-item" data-action="open">
-      <span class="context-menu-icon">🚀</span>
-      <span>Launch Application</span>
-    </div>
-    <div class="context-menu-item" data-action="details">
-      <span class="context-menu-icon">📊</span>
-      <span>View Details</span>
-    </div>
-    <div class="context-menu-separator"></div>
-    <div class="context-menu-item" data-action="favorite">
-      <span class="context-menu-icon">⭐</span>
-      <span>Add to Favorites</span>
-    </div>
-    <div class="context-menu-item submenu-item" data-action="add-to">
-      <span class="context-menu-icon">➕</span>
-      <span>Add to</span>
-      <span class="submenu-arrow">▶</span>
-      <div class="submenu" id="addToSubmenu"></div>
-    </div>
-    <div class="context-menu-item submenu-item" data-action="remove-from">
-      <span class="context-menu-icon">➖</span>
-      <span>Remove from</span>
-      <span class="submenu-arrow">▶</span>
-      <div class="submenu" id="removeFromSubmenu"></div>
-    </div>
-    <div class="context-menu-separator"></div>
-    <div class="context-menu-item submenu-item" data-action="more-options">
-      <span class="context-menu-icon">⋯</span>
-      <span>More</span>
-      <span class="submenu-arrow">▶</span>
-      <div class="submenu" id="moreOptionsSubmenu">
-        <div class="submenu-item-option hide-restore-item" data-action="hide">
-          <span class="context-menu-icon">👁️</span>
-          <span>Hide from Library</span>
-        </div>
-        <div class="submenu-item-option" data-action="remove">
-          <span class="context-menu-icon">❌</span>
-          <span>Remove from Tracker</span>
-        </div>
-        <div class="submenu-item-option" data-action="remove-permanently">
-          <span class="context-menu-icon">🗑️</span>
-          <span>Remove Permanently</span>
-        </div>
-      </div>
-    </div>
+
   </div>
 
   <!-- Scripts -->
@@ -184,6 +141,9 @@
   <script src="./js/index-page/ui-components.js"></script>
   <script src="./js/index-page/navigation.js"></script>
   <script src="./js/index-page/display.js"></script>
+  <!-- Context Menu Scripts (order matters: core and actions before main) -->
+  <script src="./js/index-page/context-menu-core.js"></script>
+  <script src="./js/index-page/context-menu-actions.js"></script>
   <script src="./js/index-page/context-menu.js"></script>
   <script src="./js/index-page/collections-view.js"></script>
   <script src="./js/index-page/window-controls.js"></script>

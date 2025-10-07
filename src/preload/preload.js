@@ -50,6 +50,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getAnalyticsData: (startDate, endDate) => ipcRenderer.invoke('get-analytics-data', startDate, endDate),
   getHourlyAppBreakdown: (startDate, endDate) => ipcRenderer.invoke('get-hourly-app-breakdown', startDate, endDate),
 
+  openFileLocation: (filePath) => ipcRenderer.invoke('open-file-location', filePath),
+
   // Productivity levels - generic invoke method
   invoke: (channel, ...args) => {
     const validChannels = [
@@ -88,5 +90,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   createGoalFromTemplate: (templateId, customizations) => ipcRenderer.invoke('goals:createFromTemplate', templateId, customizations),
 
   // Goal Insights API
-  getGoalInsights: (days) => ipcRenderer.invoke('goals:getInsights', days)
+  getGoalInsights: (days) => ipcRenderer.invoke('goals:getInsights', days),
 });

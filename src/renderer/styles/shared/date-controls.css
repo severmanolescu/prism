@@ -1,0 +1,79 @@
+/* Shared Date Range Controls - Used in Analytics, Productivity, Goals */
+
+.date-range-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.time-range-selector {
+  display: flex;
+  gap: 4px;
+}
+
+.time-range-btn {
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #8f98a0;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.time-range-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #c6d4df;
+}
+
+.time-range-btn.active {
+  background: linear-gradient(135deg, #092442 0%, #07417a 80%);
+  color: #ffffff;
+  border-color: rgba(102, 192, 244, 0.3);
+}
+
+/* Custom Date Picker */
+.custom-date-picker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.custom-date-picker input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #acb2b8;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-family: inherit;
+}
+
+.custom-date-picker input:focus {
+  outline: none;
+  border-color: #66c0f4;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.custom-date-picker span {
+  color: #8f98a0;
+  font-size: 11px;
+}
+
+/* Date Info Badge */
+.date-info {
+  padding: 6px 12px;
+  background: rgba(102, 192, 244, 0.1);
+  border: 1px solid rgba(102, 192, 244, 0.2);
+  border-radius: 3px;
+  color: #66c0f4;
+  font-size: 11px;
+}
