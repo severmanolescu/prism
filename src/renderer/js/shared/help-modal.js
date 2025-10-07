@@ -120,6 +120,14 @@
                         <h3>Goals Page</h3>
                         <div class="shortcut-list">
                             <div class="shortcut-item">
+                                <kbd>D</kbd>
+                                <span>Today</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>Y</kbd>
+                                <span>Yesterday</span>
+                            </div>
+                            <div class="shortcut-item">
                                 <kbd>N</kbd>
                                 <span>New Goal</span>
                             </div>
@@ -139,6 +147,28 @@
                                 <kbd>Delete</kbd> / <kbd>Backspace</kbd>
                                 <span>Delete Selected Goal</span>
                             </div>
+                            <div class="shortcut-item">
+                                <kbd>Ctrl</kbd> + <kbd>←</kbd> / <kbd>→</kbd>
+                                <span>Previous/Next Period</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="shortcut-section">
+                        <h3>App Details Page</h3>
+                        <div class="shortcut-list">
+                            <div class="shortcut-item">
+                                <kbd>D</kbd>
+                                <span>Today</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>W</kbd>
+                                <span>Week</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>M</kbd>
+                                <span>Month</span>
+                            </div>
                         </div>
                     </div>
 
@@ -152,6 +182,14 @@
                             <div class="shortcut-item">
                                 <kbd>Esc</kbd>
                                 <span>Close Modals</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>Ctrl</kbd> + <kbd>H</kbd>
+                                <span>Go to Home View</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>Ctrl</kbd> + <kbd>C</kbd>
+                                <span>Go to Collection View</span>
                             </div>
                         </div>
                     </div>

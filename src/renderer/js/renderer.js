@@ -452,7 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'h':
                     const homeBtn = document.querySelector('.library-submenu-item[data-submenu="home"')
-                    if (collectionBtn) {
+                    if (homeBtn) {
                         showHomeView();
                     }
                     break;
