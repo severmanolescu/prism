@@ -1,0 +1,35 @@
+/* Shared Base Styles - Global Resets and Container */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Motiva Sans", Arial, Helvetica, sans-serif;
+  background: linear-gradient(to bottom, #1b2838 0%, #171d25 100%);
+  color: #c7d5e0;
+  padding: 20px;
+  font-size: 12px;
+}
+
+/* Common Container Patterns */
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Common Header Patterns */
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-header h1 {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
