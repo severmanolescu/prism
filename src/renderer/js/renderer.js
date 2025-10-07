@@ -445,13 +445,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     break;
                 case 'c':
-                    const collectionBtn = document.querySelector('.library-submenu-item[data-submenu="collections"')
+                    const collectionBtn = document.querySelector('.library-submenu-item[data-submenu="collections"');
                     if(collectionBtn){
                         showCollectionsView();
                     }
                     break;
                 case 'h':
-                    const homeBtn = document.querySelector('.library-submenu-item[data-submenu="home"')
+                    const homeBtn = document.querySelector('.library-submenu-item[data-submenu="home"');
                     if (homeBtn) {
                         showHomeView();
                     }
