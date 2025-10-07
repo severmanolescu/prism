@@ -222,10 +222,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Keyboard shortcuts for top navigation
+    document.addEventListener('keydown', (e) => {
+        // Check if Ctrl (or Cmd on Mac) is pressed
+        if (e.ctrlKey || e.metaKey) {
+            switch(e.key) {
+                case '1':
+                    e.preventDefault();
+                    showHomeView();
+                    break;
+                case '2':
+                    e.preventDefault();
+                    showAnalyticsView();
+                    break;
+                case '3':
+                    e.preventDefault();
+                    showProductivityView();
+                    break;
+                case '4':
+                    e.preventDefault();
+                    showGoalsView();
+                    break;
+                case '5':
+                    e.preventDefault();
+                    // Settings tab
+                    const settingsTab = document.querySelector('.nav-tab[data-tab="settings"]');
+                    if (settingsTab) settingsTab.click();
+                    break;
+            }
+        }
+    });
+
     // Initialize the app
     console.log('Steam Time Tracker initialized!');
     displayCurrentTime();
-    
+
     // Update time every second
     setInterval(displayCurrentTime, 1000);
 
@@ -235,6 +266,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle analytics and productivity data requests from iframes
     window.addEventListener('message', async (event) => {
+        // Handle keyboard shortcuts from iframes
+        if (event.data.type === 'KEYBOARD_SHORTCUT') {
+            const key = event.data.key;
+            switch(key) {
+                case '1':
+                    showHomeView();
+                    break;
+                case '2':
+                    showAnalyticsView();
+                    break;
+                case '3':
+                    showProductivityView();
+                    break;
+                case '4':
+                    showGoalsView();
+                    break;
+                case '5':
+                    const settingsTab = document.querySelector('.nav-tab[data-tab="settings"]');
+                    if (settingsTab) settingsTab.click();
+                    break;
+            }
+            return;
+        }
+
         // Verify message comes from our analytics or productivity iframe
         const analyticsIframe = document.querySelector('.analytics-iframe-wrapper iframe');
         const productivityIframe = document.querySelector('.productivity-iframe-wrapper iframe');
