@@ -1,4 +1,4 @@
-const { ipcMain } = require('electron');
+const { ipcMain, shell } = require('electron');
 const { spawn } = require('child_process');
 
 const {
@@ -203,6 +203,11 @@ function initializeAppHandlers() {
       console.error('Error getting app by id:', error);
       return null;
     }
+  });
+
+  ipcMain.handle('open-file-location', async (event, filePath) => {
+    if (!filePath) return;
+    shell.showItemInFolder(filePath);
   });
 
   ipcMain.handle('launch-app', async (event, appId) => {

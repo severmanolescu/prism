@@ -14,6 +14,7 @@ const ContextMenuCore = {
         if (!existingMenu) return;
 
         existingMenu.innerHTML = `
+            <!-- Core Actions -->
             <div class="context-menu-item" data-action="open">
                 <span class="context-menu-icon">🚀</span>
                 <span>Launch Application</span>
@@ -22,7 +23,10 @@ const ContextMenuCore = {
                 <span class="context-menu-icon">📊</span>
                 <span>View Details</span>
             </div>
+
             <div class="context-menu-separator"></div>
+
+            <!-- Favorites & Lists -->
             <div class="context-menu-item" data-action="favorite">
                 <span class="context-menu-icon">⭐</span>
                 <span>Add to Favorites</span>
@@ -39,20 +43,27 @@ const ContextMenuCore = {
                 <span class="submenu-arrow">▶</span>
                 <div class="submenu" id="removeFromSubmenu"></div>
             </div>
+
             <div class="context-menu-separator"></div>
+
+            <!-- File & Properties -->
+            <div class="context-menu-item" data-action="location">
+                <span class="context-menu-icon">📂</span>
+                <span>Open App Location</span>
+            </div>
             <div class="context-menu-item" data-action="properties">
                 <span class="context-menu-icon">📋</span>
                 <span>Properties</span>
             </div>
+
+            <div class="context-menu-separator"></div>
+
+            <!-- More Options -->
             <div class="context-menu-item submenu-item" data-action="more-options">
                 <span class="context-menu-icon">⋯</span>
                 <span>More</span>
                 <span class="submenu-arrow">▶</span>
                 <div class="submenu" id="moreOptionsSubmenu">
-                    <div class="submenu-item-option" data-action="location">
-                        <span class="context-menu-icon">📂</span>
-                        <span>Open App Location</span>
-                    </div>
                     <div class="submenu-item-option hide-restore-item" data-action="hide">
                         <span class="context-menu-icon">👁️</span>
                         <span>Hide from Library</span>
@@ -68,6 +79,7 @@ const ContextMenuCore = {
                 </div>
             </div>
         `;
+
     },
 
     /**
