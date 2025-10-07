@@ -249,6 +249,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     const settingsTab = document.querySelector('.nav-tab[data-tab="settings"]');
                     if (settingsTab) settingsTab.click();
                     break;
+                case 'f':
+                    e.preventDefault();
+                    // Focus search input
+                    const searchInput = document.querySelector('.search-input');
+                    if (searchInput) {
+                        searchInput.focus();
+                        searchInput.select();
+                    }
+                    break;
             }
         }
     });
@@ -285,6 +294,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 case '5':
                     const settingsTab = document.querySelector('.nav-tab[data-tab="settings"]');
                     if (settingsTab) settingsTab.click();
+                    break;
+                case 'f':
+                    const searchInput = document.querySelector('.search-input');
+                    if (searchInput) {
+                        searchInput.focus();
+                        searchInput.select();
+                    }
                     break;
             }
             return;
