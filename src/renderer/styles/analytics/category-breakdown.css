@@ -6,10 +6,8 @@
     scroll-behavior: smooth;
   }
 
-
-
   .category-item {
-    background: transparent;
+    background: linear-gradient(135deg, rgba(42, 71, 94, 0.3) 0%, rgba(27, 40, 56, 0.5) 100%);
     border: none;
     border-left: 3px solid;
     padding: 14px;
