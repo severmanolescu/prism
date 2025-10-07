@@ -1,10 +1,18 @@
 async function showAppDetails(appName) {
     
     // Get the app ID from the clicked element or find it
-    const appData = allAppsCache.find(app => app.name === appName);
+    let appData = allAppsCache.find(app => app.name === appName);
     if (!appData) {
-        console.error('App not found:', appName);
-        return;
+        console.log('App not found:', appName, ", trying to find it in hidden apps!");
+
+        const hiddenIds = await window.electronAPI.getHiddenApps();
+
+        appData = hiddenIds.find(app => app.name === appName);
+
+        if(!appData){
+            console.error("App not found!");
+            return;
+        }
     }
     
     // Fetch app details from main process

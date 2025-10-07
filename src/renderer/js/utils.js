@@ -62,6 +62,11 @@ function getCategoryIcon(categoryName) {
 
 async function getCategoryColor(categoryName) {
   try {
+    // Special case for Favorites - return gold color
+    if (categoryName === 'Favorites') {
+      return '#ffd700';
+    }
+
     const categories = await window.electronAPI.getCategories();
     const category = categories.find(c => c.name === categoryName);
     const color = category ? (category.color || '#092442') : '#092442';

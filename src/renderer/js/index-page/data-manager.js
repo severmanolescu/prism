@@ -31,9 +31,7 @@ async function loadAppsByCategory(category, preserveScroll = false) {
         scrollTop = contentArea ? contentArea.scrollTop : 0;
     }
 
-    try {
-        console.log('Loading apps by category:', category);
-        
+    try {        
         // If "All Apps" is selected, show all cached apps
         if (category === 'All Apps') {
             console.log('Showing all apps from cache:', allAppsCache.length);
