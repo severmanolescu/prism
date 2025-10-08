@@ -35,7 +35,6 @@ function calculateDateRange(period) {
       endDate = formatDateForInput(now);
       break;
     case 'alltime':
-    case 'all-time':
       // Set to earliest possible date
       startDate = '2020-01-01';
       endDate = formatDateForInput(now);

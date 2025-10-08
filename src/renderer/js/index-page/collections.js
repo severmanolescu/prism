@@ -18,14 +18,29 @@ function showCreateCollectionModal() {
             <input type="color" id="colorPicker" value="#4a90e2" class="color-input">
             <div class="color-preview" id="colorPreview"></div>
             <div class="preset-colors">
+              <!-- Blues / Purples -->
               <div class="preset-color" data-color="#4a90e2" style="background: #4a90e2;"></div>
-              <div class="preset-color" data-color="#ff6b6b" style="background: #ff6b6b;"></div>
-              <div class="preset-color" data-color="#a55eea" style="background: #a55eea;"></div>
-              <div class="preset-color" data-color="#26de81" style="background: #26de81;"></div>
-              <div class="preset-color" data-color="#fd79a8" style="background: #fd79a8;"></div>
-              <div class="preset-color" data-color="#f39c12" style="background: #f39c12;"></div>
-              <div class="preset-color" data-color="#e74c3c" style="background: #e74c3c;"></div>
+              <div class="preset-color" data-color="#3498db" style="background: #3498db;"></div>
               <div class="preset-color" data-color="#9b59b6" style="background: #9b59b6;"></div>
+              <div class="preset-color" data-color="#a55eea" style="background: #a55eea;"></div>
+
+              <!-- Greens / Teals -->
+              <div class="preset-color" data-color="#26de81" style="background: #26de81;"></div>
+              <div class="preset-color" data-color="#2ecc71" style="background: #2ecc71;"></div>
+              <div class="preset-color" data-color="#1abc9c" style="background: #1abc9c;"></div>
+              <div class="preset-color" data-color="#16a085" style="background: #16a085;"></div>
+
+              <!-- Oranges / Reds -->
+              <div class="preset-color" data-color="#f39c12" style="background: #f39c12;"></div>
+              <div class="preset-color" data-color="#e67e22" style="background: #e67e22;"></div>
+              <div class="preset-color" data-color="#e74c3c" style="background: #e74c3c;"></div>
+              <div class="preset-color" data-color="#c0392b" style="background: #c0392b;"></div>
+
+              <!-- Pinks / Accents -->
+              <div class="preset-color" data-color="#fd79a8" style="background: #fd79a8;"></div>
+              <div class="preset-color" data-color="#ff6b6b" style="background: #ff6b6b;"></div>
+              <div class="preset-color" data-color="#d35400" style="background: #d35400;"></div>
+              <div class="preset-color" data-color="#8e44ad" style="background: #8e44ad;"></div>
             </div>
           </div>
         </div>
@@ -323,16 +338,31 @@ function showEditCollectionModal(category) {
             <div class="color-picker-container">
               <input type="color" id="colorPicker" value="${category.color}" class="color-input">
               <div class="color-preview" id="colorPreview"></div>
-              <div class="preset-colors">
-                <div class="preset-color" data-color="#4a90e2" style="background: #4a90e2;"></div>
-                <div class="preset-color" data-color="#ff6b6b" style="background: #ff6b6b;"></div>
-                <div class="preset-color" data-color="#a55eea" style="background: #a55eea;"></div>
-                <div class="preset-color" data-color="#26de81" style="background: #26de81;"></div>
-                <div class="preset-color" data-color="#fd79a8" style="background: #fd79a8;"></div>
-                <div class="preset-color" data-color="#f39c12" style="background: #f39c12;"></div>
-                <div class="preset-color" data-color="#e74c3c" style="background: #e74c3c;"></div>
-                <div class="preset-color" data-color="#9b59b6" style="background: #9b59b6;"></div>
-              </div>
+                <div class="preset-colors">
+                  <!-- Blues / Purples -->
+                  <div class="preset-color" data-color="#4a90e2" style="background: #4a90e2;"></div>
+                  <div class="preset-color" data-color="#3498db" style="background: #3498db;"></div>
+                  <div class="preset-color" data-color="#9b59b6" style="background: #9b59b6;"></div>
+                  <div class="preset-color" data-color="#a55eea" style="background: #a55eea;"></div>
+
+                  <!-- Greens / Teals -->
+                  <div class="preset-color" data-color="#26de81" style="background: #26de81;"></div>
+                  <div class="preset-color" data-color="#2ecc71" style="background: #2ecc71;"></div>
+                  <div class="preset-color" data-color="#1abc9c" style="background: #1abc9c;"></div>
+                  <div class="preset-color" data-color="#16a085" style="background: #16a085;"></div>
+
+                  <!-- Oranges / Reds -->
+                  <div class="preset-color" data-color="#f39c12" style="background: #f39c12;"></div>
+                  <div class="preset-color" data-color="#e67e22" style="background: #e67e22;"></div>
+                  <div class="preset-color" data-color="#e74c3c" style="background: #e74c3c;"></div>
+                  <div class="preset-color" data-color="#c0392b" style="background: #c0392b;"></div>
+
+                  <!-- Pinks / Accents -->
+                  <div class="preset-color" data-color="#fd79a8" style="background: #fd79a8;"></div>
+                  <div class="preset-color" data-color="#ff6b6b" style="background: #ff6b6b;"></div>
+                  <div class="preset-color" data-color="#d35400" style="background: #d35400;"></div>
+                  <div class="preset-color" data-color="#8e44ad" style="background: #8e44ad;"></div>
+                </div>
             </div>
           </div>
           <div class="form-group">

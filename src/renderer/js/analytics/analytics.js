@@ -32,8 +32,6 @@ let categoriesCache = new Map(); // Cache for category colors
 let heatmapAppCount = 5; // Default to top 5 apps
 let currentAnalyticsData = null; // Cache analytics data for heatmap updates
 
-// calculateDateRange now provided by shared/date-range.js
-
 // Load analytics data for the selected period
 async function loadAnalyticsData(period, customStartDate, customEndDate) {
   try {
@@ -134,7 +132,7 @@ function updateTopAppsList(topApps) {
     for (let i = 0; i < appsToShow; i++) {
         const app = topApps[i];
         top_apps_list.innerHTML += `
-        <div class="app-row">
+        <div class="app-row" style="border-left-color: ${categoriesCache.get(app.category) || '#092442'};">
             <div class="app-rank">${i + 1}</div>
             <div class="app-info">
                 <div class="app-name">${escapeHtml(app.name)}</div>
@@ -295,7 +293,7 @@ function initAnalytics() {
         }, '*');
       }
     }
-  });
+  });  
 }
 
 // Initialize when the page loads
