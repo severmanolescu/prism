@@ -11,7 +11,7 @@
                 </div>
                 <div class="keyboard-help-body">
                     <div class="shortcut-section">
-                        <h3>Navigation</h3>
+                        <h3 class="shortcut-header">Navigation</h3>
                         <div class="shortcut-list">
                             <div class="shortcut-item">
                                 <kbd>Ctrl</kbd> + <kbd>1</kbd>
@@ -45,7 +45,7 @@
                     </div>
 
                     <div class="shortcut-section">
-                        <h3>Search & Navigation</h3>
+                        <h3 class="shortcut-header">Search & Navigation</h3>
                         <div class="shortcut-list">
                             <div class="shortcut-item">
                                 <kbd>Ctrl</kbd> + <kbd>F</kbd> or <kbd>/</kbd>
@@ -79,7 +79,7 @@
                     </div>
 
                     <div class="shortcut-section">
-                        <h3>Analytics & Productivity</h3>
+                        <h3 class="shortcut-header">Analytics & Productivity</h3>
                         <div class="shortcut-list">
                             <div class="shortcut-item">
                                 <kbd>D</kbd>
@@ -117,7 +117,7 @@
                     </div>
 
                     <div class="shortcut-section">
-                        <h3>Goals Page</h3>
+                        <h3 class="shortcut-header">Goals Page</h3>
                         <div class="shortcut-list">
                             <div class="shortcut-item">
                                 <kbd>D</kbd>
@@ -159,7 +159,7 @@
                     </div>
 
                     <div class="shortcut-section">
-                        <h3>App Details Page</h3>
+                        <h3 class="shortcut-header">App Details Page</h3>
                         <div class="shortcut-list">
                             <div class="shortcut-item">
                                 <kbd>D</kbd>
@@ -177,7 +177,7 @@
                     </div>
 
                     <div class="shortcut-section">
-                        <h3>General</h3>
+                        <h3 class="shortcut-header">General</h3>
                         <div class="shortcut-list">
                             <div class="shortcut-item">
                                 <kbd>?</kbd>
