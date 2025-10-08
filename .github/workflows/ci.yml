@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, ubuntu-latest-arm]
+        os: [windows-latest, ubuntu-latest]
         node-version: [18.x, 20.x]
 
     steps:
@@ -29,16 +29,29 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Install cross-compile tools for ARM64
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qemu-user-static gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
     - name: Build application (x64)
-      if: matrix.os != 'ubuntu-latest-arm'
+      if: matrix.os == 'ubuntu-latest'
       run: npm run build
       env:
         CI: true
         CSC_IDENTITY_AUTO_DISCOVERY: false
 
     - name: Build application (ARM64)
-      if: matrix.os == 'ubuntu-latest-arm'
+      if: matrix.os == 'ubuntu-latest'
       run: npm run build -- --arch=arm64
+      env:
+        CI: true
+        CSC_IDENTITY_AUTO_DISCOVERY: false
+
+    - name: Build application (Windows)
+      if: matrix.os == 'windows-latest'
+      run: npm run build
       env:
         CI: true
         CSC_IDENTITY_AUTO_DISCOVERY: false
@@ -62,7 +75,7 @@ jobs:
         retention-days: 7
 
     - name: Upload build artifacts (Linux ARM64)
-      if: matrix.os == 'ubuntu-latest-arm' && matrix.node-version == '20.x'
+      if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20.x'
       uses: actions/upload-artifact@v4
       with:
         name: prism-arm-build

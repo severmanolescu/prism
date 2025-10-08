@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, ubuntu-latest-arm]
+        os: [windows-latest, ubuntu-latest]
 
     steps:
     - name: Checkout code
@@ -34,16 +34,29 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Install cross-compile tools for ARM64
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qemu-user-static gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
     - name: Build application (x64)
-      if: matrix.os != 'ubuntu-latest-arm'
+      if: matrix.os == 'ubuntu-latest'
       run: npm run build
       env:
         CI: true
         CSC_IDENTITY_AUTO_DISCOVERY: false
 
     - name: Build application (ARM64)
-      if: matrix.os == 'ubuntu-latest-arm'
+      if: matrix.os == 'ubuntu-latest'
       run: npm run build -- --arch=arm64
+      env:
+        CI: true
+        CSC_IDENTITY_AUTO_DISCOVERY: false
+
+    - name: Build application (Windows)
+      if: matrix.os == 'windows-latest'
+      run: npm run build
       env:
         CI: true
         CSC_IDENTITY_AUTO_DISCOVERY: false
@@ -58,7 +71,7 @@ jobs:
           dist/*.zip
         retention-days: 30
 
-    - name: Upload Linux artifacts
+    - name: Upload Linux artifacts (x64)
       if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v4
       with:
@@ -68,23 +81,6 @@ jobs:
           dist/*.deb
         retention-days: 30
 
-    - name: Upload ARM artifacts
-      if: matrix.os == 'ubuntu-latest-arm'
-      uses: actions/upload-artifact@v4
-      with:
-        name: prism-arm-installer
-        path: dist/*.AppImage
-        retention-days: 30
-
-    # Automatically attach to release if triggered by release event
-    - name: Upload to GitHub Release
-      if: github.event_name == 'release'
-      uses: softprops/action-gh-release@v2
-      with:
-        files: |
-          dist/*.exe
-          dist/*.zip
-          dist/*.AppImage
-          dist/*.deb
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload Linux artifacts (ARM64)
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifa
