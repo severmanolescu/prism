@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, ubuntu-latest-arm]
 
     steps:
     - name: Checkout code
@@ -34,8 +34,16 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Build application
+    - name: Build application (x64)
+      if: matrix.os != 'ubuntu-latest-arm'
       run: npm run build
+      env:
+        CI: true
+        CSC_IDENTITY_AUTO_DISCOVERY: false
+
+    - name: Build application (ARM64)
+      if: matrix.os == 'ubuntu-latest-arm'
+      run: npm run build -- --arch=arm64
       env:
         CI: true
         CSC_IDENTITY_AUTO_DISCOVERY: false
@@ -58,6 +66,14 @@ jobs:
         path: |
           dist/*.AppImage
           dist/*.deb
+        retention-days: 30
+
+    - name: Upload ARM artifacts
+      if: matrix.os == 'ubuntu-latest-arm'
+      uses: actions/upload-artifact@v4
+      with:
+        name: prism-arm-installer
+        path: dist/*.AppImage
         retention-days: 30
 
     # Automatically attach to release if triggered by release event
