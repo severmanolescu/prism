@@ -87,6 +87,11 @@ Just like a prism breaks white light into a beautiful spectrum of colors, **Pris
 - **Milestones** - Celebrate usage achievements (10h, 50h, 100h, etc.)
 - **Insights & Recommendations** - Smart analysis of your usage patterns
 - **Quick Actions** - Launch app, manage favorites, change productivity level
+
+### Usage
+- **Keyboard Shortcuts** 
+  – Press ? anytime in the app to view all available shortcuts
+
 ## Installation
 ### Prerequisites
 - Node.js 16 or higher
