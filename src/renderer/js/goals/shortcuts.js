@@ -135,6 +135,12 @@ function setUpShortcuts() {
                     }
                 }
                 break;
+            case "i":
+                const insightsSection = document.getElementById('insightsSection');
+                if(insightsSection){
+                    insightsSection.classList.toggle('collapsed');
+                }
+                break;
         }
     });
 }

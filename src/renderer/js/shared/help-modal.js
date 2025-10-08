@@ -136,6 +136,10 @@
                                 <span>Browse Templates</span>
                             </div>
                             <div class="shortcut-item">
+                                <kbd>I</kbd>
+                                <span>Expand/Colapse Insights & Analytics</span>
+                            </div>
+                            <div class="shortcut-item">
                                 <kbd>↑</kbd> <kbd>↓</kbd>
                                 <span>Navigate Goals</span>
                             </div>
