@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupInsightsSection();
   loadGoalsForDate(currentDate);
   loadInsights();
+
+  setUpShortcuts();
 });
 
 // Setup date range controls
@@ -379,3 +381,4 @@ function renderCalendarHeatmap(data) {
 
   container.innerHTML = html.join('');
 }
+

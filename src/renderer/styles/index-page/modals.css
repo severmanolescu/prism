@@ -161,8 +161,10 @@
 
 .preset-colors {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(8, auto);
   gap: 8px;
+  justify-content: center;
+  align-content: center;
 }
 
 .preset-color {
