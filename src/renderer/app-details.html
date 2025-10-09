@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="styles/app-details/quick-stats.css">
   <link rel="stylesheet" href="styles/app-details/recent-sessions.css">
   <link rel="stylesheet" href="styles/app-details/usage-trend.css">
+  <link rel="stylesheet" href="styles/index-page/context-menu.css">
   <link rel="stylesheet" href="styles/global/scrollbar.css">
 </head>
 <body>
@@ -73,9 +74,8 @@
         <span class="btn-icon">⭐</span>
         <span>Add to Favorites</span>
       </button>
-      <button class="btn-secondary" id="properties-btn">
-        <span class="btn-icon">📋</span>
-        <span>Properties</span>
+      <button class="btn-icon-only" id="options-btn" title="More Options">
+        <span class="btn-icon">⚙️</span>
       </button>
     </div>
 
@@ -310,6 +310,10 @@
     </div>
 
   </div>
+
+  <!-- Context Menu -->
+  <div class="context-menu" id="contextMenu"></div>
+
   <script src="./js/utils.js"></script>
   <script src="./js/app-details/app-details.js"></script>
   <script src="./js/app-details/day-of-week-chart.js"></script>
@@ -320,6 +324,11 @@
   <script src="./js/app-details/usage-over-time-chart.js"></script>
   <script src="./js/app-details/usage-insights.js"></script>
   <script src="./js/app-details/show-properties.js"></script>
+
+  <!-- Context Menu Scripts -->
+  <script src="./js/index-page/context-menu-core.js"></script>
+  <script src="./js/index-page/context-menu-actions.js"></script>
+  <script src="./js/app-details/context-menu-adapter.js"></script>
 
   <!-- Keyboard Shortcuts -->
   <script src="./js/shared/keyboard-shortcuts.js"></script>
