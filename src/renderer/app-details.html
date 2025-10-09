@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="styles/shared/base.css">
   <link rel="stylesheet" href="styles/shared/section-headers.css">
   <link rel="stylesheet" href="styles/shared/buttons.css">
+  <link rel="stylesheet" href="styles/shared/properties-modal.css">
 
   <!-- Page-Specific Styles -->
   <link rel="stylesheet" href="styles/app-details/app-details.css">
@@ -21,6 +22,7 @@
   <link rel="stylesheet" href="styles/app-details/quick-stats.css">
   <link rel="stylesheet" href="styles/app-details/recent-sessions.css">
   <link rel="stylesheet" href="styles/app-details/usage-trend.css">
+  <link rel="stylesheet" href="styles/index-page/context-menu.css">
   <link rel="stylesheet" href="styles/global/scrollbar.css">
 </head>
 <body>
@@ -72,56 +74,10 @@
         <span class="btn-icon">⭐</span>
         <span>Add to Favorites</span>
       </button>
-      <button class="btn-secondary" id="properties-btn">
-        <span class="btn-icon">📋</span>
-        <span>Properties</span>
+      <button class="btn-icon-only" id="options-btn" title="More Options">
+        <span class="btn-icon">⚙️</span>
       </button>
     </div>
-
-    <!-- Properties Modal -->
-    <div id="properties-modal" class="modal" style="display: none;">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Application Properties</h3>
-          <button class="modal-close">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="property-item">
-            <div class="property-label">Name:</div>
-            <div class="property-value" id="prop-name">-</div>
-          </div>
-          <div class="property-item">
-            <div class="property-label">Category:</div>
-            <div class="property-value" id="prop-category">-</div>
-          </div>
-          <div class="property-item">
-            <div class="property-label">Executable:</div>
-            <div class="property-value" id="prop-executable">-</div>
-          </div>
-          <div class="property-item">
-            <div class="property-label">Path:</div>
-            <div class="property-value" id="prop-path">-</div>
-          </div>
-          <div class="property-item">
-            <div class="property-label">First Added:</div>
-            <div class="property-value" id="prop-first-added">-</div>
-          </div>
-          <div class="property-item">
-            <div class="property-label">Last Used:</div>
-            <div class="property-value" id="prop-last-used">-</div>
-          </div>
-          <div class="property-item">
-            <div class="property-label">Total Time:</div>
-            <div class="property-value" id="prop-total-time">-</div>
-          </div>
-          <div class="property-item">
-            <div class="property-label">Launch Count:</div>
-            <div class="property-value" id="prop-launch-count">-</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
 
     <!-- Quick Stats -->
     <div class="section-title">Overview</div>
@@ -354,6 +310,10 @@
     </div>
 
   </div>
+
+  <!-- Context Menu -->
+  <div class="context-menu" id="contextMenu"></div>
+
   <script src="./js/utils.js"></script>
   <script src="./js/app-details/app-details.js"></script>
   <script src="./js/app-details/day-of-week-chart.js"></script>
@@ -363,6 +323,12 @@
   <script src="./js/app-details/session-duration-chart.js"></script>
   <script src="./js/app-details/usage-over-time-chart.js"></script>
   <script src="./js/app-details/usage-insights.js"></script>
+  <script src="./js/app-details/show-properties.js"></script>
+
+  <!-- Context Menu Scripts -->
+  <script src="./js/index-page/context-menu-core.js"></script>
+  <script src="./js/index-page/context-menu-actions.js"></script>
+  <script src="./js/app-details/context-menu-adapter.js"></script>
 
   <!-- Keyboard Shortcuts -->
   <script src="./js/shared/keyboard-shortcuts.js"></script>

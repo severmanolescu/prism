@@ -497,7 +497,7 @@ const ContextMenuActions = {
                             <div class="properties-stats-grid">
                                 <div class="property-item">
                                     <span class="property-label">Total Time:</span>
-                                    <span class="property-value">${formatTime(details.stats.totalTime)}</span>
+                                    <span class="property-value">${formatTime(details.stats.totalTime) || 0}</span>
                                 </div>
                                 <div class="property-item">
                                     <span class="property-label">Total Sessions:</span>

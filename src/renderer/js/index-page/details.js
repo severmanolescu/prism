@@ -122,5 +122,163 @@ window.addEventListener('message', async (event) => {
         if (recentSection) recentSection.style.display = 'block';
         if (allAppsSection) allAppsSection.style.display = 'block';
         if (categoryOverview) categoryOverview.style.display = 'grid';
+    } else if (event.data.type === 'OPEN_FILE_LOCATION') {
+        // Open file location
+        try {
+            await window.electronAPI.openFileLocation(event.data.path);
+        } catch (error) {
+            console.error('Error opening file location:', error);
+        }
+    } else if (event.data.type === 'HIDE_APP') {
+        // Hide app from library
+        try {
+            const result = await window.electronAPI.hideAppFromLibrary(event.data.appId);
+            if (result.success) {
+                showFeedback('App hidden from library', true);
+                allAppsCache = await window.electronAPI.getAllApps();
+                await createCategoryNavigation(allAppsCache);
+
+                // Go back to library
+                const backToLibraryEvent = { data: { type: 'BACK_TO_LIBRARY' } };
+                window.dispatchEvent(new MessageEvent('message', {
+                    data: backToLibraryEvent.data,
+                    source: appDetailsIframe.contentWindow
+                }));
+            }
+        } catch (error) {
+            console.error('Error hiding app:', error);
+            showFeedback('Failed to hide app', false);
+        }
+    } else if (event.data.type === 'RESTORE_APP') {
+        // Restore app to library
+        try {
+            const result = await window.electronAPI.restoreHiddenApp(event.data.appId);
+            if (result.success) {
+                showFeedback('App restored to library', true);
+                allAppsCache = await window.electronAPI.getAllApps();
+                await createCategoryNavigation(allAppsCache);
+            }
+        } catch (error) {
+            console.error('Error restoring app:', error);
+            showFeedback('Failed to restore app', false);
+        }
+    } else if (event.data.type === 'REMOVE_APP') {
+        // Remove app from tracker
+        try {
+            const confirmed = await window.confirmationDialog.show({
+                title: 'Remove from Tracker',
+                message: `Are you sure you want to stop tracking "${event.data.appName}"? This will keep your existing data.`,
+                icon: '❌',
+                iconColor: '#e74c3c',
+                confirmText: 'Remove',
+                cancelText: 'Cancel',
+                dangerMode: false
+            });
+
+            if (!confirmed) return;
+
+            const result = await window.electronAPI.removeAppFromTracker(event.data.appId);
+            if (result.success) {
+                showFeedback('App removed from tracker', true);
+                allAppsCache = await window.electronAPI.getAllApps();
+                await createCategoryNavigation(allAppsCache);
+
+                // Go back to library
+                const backToLibraryEvent = { data: { type: 'BACK_TO_LIBRARY' } };
+                window.dispatchEvent(new MessageEvent('message', {
+                    data: backToLibraryEvent.data,
+                    source: appDetailsIframe.contentWindow
+                }));
+            }
+        } catch (error) {
+            console.error('Error removing app:', error);
+            showFeedback('Failed to remove app', false);
+        }
+    } else if (event.data.type === 'REMOVE_APP_PERMANENTLY') {
+        // Remove app permanently
+        try {
+            const confirmed = await window.confirmationDialog.show({
+                title: 'Permanently Delete',
+                message: `Are you sure you want to permanently delete "${event.data.appName}" and ALL its data? This cannot be undone.`,
+                icon: '🗑️',
+                iconColor: '#c0392b',
+                confirmText: 'Delete Permanently',
+                cancelText: 'Cancel',
+                dangerMode: true
+            });
+
+            if (!confirmed) return;
+
+            const result = await window.electronAPI.removeAppPermanently(event.data.appId);
+            if (result.success) {
+                showFeedback('App permanently deleted', true);
+                allAppsCache = await window.electronAPI.getAllApps();
+                await createCategoryNavigation(allAppsCache);
+
+                // Go back to library
+                const backToLibraryEvent = { data: { type: 'BACK_TO_LIBRARY' } };
+                window.dispatchEvent(new MessageEvent('message', {
+                    data: backToLibraryEvent.data,
+                    source: appDetailsIframe.contentWindow
+                }));
+            }
+        } catch (error) {
+            console.error('Error deleting app:', error);
+            showFeedback('Failed to delete app', false);
+        }
+    } else if (event.data.type === 'MOVE_APP_TO_CATEGORY') {
+        // Move app to category
+        try {
+            const result = await window.electronAPI.moveAppToCollection(event.data.appId, event.data.category);
+            if (result.success) {
+                showFeedback(`Moved to ${event.data.category}`, true);
+
+                // Update the app in the cache
+                const app = allAppsCache.find(app => app.id === event.data.appId);
+                if (app) {
+                    app.category = event.data.category;
+                }
+
+                // Update favorites cache
+                favoritesCache = await window.electronAPI.getFavorites();
+
+                // Refresh navigation
+                await createCategoryNavigation(allAppsCache);
+
+                // Reload app details with updated category and color
+                const appDetails = await window.electronAPI.getAppDetails(event.data.appId);
+                const categories = await window.electronAPI.getCategories();
+                const categoryData = categories.find(cat => cat.name === event.data.category);
+
+                // Add category color to the app details
+                if (categoryData && categoryData.color) {
+                    appDetails.categoryColor = categoryData.color;
+                }
+
+                const iframe = document.querySelector('#app-details-iframe');
+                if (iframe) {
+                    iframe.contentWindow.postMessage({
+                        type: 'APP_DETAILS',
+                        data: appDetails
+                    }, '*');
+                }
+            }
+        } catch (error) {
+            console.error('Error moving app to category:', error);
+            showFeedback('Failed to move app', false);
+        }
+    } else if (event.data.type === 'GET_FAVORITES') {
+        // Send favorites to iframe
+        try {
+            const iframe = document.querySelector('#app-details-iframe');
+            if (iframe) {
+                iframe.contentWindow.postMessage({
+                    type: 'FAVORITES_DATA',
+                    favorites: favoritesCache
+                }, '*');
+            }
+        } catch (error) {
+            console.error('Error sending favorites:', error);
+        }
     }
 });
