@@ -5,6 +5,9 @@ let allAppsCache = []; // Cache all apps for filtering
 let currentSearchTerm = ''; // Track current search term
 let favoritesCache = [];
 
+// Expose currentCategory on window so other modules can access it
+window.currentCategory = currentCategory;
+
 document.addEventListener('DOMContentLoaded', () => {
     // Window control handlers
     setupWindowControls();
@@ -38,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Category selected
                 currentCategory = libraryName;
+                window.currentCategory = currentCategory; // Keep window in sync
                 loadAppsByCategory(currentCategory);
                 updateLibraryTitle(libraryName);
             }
@@ -150,10 +154,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const categoryName = categorySpans[1] ? categorySpans[1].textContent.trim() : 
                                 categorySpans[0].textContent.trim();
             
-            console.log('Category clicked:', categoryName);
-            
             currentCategory = categoryName;
-            
+            window.currentCategory = currentCategory; // Keep window in sync
+
             // Handle Favorites category specially
             if (categoryName === 'Favorites') {
                 loadFavoriteApps();

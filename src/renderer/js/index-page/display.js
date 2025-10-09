@@ -50,14 +50,10 @@ async function displayAllApps(apps) {
                 // Get sort preference from category data or default to name-asc
                 const sortPreference = categoryApps.sortPreference || 'name-asc';
 
-                // Get sort label for display
-                const sortLabels = {
-                    'name-asc': 'Name (A-Z)',
-                    'name-desc': 'Name (Z-A)',
-                    'time-desc': 'Most Used',
-                    'time-asc': 'Least Used',
-                    'recent': 'Recently Used'
-                };
+                // Determine if we should show the category productivity dropdown
+                // Only show when viewing a specific category (not when viewing "All Apps")
+                const showProductivityDropdown = currentCategory !== 'All Apps';
+                const categoryProductivity = categoryApps.productivity_level || 'neutral';
 
                 // Create category header with collapse toggle and sort dropdown
                 const categoryHeader = document.createElement('div');
@@ -67,6 +63,16 @@ async function displayAllApps(apps) {
                         <div class="category-title">
                             <span class="category-icon">${getCategoryIcon(categoryName)}</span>
                             <h3>${categoryName} <span class="category-app-count">(${categoryApps.apps.length})</span></h3>
+                            ${showProductivityDropdown ? `
+                                <div class="category-productivity-dropdown" data-category="${escapeHtml(categoryName)}">
+                                    <label class="productivity-label">Productivity:</label>
+                                    <select class="category-productivity-select">
+                                        <option value="productive" ${categoryProductivity === 'productive' ? 'selected' : ''}>✅ Productive</option>
+                                        <option value="neutral" ${categoryProductivity === 'neutral' ? 'selected' : ''}>⚪ Neutral</option>
+                                        <option value="unproductive" ${categoryProductivity === 'unproductive' ? 'selected' : ''}>❌ Unproductive</option>
+                                    </select>
+                                </div>
+                            ` : ''}
                         </div>
                         <div class="category-header-actions">
                             <div class="category-sort-dropdown" data-category="${escapeHtml(categoryName)}">
@@ -303,4 +309,41 @@ document.addEventListener('change', (e) => {
         // Re-sort only this category without full refresh
         resortCategory(categoryName, sortType);
     }
+
+    // Handle category productivity change
+    if (e.target.classList.contains('category-productivity-select')) {
+        const select = e.target;
+        const productivityLevel = select.value;
+        const dropdown = select.closest('.category-productivity-dropdown');
+        const categoryName = dropdown.dataset.category;
+
+        // Update category productivity
+        updateCategoryProductivityLevel(categoryName, productivityLevel);
+    }
 });
+
+// Update category productivity level
+async function updateCategoryProductivityLevel(categoryName, productivityLevel) {
+    try {
+        const categories = await window.electronAPI.getCategories();
+        const category = categories.find(c => c.name === categoryName);
+
+        if (category) {
+            const result = await window.electronAPI.editCollection(category.id, {
+                productivityLevel: productivityLevel
+            });
+
+            // Force reload all apps to refresh the cache
+            if (typeof loadAllApps === 'function') {
+                await loadAllApps();
+            }
+
+            // Reload the current view to reflect changes
+            if (typeof loadAppsByCategory === 'function' && currentCategory) {
+                await loadAppsByCategory(currentCategory, false);
+            }
+        }
+    } catch (error) {
+        console.error('Error updating category productivity:', error);
+    }
+}

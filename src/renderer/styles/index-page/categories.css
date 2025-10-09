@@ -28,11 +28,46 @@
     font-size: 18px;
     font-weight: 600;
     color: #ffffff;
-    flex-grow: 1;
 }
 
 .category-icon {
     font-size: 20px;
+}
+
+/* Category productivity dropdown in header */
+.category-productivity-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 12px;
+    margin-right: 24px;
+    padding-right: 24px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.productivity-label {
+    color: #8f98a0;
+    font-size: 12px;
+}
+
+.category-productivity-select {
+    padding: 4px 8px;
+    background: rgba(27, 40, 56, 0.8);
+    border: 1px solid rgba(103, 193, 245, 0.25);
+    border-radius: 4px;
+    color: #c6d4df;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.category-productivity-select:hover {
+    border-color: #66c0f4;
+}
+
+.category-productivity-select:focus {
+    outline: none;
+    border-color: #66c0f4;
 }
 
 .category-app-count {

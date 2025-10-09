@@ -38,7 +38,7 @@ async function loadAppsByCategory(category, preserveScroll = false) {
             await displayAllApps(allAppsCache);
             return;
         }
-        
+
         // If "Favorites" is selected, load favorites
         if (category === 'Favorites') {
             await loadFavoriteApps();
@@ -55,10 +55,7 @@ async function loadAppsByCategory(category, preserveScroll = false) {
             const appCategory = app.category || 'Uncategorized';
             return appCategory === category;
         });
-        
-        console.log('Filtered apps for category "' + category + '":', filteredApps.length);
-        console.log('Apps in this category:', filteredApps.map(app => app.name));
-        
+
         await displayAllApps(filteredApps);
 
         if (preserveScroll) {
@@ -69,7 +66,7 @@ async function loadAppsByCategory(category, preserveScroll = false) {
                 }
             }, 50);
         }
-        
+
     } catch (error) {
         console.error('Error loading apps by category:', error);
     }
@@ -77,20 +74,14 @@ async function loadAppsByCategory(category, preserveScroll = false) {
 
 async function loadFavoriteApps() {
     try {
-        console.log('Loading favorite apps');
-
         // Get current favorites (returns full app objects)
         const favorites = await window.electronAPI.getFavorites();
-        console.log('Favorites:', favorites);
 
         // Extract IDs from favorite objects
         const favoriteIds = favorites.map(app => app.id);
 
         // Filter from cached apps to get favorite apps
         const favoriteApps = allAppsCache.filter(app => favoriteIds.includes(app.id));
-
-        console.log('Filtered favorite apps:', favoriteApps.length);
-        console.log('Favorite apps:', favoriteApps.map(app => app.name));
 
         await displayAllApps(favoriteApps);
 
@@ -139,7 +130,8 @@ async function groupAppsByCategory(apps) {
                 apps: [],
                 color: category.color || '#092442 ',
                 isDefault: category.isDefault || false,
-                sortPreference: category.sortPreference || 'name-asc'
+                sortPreference: category.sortPreference || 'name-asc',
+                productivity_level: category.productivity_level || 'neutral'
             };
         });
 
