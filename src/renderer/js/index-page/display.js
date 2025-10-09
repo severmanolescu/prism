@@ -329,7 +329,7 @@ async function updateCategoryProductivityLevel(categoryName, productivityLevel) 
         const category = categories.find(c => c.name === categoryName);
 
         if (category) {
-            const result = await window.electronAPI.editCollection(category.id, {
+            await window.electronAPI.editCollection(category.id, {
                 productivityLevel: productivityLevel
             });
 
