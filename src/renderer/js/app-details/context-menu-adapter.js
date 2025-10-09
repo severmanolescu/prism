@@ -103,7 +103,6 @@ class AppDetailsContextMenu {
 
         // Get menu dimensions and position properly
         const menuRect = this.menu.getBoundingClientRect();
-        const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
 
         // Position below and to the left of the button
