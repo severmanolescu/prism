@@ -58,7 +58,6 @@ async function displayAllApps(apps) {
                     'time-asc': 'Least Used',
                     'recent': 'Recently Used'
                 };
-                const currentSortLabel = sortLabels[sortPreference] || 'Name (A-Z)';
 
                 // Create category header with collapse toggle and sort dropdown
                 const categoryHeader = document.createElement('div');
