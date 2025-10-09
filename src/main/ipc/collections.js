@@ -3,6 +3,7 @@ const {
   getAllCategories,
   createCategory,
   updateCategory,
+  updateCategorySortPreference,
   deleteCategory,
   moveAppToCategory
 } = require('../services/data-access');
@@ -16,6 +17,7 @@ function initializeCollectionHandlers() {
       color: cat.color,
       icon: cat.icon,
       productivity_level: cat.productivity_level,
+      sortPreference: cat.sort_preference || 'name-asc',
       isDefault: cat.is_default === 1,
       createdAt: cat.created_at
     }));
@@ -75,6 +77,16 @@ function initializeCollectionHandlers() {
       return { success: true };
     } catch (error) {
       console.error('Error moving app:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('update-category-sort', async (event, categoryName, sortPreference) => {
+    try {
+      await updateCategorySortPreference(categoryName, sortPreference);
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating category sort preference:', error);
       return { success: false, error: error.message };
     }
   });

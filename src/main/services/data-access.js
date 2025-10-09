@@ -102,7 +102,7 @@ function createCategory(category) {
 // Update category
 function updateCategory(categoryId, updates) {
   const db = getDb();
-  const { name, color, icon, productivityLevel } = updates;
+  const { name, color, icon, productivityLevel, sortPreference } = updates;
 
   // If name is being changed, we need to update apps table as well
   if (name) {
@@ -124,9 +124,20 @@ function updateCategory(categoryId, updates) {
     SET name = COALESCE(?, name),
         color = COALESCE(?, color),
         icon = COALESCE(?, icon),
-        productivity_level = COALESCE(?, productivity_level)
+        productivity_level = COALESCE(?, productivity_level),
+        sort_preference = COALESCE(?, sort_preference)
     WHERE id = ?
-  `).run([name, color, icon, productivityLevel, categoryId]);
+  `).run([name, color, icon, productivityLevel, sortPreference, categoryId]);
+}
+
+// Update category sort preference
+function updateCategorySortPreference(categoryName, sortPreference) {
+  const db = getDb();
+  return db.prepare(`
+    UPDATE categories
+    SET sort_preference = ?
+    WHERE name = ?
+  `).run([sortPreference, categoryName]);
 }
 
 // Delete category (moves apps to uncategorized)
@@ -822,6 +833,7 @@ module.exports = {
   getAllCategories,
   createCategory,
   updateCategory,
+  updateCategorySortPreference,
   deleteCategory,
   moveAppToCategory,
   getFavorites,

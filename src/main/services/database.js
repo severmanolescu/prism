@@ -73,6 +73,7 @@ async function initDatabase() {
       icon TEXT,
       productivity_level TEXT DEFAULT 'neutral',
       is_default INTEGER DEFAULT 0,
+      sort_preference TEXT DEFAULT 'name-asc',
       created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)
     );
 
