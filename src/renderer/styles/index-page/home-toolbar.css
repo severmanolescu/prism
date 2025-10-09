@@ -5,10 +5,14 @@
     justify-content: space-between;
     gap: 20px;
     padding: 16px 20px;
-    background: rgba(22, 32, 45, 0.6);
+    background: rgba(22, 32, 45, 0.95);
+    backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 20px;
     flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 /* Search and Filter Section */
@@ -60,27 +64,6 @@
     color: #8f98a0;
 }
 
-.search-clear {
-    position: absolute;
-    right: 8px;
-    background: none;
-    border: none;
-    color: #8f98a0;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 3px;
-    font-size: 16px;
-    transition: all 0.15s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.search-clear:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #c6d4df;
-}
-
 /* Filter Buttons */
 .filter-buttons {
     display: flex;
@@ -89,11 +72,11 @@
 }
 
 .filter-btn {
-    padding: 6px 12px;
-    background: rgba(103, 193, 245, 0.1);
-    border: 1px solid rgba(103, 193, 245, 0.25);
-    border-radius: 4px;
-    color: #c6d4df;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #8f98a0;
+    border-radius: 3px;
     font-size: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -101,14 +84,14 @@
 }
 
 .filter-btn:hover {
-    background: rgba(103, 193, 245, 0.2);
-    border-color: #66c0f4;
+    background: rgba(255, 255, 255, 0.08);
+    color: #c6d4df;
 }
 
 .filter-btn.active {
-    background: rgba(103, 193, 245, 0.25);
-    border-color: #66c0f4;
-    color: #66c0f4;
+    background: linear-gradient(135deg, #092442 0%, #07417a 80%);
+    color: #ffffff;
+    border-color: rgba(102, 192, 244, 0.3);
 }
 
 /* View Options */

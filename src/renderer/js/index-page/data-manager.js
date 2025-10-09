@@ -138,7 +138,8 @@ async function groupAppsByCategory(apps) {
             appsByCategory[category.name] = {
                 apps: [],
                 color: category.color || '#092442 ',
-                isDefault: category.isDefault || false
+                isDefault: category.isDefault || false,
+                sortPreference: category.sortPreference || 'name-asc'
             };
         });
 

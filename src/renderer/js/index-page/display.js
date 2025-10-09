@@ -25,12 +25,12 @@ async function displayAllApps(apps) {
         appsContainer.innerHTML = '<p style="color: #8f98a0; padding: 20px; text-align: center;">No applications found</p>';
         return;
     }
-    
-    // If we're showing all apps (currentCategory is 'All Apps'), group by categories
-    if (currentCategory === 'All Apps') {
-        // Update section header to "All Applications"
+
+    // Show apps grouped by categories (either all categories or just the selected one)
+    if (currentCategory === 'All Apps' || (currentCategory !== 'Favorites' && currentCategory !== 'Hidden')) {
+        // Hide the section header when showing categorized view
         if (sectionHeader) {
-            sectionHeader.textContent = 'All Applications';
+            sectionHeader.style.display = 'none';
         }
         
         // Change the apps-grid to not use CSS grid when showing categories
@@ -47,39 +47,92 @@ async function displayAllApps(apps) {
                 const categorySection = document.createElement('div');
                 categorySection.className = 'category-section';
                 
-                // Create category header
+                // Get sort preference from category data or default to name-asc
+                const sortPreference = categoryApps.sortPreference || 'name-asc';
+
+                // Get sort label for display
+                const sortLabels = {
+                    'name-asc': 'Name (A-Z)',
+                    'name-desc': 'Name (Z-A)',
+                    'time-desc': 'Most Used',
+                    'time-asc': 'Least Used',
+                    'recent': 'Recently Used'
+                };
+                const currentSortLabel = sortLabels[sortPreference] || 'Name (A-Z)';
+
+                // Create category header with collapse toggle and sort dropdown
                 const categoryHeader = document.createElement('div');
                 categoryHeader.className = 'category-header';
                 categoryHeader.innerHTML = `
-                    <div class="category-title">
-                        <span class="category-icon">${getCategoryIcon(categoryName)}</span>
-                        <h3>${categoryName}</h3>
-                        <span class="category-app-count">${categoryApps.apps.length} apps</span>
+                    <div class="category-header-content">
+                        <div class="category-title">
+                            <span class="category-icon">${getCategoryIcon(categoryName)}</span>
+                            <h3>${categoryName} <span class="category-app-count">(${categoryApps.apps.length})</span></h3>
+                        </div>
+                        <div class="category-header-actions">
+                            <div class="category-sort-dropdown" data-category="${escapeHtml(categoryName)}">
+                                <label class="sort-label">Sort by:</label>
+                                <select class="category-sort-btn">
+                                    <option value="name-asc" ${sortPreference === 'name-asc' ? 'selected' : ''}>Name (A-Z)</option>
+                                    <option value="name-desc" ${sortPreference === 'name-desc' ? 'selected' : ''}>Name (Z-A)</option>
+                                    <option value="time-desc" ${sortPreference === 'time-desc' ? 'selected' : ''}>Most Used</option>
+                                    <option value="time-asc" ${sortPreference === 'time-asc' ? 'selected' : ''}>Least Used</option>
+                                    <option value="recent" ${sortPreference === 'recent' ? 'selected' : ''}>Recently Used</option>
+                                </select>
+                            </div>
+                            <button class="category-section-toggle" data-category="${escapeHtml(categoryName)}">
+                                <svg width="12" height="12" viewBox="0 0 12 12">
+                                    <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 `;
                 categorySection.appendChild(categoryHeader);
-                
+
+                // Sort apps according to preference
+                const sortedApps = sortCategoryApps(categoryApps.apps, sortPreference);
+
                 // Create grid for this category's apps
                 const categoryGrid = document.createElement('div');
                 categoryGrid.className = 'category-apps-grid';
+                categoryGrid.dataset.category = categoryName;
 
-                categoryApps.apps.forEach((app, index) => {
+                sortedApps.forEach((app, index) => {
                     const appItem = createAppElement(app, appsByCategory[categoryName].color);
                     categoryGrid.appendChild(appItem);
                 });
                 
                 categorySection.appendChild(categoryGrid);
                 appsContainer.appendChild(categorySection);
-            }            
+
+                // Restore collapsed state from localStorage
+                const collapsedSections = JSON.parse(localStorage.getItem('collapsed-home-sections') || '[]');
+                if (collapsedSections.includes(categoryName)) {
+                    categorySection.classList.add('collapsed');
+                    categoryGrid.style.maxHeight = '0';
+                    const toggleBtn = categorySection.querySelector('.category-section-toggle');
+                    if (toggleBtn) toggleBtn.classList.add('collapsed');
+                }
+
+                // Don't set maxHeight initially for expanded sections - let it be 'none' for proper display
+                // maxHeight will only be set during collapse/expand animations
+            }
         });
+
+        // Apply saved grid size preference after all categories are rendered
+        if (window.homeToolbar && window.homeToolbar.applyGridSize) {
+            window.homeToolbar.applyGridSize();
+        }
     } else {
-        // For specific categories, remove categorized view class
+        // For Favorites and Hidden views, remove categorized view class
         appsContainer.classList.remove('categorized-view');
-        
+
         bgColor = await getCategoryColor(currentCategory);
 
         // Show the category name as section header
         if (sectionHeader) {
+            sectionHeader.style.display = 'block';
             const categoryIcon = getCategoryIcon(currentCategory);
             sectionHeader.innerHTML = `${categoryIcon} ${currentCategory}`;
         }
@@ -114,3 +167,141 @@ async function displayRecentApps(apps) {
         recentContainer.appendChild(appItem);
     }
 }
+
+// Re-sort a specific category without refreshing the entire page
+function resortCategory(categoryName, sortType) {
+    // Find the category section
+    const categorySection = document.querySelector(`.category-section .category-header-content .category-title h3`);
+    if (!categorySection) return;
+
+    // Find the specific category section by matching the category name
+    const allSections = document.querySelectorAll('.category-section');
+    let targetSection = null;
+
+    allSections.forEach(section => {
+        const titleElement = section.querySelector('.category-title h3');
+        if (titleElement && titleElement.textContent.includes(categoryName)) {
+            targetSection = section;
+        }
+    });
+
+    if (!targetSection) return;
+
+    // Get the category grid
+    const categoryGrid = targetSection.querySelector('.category-apps-grid');
+    if (!categoryGrid) return;
+
+    // Get all apps from this category from the cache
+    const categoryApps = allAppsCache.filter(app => app.category === categoryName);
+
+    // Sort the apps
+    const sortedApps = sortCategoryApps(categoryApps, sortType);
+
+    // Get the current scroll position
+    const scrollTop = document.querySelector('.content-area')?.scrollTop || 0;
+
+    // Clear and repopulate the grid
+    categoryGrid.innerHTML = '';
+
+    // Get category color
+    const getCategoryColor = async (category) => {
+        const categories = await window.electronAPI.getCategories();
+        const cat = categories.find(c => c.name === category);
+        return cat?.color || '#092442';
+    };
+
+    getCategoryColor(categoryName).then(color => {
+        sortedApps.forEach(app => {
+            const appItem = createAppElement(app, color);
+            categoryGrid.appendChild(appItem);
+        });
+
+        // Restore scroll position
+        requestAnimationFrame(() => {
+            const contentArea = document.querySelector('.content-area');
+            if (contentArea) {
+                contentArea.scrollTop = scrollTop;
+            }
+        });
+
+        // Update maxHeight for animation
+        requestAnimationFrame(() => {
+            categoryGrid.style.maxHeight = categoryGrid.scrollHeight + 'px';
+        });
+    });
+
+    // Update the select value
+    const sortSelect = targetSection.querySelector('.category-sort-btn');
+    if (sortSelect) {
+        sortSelect.value = sortType;
+    }
+}
+
+// Sort apps based on selected criteria
+function sortCategoryApps(apps, sortType) {
+    const sorted = [...apps];
+
+    switch(sortType) {
+        case 'name-asc':
+            sorted.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        case 'name-desc':
+            sorted.sort((a, b) => b.name.localeCompare(a.name));
+            break;
+        case 'time-desc':
+            // Most used: highest time first, then by name
+            sorted.sort((a, b) => {
+                const aTime = a.total_time || a.totalTime || 0;
+                const bTime = b.total_time || b.totalTime || 0;
+                const timeDiff = bTime - aTime;
+                if (timeDiff !== 0) return timeDiff;
+                return a.name.localeCompare(b.name);
+            });
+            break;
+        case 'time-asc':
+            // Least used: lowest time first (excluding 0), then 0s by name
+            sorted.sort((a, b) => {
+                const aTime = a.total_time || a.totalTime || 0;
+                const bTime = b.total_time || b.totalTime || 0;
+
+                // If both are 0, sort by name
+                if (aTime === 0 && bTime === 0) {
+                    return a.name.localeCompare(b.name);
+                }
+                // Put 0s at the end
+                if (aTime === 0) return 1;
+                if (bTime === 0) return -1;
+
+                // Otherwise sort by time ascending
+                const timeDiff = aTime - bTime;
+                if (timeDiff !== 0) return timeDiff;
+                return a.name.localeCompare(b.name);
+            });
+            break;
+        case 'recent':
+            sorted.sort((a, b) => {
+                const aTime = a.last_used ? new Date(a.last_used).getTime() : 0;
+                const bTime = b.last_used ? new Date(b.last_used).getTime() : 0;
+                return bTime - aTime;
+            });
+            break;
+    }
+
+    return sorted;
+}
+
+// Handle sort dropdown change
+document.addEventListener('change', (e) => {
+    if (e.target.classList.contains('category-sort-btn')) {
+        const select = e.target;
+        const sortType = select.value;
+        const dropdown = select.closest('.category-sort-dropdown');
+        const categoryName = dropdown.dataset.category;
+
+        // Save preference to database
+        window.electronAPI.updateCategorySort(categoryName, sortType);
+
+        // Re-sort only this category without full refresh
+        resortCategory(categoryName, sortType);
+    }
+});

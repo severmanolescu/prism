@@ -46,30 +46,96 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle category section clicks
     document.addEventListener('click', (e) => {
-        // Handle category toggle button clicks
+        // Handle category section toggle button clicks (in home view)
+        if (e.target.closest('.category-section-toggle')) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const toggleButton = e.target.closest('.category-section-toggle');
+            const categorySection = toggleButton.closest('.category-section');
+            const categoryGrid = categorySection.querySelector('.category-apps-grid');
+
+            // Get category name
+            const categoryTitle = categorySection.querySelector('.category-title h3');
+            const categoryFullText = categoryTitle?.textContent || '';
+            const categoryNameMatch = categoryFullText.match(/^([^(]+)/);
+            const categoryName = categoryNameMatch ? categoryNameMatch[1].trim() : '';
+
+            // Toggle the collapsed state
+            const isCollapsed = categorySection.classList.contains('collapsed');
+
+            if (isCollapsed) {
+                // Expand
+                categorySection.classList.remove('collapsed');
+                categoryGrid.style.maxHeight = categoryGrid.scrollHeight + 'px';
+                toggleButton.classList.remove('collapsed');
+
+                // Save to localStorage
+                const collapsedSections = JSON.parse(localStorage.getItem('collapsed-home-sections') || '[]');
+                const index = collapsedSections.indexOf(categoryName);
+                if (index > -1) {
+                    collapsedSections.splice(index, 1);
+                    localStorage.setItem('collapsed-home-sections', JSON.stringify(collapsedSections));
+                }
+            } else {
+                // Collapse
+                categorySection.classList.add('collapsed');
+                categoryGrid.style.maxHeight = '0';
+                toggleButton.classList.add('collapsed');
+
+                // Save to localStorage
+                const collapsedSections = JSON.parse(localStorage.getItem('collapsed-home-sections') || '[]');
+                if (!collapsedSections.includes(categoryName)) {
+                    collapsedSections.push(categoryName);
+                    localStorage.setItem('collapsed-home-sections', JSON.stringify(collapsedSections));
+                }
+            }
+
+            return;
+        }
+
+        // Handle category toggle button clicks (in left nav)
         if (e.target.closest('.category-toggle')) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             const toggleButton = e.target.closest('.category-toggle');
             const navSection = toggleButton.closest('.nav-section');
             const subitemsContainer = navSection.querySelector('.nav-subitems');
-            
+
+            // Get category name
+            const categoryName = subitemsContainer.dataset.category;
+
             // Toggle the collapsed state
             const isCollapsed = navSection.classList.contains('collapsed');
-            
+
             if (isCollapsed) {
                 // Expand
                 navSection.classList.remove('collapsed');
                 subitemsContainer.style.maxHeight = subitemsContainer.scrollHeight + 'px';
                 toggleButton.classList.remove('collapsed');
+
+                // Save to localStorage
+                const collapsedNav = JSON.parse(localStorage.getItem('collapsed-nav-sections') || '[]');
+                const index = collapsedNav.indexOf(categoryName);
+                if (index > -1) {
+                    collapsedNav.splice(index, 1);
+                    localStorage.setItem('collapsed-nav-sections', JSON.stringify(collapsedNav));
+                }
             } else {
                 // Collapse
                 navSection.classList.add('collapsed');
                 subitemsContainer.style.maxHeight = '0';
                 toggleButton.classList.add('collapsed');
+
+                // Save to localStorage
+                const collapsedNav = JSON.parse(localStorage.getItem('collapsed-nav-sections') || '[]');
+                if (!collapsedNav.includes(categoryName)) {
+                    collapsedNav.push(categoryName);
+                    localStorage.setItem('collapsed-nav-sections', JSON.stringify(collapsedNav));
+                }
             }
-            
+
             return;
         }
         
