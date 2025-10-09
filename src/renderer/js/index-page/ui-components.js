@@ -110,7 +110,21 @@ function createNavSection(categoryName, apps, isFavorites = false) {
     
     navSection.appendChild(categoryHeader);
     navSection.appendChild(subitemsContainer);
-    
+
+    // Restore collapsed state from localStorage
+    const collapsedNav = JSON.parse(localStorage.getItem('collapsed-nav-sections') || '[]');
+    if (collapsedNav.includes(categoryName)) {
+        navSection.classList.add('collapsed');
+        subitemsContainer.style.maxHeight = '0';
+        const toggleBtn = categoryHeader.querySelector('.category-toggle');
+        if (toggleBtn) toggleBtn.classList.add('collapsed');
+    } else {
+        // Set initial maxHeight for smooth collapse animation (only for expanded sections)
+        requestAnimationFrame(() => {
+            subitemsContainer.style.maxHeight = subitemsContainer.scrollHeight + 'px';
+        });
+    }
+
     return navSection;
 }
 
@@ -185,7 +199,7 @@ function createCategoryCard(categoryName, apps, color = '#4a90e2') {
             <div class="collection-count">( ${apps.length} )</div>
         </div>
     `;
-    
+
     // Add click handler
     card.addEventListener('click', () => {
         currentCategory = categoryName;
@@ -195,15 +209,15 @@ function createCategoryCard(categoryName, apps, color = '#4a90e2') {
             loadAppsByCategory(categoryName);
         }
         updateLibraryTitle(categoryName);
-        
+
         toggleView('grid');
         document.querySelector('.view-toggle-btn[data-view="categories"]').classList.remove('active');
-        
+
         document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
         const navItem = document.querySelector(`[data-category="${categoryName}"]`)?.closest('.nav-item');
         if (navItem) navItem.classList.add('active');
     });
-    
+
     return card;
 }
 

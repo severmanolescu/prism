@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Time Tracker</title>
   <link rel="stylesheet" href="styles/index-page/main.css">
+  <link rel="stylesheet" href="styles/index-page/home-toolbar.css">
   <link rel="stylesheet" href="styles/shared/properties-modal.css">
   <link rel="stylesheet" href="styles/global/scrollbar.css">
   <link rel="stylesheet" href="styles/shared/help-modal.css">
@@ -120,9 +121,28 @@
             </div>
           </div>
 
+          <!-- Home View Toolbar -->
+          <div class="home-toolbar">
+            <div class="filter-buttons">
+              <button class="filter-btn active" id="filter-all" data-filter="all">All</button>
+              <button class="filter-btn" id="filter-productive" data-filter="productive">✅ Productive</button>
+              <button class="filter-btn" id="filter-neutral" data-filter="neutral">⚪ Neutral</button>
+              <button class="filter-btn" id="filter-unproductive" data-filter="unproductive">❌ Unproductive</button>
+            </div>
+            <div class="view-options">
+              <div class="grid-size-toggle">
+                <label for="grid-size">Size:</label>
+                <select id="grid-size">
+                  <option value="compact">Compact</option>
+                  <option value="normal" selected>Normal</option>
+                  <option value="large">Large</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
           <!-- All Applications Section -->
           <div class="all-apps-section">
-            <h3 class="section-header">All Applications</h3>
             <div class="apps-grid">
               <!-- Apps grid will be populated here -->
             </div>
@@ -156,6 +176,7 @@
   <script src="./js/index-page/confirmation-dialog.js"></script>
   <script src="./js/index-page/stats.js"></script>
   <script src="./js/index-page/sidebar-resize.js"></script>
+  <script src="./js/index-page/home-toolbar.js"></script>
   <script src="./js/shared/help-modal.js"></script>
 </body>
 </html>
