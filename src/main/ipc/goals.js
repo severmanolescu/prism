@@ -1088,7 +1088,6 @@ function findCompletedPeriods(goals, startDate, endDate) {
 
 // Auto-save yesterday's progress on startup (deprecated - use backfillMissingProgress)
 function autoSaveYesterdayProgress() {
-  console.log('Running comprehensive backfill instead of just yesterday...');
   return backfillMissingProgress();
 }
 
@@ -1100,8 +1099,6 @@ function scheduleMidnightSave() {
   tomorrow.setHours(0, 0, 1, 0); // 1 second past midnight
 
   const timeUntilMidnight = tomorrow - now;
-
-  console.log(`Scheduling midnight save in ${Math.round(timeUntilMidnight / 1000 / 60)} minutes`);
 
   setTimeout(() => {
     const yesterday = new Date();
@@ -1120,8 +1117,6 @@ function scheduleMidnightSave() {
 function cleanupOrphanedProgress() {
   try {
     const db = getDb();
-
-    console.log('Cleaning up orphaned progress data...');
 
     const result = db.prepare(`
       DELETE FROM goal_progress
