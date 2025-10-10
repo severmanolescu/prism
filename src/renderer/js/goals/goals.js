@@ -2,6 +2,8 @@
 
 let currentDate = new Date();
 let currentPeriod = 'today';
+let showInactiveGoals = false;
+let cachedInactiveGoals = [];
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -94,9 +96,15 @@ async function loadGoalsForDate(date) {
     const api = window.electronAPI || parent.electronAPI;
     const data = await api.getGoalsForDate(dateString);
 
+    // Cache inactive goals for toggling
+    cachedInactiveGoals = data.inactiveGoals || [];
+
     updateDateDisplay(date);
     updateStats(data.stats);
     renderGoalsFromDatabase(data.goals, data.isToday);
+
+    // Update inactive goals button
+    updateInactiveGoalsButton();
   } catch (error) {
     console.error('Error loading goals for date:', error);
 
@@ -109,6 +117,8 @@ async function loadGoalsForDate(date) {
       successRate: 0
     });
     renderGoalsFromDatabase([], false);
+    cachedInactiveGoals = [];
+    updateInactiveGoalsButton();
   }
 }
 
@@ -190,6 +200,63 @@ function renderGoalsFromDatabase(goals, isToday = true) {
   renderCategoryGoals(groupedGoals.categories, isToday, hasNoGoals);
 }
 
+// Render inactive goals
+function renderInactiveGoals() {
+  if (!cachedInactiveGoals || cachedInactiveGoals.length === 0) return;
+
+  // Group inactive goals by type
+  const groupedGoals = {
+    productivity: [],
+    apps: [],
+    categories: []
+  };
+
+  cachedInactiveGoals.forEach(goal => {
+    if (goal.type === 'productivity_score' || goal.type === 'productivity_time' || goal.type === 'work_sessions') {
+      groupedGoals.productivity.push(goal);
+    } else if (goal.type === 'app') {
+      groupedGoals.apps.push(goal);
+    } else if (goal.type === 'category') {
+      groupedGoals.categories.push(goal);
+    }
+  });
+
+  // Append inactive goals to each section
+  appendInactiveGoalsToSection('.goals-section:nth-of-type(1) .goals-grid', groupedGoals.productivity, false);
+  appendInactiveGoalsToSection('.goals-section:nth-of-type(2) .goals-grid', groupedGoals.apps, true);
+  appendInactiveGoalsToSection('.goals-section:nth-of-type(3) .goals-grid', groupedGoals.categories, true);
+}
+
+// Append inactive goals to a section
+function appendInactiveGoalsToSection(selector, goals, showAppOrCategory) {
+  const section = document.querySelector(selector);
+  if (!section || !goals || goals.length === 0) return;
+
+  const inactiveHtml = goals.map(goal => createGoalCard(goal, showAppOrCategory, true)).join('');
+
+  // Add a divider before inactive goals
+  const divider = '<div style="grid-column: 1 / -1; border-top: 2px dashed rgba(143, 152, 160, 0.3); margin: 10px 0; padding-top: 10px; font-size: 12px; color: #8f98a0; text-align: center;">Inactive Today</div>';
+
+  section.insertAdjacentHTML('beforeend', divider + inactiveHtml);
+  attachGoalEventListeners(section);
+}
+
+// Hide inactive goals
+function hideInactiveGoals() {
+  const sections = document.querySelectorAll('.goals-grid');
+  sections.forEach(section => {
+    // Remove all inactive goal cards
+    const inactiveCards = section.querySelectorAll('.goal-card.inactive');
+    inactiveCards.forEach(card => card.remove());
+
+    // Remove dividers
+    const dividers = Array.from(section.children).filter(child =>
+      child.style.borderTop && child.textContent.includes('Inactive Today')
+    );
+    dividers.forEach(divider => divider.remove());
+  });
+}
+
 // Calculate progress percentage (legacy)
 function calculateProgress(goal) {
   return Math.round((goal.current / goal.target) * 100);
@@ -263,6 +330,50 @@ function setupEventListeners() {
       }
     });
   }
+
+  // Setup show inactive goals toggle
+  const showInactiveBtn = document.getElementById('showInactiveGoalsBtn');
+  if (showInactiveBtn) {
+    showInactiveBtn.addEventListener('click', handleToggleInactiveGoals);
+  }
+}
+
+// Handle toggle inactive goals
+function handleToggleInactiveGoals() {
+  showInactiveGoals = !showInactiveGoals;
+  updateInactiveGoalsButton();
+
+  // Re-render goals with/without inactive ones
+  if (showInactiveGoals) {
+    renderInactiveGoals();
+  } else {
+    hideInactiveGoals();
+  }
+}
+
+// Update inactive goals button text and icon
+function updateInactiveGoalsButton() {
+  const btn = document.getElementById('showInactiveGoalsBtn');
+  const icon = document.getElementById('inactiveGoalsIcon');
+  const text = document.getElementById('inactiveGoalsText');
+
+  if (!btn || !icon || !text) return;
+
+  const count = cachedInactiveGoals.length;
+
+  if (showInactiveGoals) {
+    icon.textContent = '🙈';
+    text.textContent = 'Hide Inactive';
+    btn.title = 'Hide goals not active today';
+  } else {
+    icon.textContent = '👁️';
+    text.textContent = count > 0 ? `Show Inactive (${count})` : 'Show Inactive';
+    btn.title = `Show ${count} goal${count !== 1 ? 's' : ''} not active today`;
+  }
+
+  // Disable button if no inactive goals
+  btn.disabled = count === 0;
+  btn.style.opacity = count === 0 ? '0.5' : '1';
 }
 
 // Attach event listeners to goal cards

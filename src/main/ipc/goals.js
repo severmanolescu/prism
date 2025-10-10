@@ -42,8 +42,8 @@ function initializeGoalHandlers() {
           name, description, icon, type,
           target_value, target_unit, target_type,
           reference_type, reference_id, min_session_duration,
-          frequency
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          frequency, active_days
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         goalData.name,
         goalData.description,
@@ -55,7 +55,8 @@ function initializeGoalHandlers() {
         goalData.reference_type,
         goalData.reference_id,
         goalData.min_session_duration,
-        goalData.frequency
+        goalData.frequency,
+        goalData.active_days || null
       );
 
       console.log(`Created goal from template: "${goalData.name}" (ID: ${result.lastInsertRowid})`);
@@ -97,6 +98,9 @@ function initializeGoalHandlers() {
       const db = getDb();
       const today = getLocalDateString(new Date());
 
+      // Get day of week for the specified date (0=Sunday, 1=Monday, etc.)
+      const dayOfWeek = new Date(date).getDay();
+
       // Get all active goals with app/category names
       const goals = db.prepare(`
         SELECT
@@ -113,8 +117,27 @@ function initializeGoalHandlers() {
         ORDER BY g.type, g.created_at DESC
       `).all();
 
-      // Get progress for the specific date
-      const goalsWithProgress = goals.map(goal => {
+      // Separate active and inactive goals based on active_days
+      const activeGoals = [];
+      const inactiveGoals = [];
+
+      goals.forEach(goal => {
+        if (!goal.active_days) {
+          // No active_days restriction, goal is active every day
+          activeGoals.push(goal);
+        } else {
+          // Check if the day of week is in the active_days list
+          const activeDays = goal.active_days.split(',').map(d => parseInt(d));
+          if (activeDays.includes(dayOfWeek)) {
+            activeGoals.push(goal);
+          } else {
+            inactiveGoals.push(goal);
+          }
+        }
+      });
+
+      // Get progress for active goals
+      const goalsWithProgress = activeGoals.map(goal => {
         // Get the date range for this goal based on frequency
         const { startDate, endDate } = getDateRangeForGoal(goal, date);
 
@@ -165,11 +188,30 @@ function initializeGoalHandlers() {
         };
       }).filter(goal => goal !== null); // Remove goals with no data for past periods
 
+      // Get progress for inactive goals (simplified - just show the goal without calculating progress)
+      const inactiveGoalsData = inactiveGoals.map(goal => {
+        // Check if the goal existed on the date we're viewing
+        const goalCreatedDate = getLocalDateString(new Date(goal.created_at));
+        if (goalCreatedDate > date) {
+          return null;
+        }
+
+        return {
+          ...goal,
+          current_value: 0,
+          status: 'inactive',
+          progress_percentage: 0,
+          period_start: date,
+          period_end: date
+        };
+      }).filter(goal => goal !== null);
+
       // Calculate stats for the day
       const stats = calculateDayStats(db, date, goalsWithProgress);
 
       return {
         goals: goalsWithProgress,
+        inactiveGoals: inactiveGoalsData,
         stats: stats,
         isToday: date === today
       };
@@ -189,8 +231,8 @@ function initializeGoalHandlers() {
           name, description, icon, type,
           target_value, target_unit, target_type,
           reference_type, reference_id, min_session_duration,
-          frequency
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          frequency, active_days
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         goalData.name,
         goalData.description,
@@ -202,7 +244,8 @@ function initializeGoalHandlers() {
         goalData.reference_type,
         goalData.reference_id,
         goalData.min_session_duration,
-        goalData.frequency
+        goalData.frequency,
+        goalData.active_days || null
       );
 
       return { id: result.lastInsertRowid };
@@ -229,6 +272,7 @@ function initializeGoalHandlers() {
           reference_id = ?,
           min_session_duration = ?,
           frequency = ?,
+          active_days = ?,
           updated_at = ?
         WHERE id = ?
       `).run(
@@ -242,6 +286,7 @@ function initializeGoalHandlers() {
         goalData.reference_id,
         goalData.min_session_duration,
         goalData.frequency,
+        goalData.active_days || null,
         Date.now(),
         goalId
       );
@@ -537,11 +582,9 @@ function calculateStreak(db, date, todayGoals = null) {
   let currentDate = typeof date === 'string' ? new Date(date + 'T00:00:00') : new Date(date);
   const today = getLocalDateString(new Date());
 
-  console.log(`[Streak] Starting streak calculation from date: ${getLocalDateString(currentDate)}, today: ${today}`);
-
-  // Get all active goals to know their frequencies
+  // Get all active goals to know their frequencies, active_days, and creation dates
   const allGoals = db.prepare(`
-    SELECT id, frequency FROM goals WHERE is_active = 1
+    SELECT id, frequency, active_days, created_at FROM goals WHERE is_active = 1
   `).all();
 
   // If there are no goals, return 0 streak
@@ -555,14 +598,76 @@ function calculateStreak(db, date, todayGoals = null) {
   const weeklyGoals = allGoals.filter(g => g.frequency === 'weekly');
   const monthlyGoals = allGoals.filter(g => g.frequency === 'monthly');
 
-  console.log(`[Streak] Goal counts - Daily: ${dailyGoals.length}, Weekly: ${weeklyGoals.length}, Monthly: ${monthlyGoals.length}`);
+  // Find the earliest goal creation date to avoid counting before goals existed
+  const earliestGoalDate = allGoals.reduce((earliest, goal) => {
+    const goalDate = new Date(goal.created_at);
+    goalDate.setHours(0, 0, 0, 0);
+    return !earliest || goalDate < earliest ? goalDate : earliest;
+  }, null);
+
+  if (earliestGoalDate) {
+    console.log(`[Streak] Earliest goal created: ${getLocalDateString(earliestGoalDate)}`);
+  }
 
   // Go backwards from the given date
   while (true) {
     const checkDateString = getLocalDateString(currentDate);
     const dayOfWeek = currentDate.getDay();
 
-    console.log(`[Streak] Checking date: ${checkDateString}, day of week: ${dayOfWeek}`);
+    // Stop if we've gone back before any goals existed
+    if (earliestGoalDate && currentDate < earliestGoalDate) {
+      console.log(`[Streak] Reached date before any goals existed (${checkDateString}), stopping`);
+      break;
+    }
+
+    // Check which goals should be checked on this specific date
+    const goalsActiveOnThisDate = allGoals.filter(goal => {
+      const goalCreatedDate = new Date(goal.created_at);
+      goalCreatedDate.setHours(0, 0, 0, 0);
+
+      // Goal must have existed on this date
+      if (currentDate < goalCreatedDate) {
+        return false;
+      }
+
+      // For daily goals with active_days, check if this day is included
+      if (goal.frequency === 'daily' && goal.active_days) {
+        const activeDays = goal.active_days.split(',').map(d => parseInt(d));
+        if (!activeDays.includes(dayOfWeek)) {
+          return false;
+        }
+      }
+
+      // For weekly goals, only check on Sundays
+      if (goal.frequency === 'weekly' && dayOfWeek !== 0) {
+        return false;
+      }
+
+      // For monthly goals, only check on last day of month
+      if (goal.frequency === 'monthly') {
+        const tomorrow = new Date(currentDate);
+        tomorrow.setDate(currentDate.getDate() + 1);
+        const isLastDayOfMonth = tomorrow.getMonth() !== currentDate.getMonth();
+        if (!isLastDayOfMonth) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    // If no goals should be checked on this date, continue streak (don't break)
+    if (goalsActiveOnThisDate.length === 0) {
+      console.log(`[Streak] No goals active on ${checkDateString}, continuing`);
+      streak++;
+      currentDate.setDate(currentDate.getDate() - 1);
+
+      // Safety limit: don't go back more than 365 days
+      if (streak >= 365) {
+        break;
+      }
+      continue;
+    }
 
     // For streak calculation:
     // - Daily goals: check every day
@@ -573,39 +678,61 @@ function calculateStreak(db, date, todayGoals = null) {
 
     // 1. Check daily goals (every day)
     if (dailyGoals.length > 0) {
-      // Special case: if checking today and we have live goal data, use that instead
-      if (checkDateString === today && todayGoals) {
-        console.log(`[Streak] Using live data for today`);
-        const dailyTodayGoals = todayGoals.filter(g => g.frequency === 'daily');
-        const achievedCount = dailyTodayGoals.filter(g => g.status === 'achieved').length;
+      // Filter daily goals that should be active on this day of week
+      const activeDailyGoals = dailyGoals.filter(goal => {
+        if (!goal.active_days) return true; // No restriction, always active
+        const activeDays = goal.active_days.split(',').map(d => parseInt(d));
+        return activeDays.includes(dayOfWeek);
+      });
 
-        console.log(`[Streak] Today: ${achievedCount}/${dailyGoals.length} daily goals achieved`);
+      // If no goals are active on this day, skip checking (don't break streak)
+      if (activeDailyGoals.length > 0) {
+        // Special case: if checking today and we have live goal data, use that instead
+        if (checkDateString === today && todayGoals) {
+          const dailyTodayGoals = todayGoals.filter(g => g.frequency === 'daily');
 
-        if (achievedCount < dailyGoals.length) {
-          // Not all goals achieved today, streak ends
-          console.log(`[Streak] Not all goals achieved today, streak ends`);
-          break;
-        }
-      } else {
-        // Check saved progress
-        const dailyProgress = db.prepare(`
-          SELECT goal_id, status FROM goal_progress
-          WHERE date = ? AND goal_id IN (${dailyGoals.map(() => '?').join(',')})
-        `).all(checkDateString, ...dailyGoals.map(g => g.id));
+          // Check if any goal failed (not just missing achievements)
+          const failedGoals = dailyTodayGoals.filter(g =>
+            g.status === 'failed' ||
+            (g.status !== 'achieved' && g.status !== 'in_progress' && g.status !== 'warning' && g.status !== 'pending')
+          );
 
-        console.log(`[Streak] Found ${dailyProgress.length}/${dailyGoals.length} saved progress records for ${checkDateString}`);
+          if (failedGoals.length > 0) {
+            console.log(`[Streak] ${failedGoals.length} goal(s) failed today, streak ends`);
+            break;
+          }
 
-        // If we don't have progress for all daily goals on this date, streak ends
-        if (dailyProgress.length < dailyGoals.length) {
-          console.log(`[Streak] Missing progress records, streak ends`);
-          break;
-        }
+          // Check if there are goals with progress that weren't achieved
+          const goalsWithProgress = dailyTodayGoals.filter(g =>
+            g.status === 'in_progress' || g.status === 'warning' || g.status === 'failed'
+          );
 
-        // Check if all daily goals were achieved
-        const dailyAchieved = dailyProgress.every(record => record.status === 'achieved');
-        console.log(`[Streak] All daily goals achieved: ${dailyAchieved}`);
-        if (!dailyAchieved) {
-          allAchievedForThisDay = false;
+          if (goalsWithProgress.some(g => g.status !== 'achieved')) {
+            console.log(`[Streak] Some goals with activity weren't achieved today, streak ends`);
+            allAchievedForThisDay = false;
+          }
+        } else {
+          // Check saved progress for goals that existed on this date
+          const dailyProgress = db.prepare(`
+            SELECT gp.goal_id, gp.status, g.created_at
+            FROM goal_progress gp
+            JOIN goals g ON gp.goal_id = g.id
+            WHERE gp.date = ? AND gp.goal_id IN (${activeDailyGoals.map(() => '?').join(',')})
+          `).all(checkDateString, ...activeDailyGoals.map(g => g.id));
+
+          // Check for explicitly failed goals or goals with progress that weren't achieved
+          const failedProgress = dailyProgress.filter(record =>
+            record.status === 'failed' ||
+            (record.status !== 'achieved' && record.status !== 'pending')
+          );
+
+          if (failedProgress.length > 0) {
+            console.log(`[Streak] ${failedProgress.length} goal(s) failed on ${checkDateString}, streak ends`);
+            allAchievedForThisDay = false;
+          }
+
+          // Note: Missing progress records don't break the streak
+          // (goal might not have existed yet, or had no activity)
         }
       }
     }
@@ -617,16 +744,19 @@ function calculateStreak(db, date, todayGoals = null) {
         WHERE date = ? AND goal_id IN (${weeklyGoals.map(() => '?').join(',')})
       `).all(checkDateString, ...weeklyGoals.map(g => g.id));
 
-      // If we don't have progress for all weekly goals on this Sunday, streak ends
-      if (weeklyProgress.length < weeklyGoals.length) {
-        break;
-      }
+      // Check for explicitly failed goals or goals with progress that weren't achieved
+      const failedWeeklyProgress = weeklyProgress.filter(record =>
+        record.status === 'failed' ||
+        (record.status !== 'achieved' && record.status !== 'pending')
+      );
 
-      // Check if all weekly goals were achieved
-      const weeklyAchieved = weeklyProgress.every(record => record.status === 'achieved');
-      if (!weeklyAchieved) {
+      if (failedWeeklyProgress.length > 0) {
+        console.log(`[Streak] ${failedWeeklyProgress.length} weekly goal(s) failed on ${checkDateString}, streak ends`);
         allAchievedForThisDay = false;
       }
+
+      // Note: Missing progress records don't break the streak
+      // (goal might not have existed yet during this week)
     }
 
     // 3. Check monthly goals (only on last day of month)
@@ -641,16 +771,19 @@ function calculateStreak(db, date, todayGoals = null) {
           WHERE date = ? AND goal_id IN (${monthlyGoals.map(() => '?').join(',')})
         `).all(checkDateString, ...monthlyGoals.map(g => g.id));
 
-        // If we don't have progress for all monthly goals on month-end, streak ends
-        if (monthlyProgress.length < monthlyGoals.length) {
-          break;
-        }
+        // Check for explicitly failed goals or goals with progress that weren't achieved
+        const failedMonthlyProgress = monthlyProgress.filter(record =>
+          record.status === 'failed' ||
+          (record.status !== 'achieved' && record.status !== 'pending')
+        );
 
-        // Check if all monthly goals were achieved
-        const monthlyAchieved = monthlyProgress.every(record => record.status === 'achieved');
-        if (!monthlyAchieved) {
+        if (failedMonthlyProgress.length > 0) {
+          console.log(`[Streak] ${failedMonthlyProgress.length} monthly goal(s) failed on ${checkDateString}, streak ends`);
           allAchievedForThisDay = false;
         }
+
+        // Note: Missing progress records don't break the streak
+        // (goal might not have existed yet during this month)
       }
     }
 
@@ -753,6 +886,17 @@ function saveProgressForDate(date, forceUpdate = false) {
         console.log(`  Goal ${goal.name} was created on ${goalCreatedDate}, after ${date}, skipping`);
         skippedCount++;
         return;
+      }
+
+      // For daily goals with active_days, check if this date's day of week is included
+      if (goal.frequency === 'daily' && goal.active_days) {
+        const dayOfWeek = new Date(date).getDay();
+        const activeDays = goal.active_days.split(',').map(d => parseInt(d));
+        if (!activeDays.includes(dayOfWeek)) {
+          console.log(`  Goal ${goal.name} is not active on ${date} (day ${dayOfWeek}), skipping`);
+          skippedCount++;
+          return;
+        }
       }
 
       // Get the date range for this goal's frequency

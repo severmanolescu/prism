@@ -104,6 +104,15 @@
   border-left: 4px solid #8f98a0;
 }
 
+.goal-card.inactive {
+  border-left: 4px solid #5a6a7a;
+  opacity: 0.7;
+}
+
+.goal-card.inactive:hover {
+  opacity: 1;
+}
+
 /* Icon Section */
 .goal-card-icon-section {
   width: 120px;
@@ -206,6 +215,12 @@
   border: 1px solid rgba(143, 152, 160, 0.3);
 }
 
+.goal-status-badge.inactive {
+  background: rgba(90, 106, 122, 0.2);
+  color: #8f98a0;
+  border: 1px solid rgba(90, 106, 122, 0.3);
+}
+
 /* Meta Section */
 .goal-card-meta {
   display: flex;
@@ -214,7 +229,8 @@
 }
 
 .goal-frequency-badge,
-.goal-reference-badge {
+.goal-reference-badge,
+.goal-active-days-badge {
   font-size: 11px;
   padding: 4px 8px;
   border-radius: 3px;
@@ -230,6 +246,12 @@
   background: rgba(102, 192, 244, 0.15);
   color: #66c0f4;
   border: 1px solid rgba(102, 192, 244, 0.2);
+}
+
+.goal-active-days-badge {
+  background: rgba(255, 187, 51, 0.15);
+  color: #ffbb33;
+  border: 1px solid rgba(255, 187, 51, 0.2);
 }
 
 /* Progress Section */
@@ -290,6 +312,10 @@
 
 .progress-bar-fill.pending {
   background: linear-gradient(90deg, #6b7780 0%, #8f98a0 100%);
+}
+
+.progress-bar-fill.inactive {
+  background: linear-gradient(90deg, #3a4a5a 0%, #5a6a7a 100%);
 }
 
 .progress-info {

@@ -5,7 +5,8 @@ function getStatusText(goal) {
         'in_progress': '⏳ In Progress',
         'warning': '⚠️ Warning',
         'failed': '❌ Failed',
-        'pending': '⏸️ Pending'
+        'pending': '⏸️ Pending',
+        'inactive': '💤 Not Active Today'
     };
     return statusMap[goal.status] || goal.status;
 }
@@ -68,6 +69,19 @@ function renderCategoryGoals(goals, isToday = true, hasNoGoalsAtAll = false) {
     attachGoalEventListeners(section);
 }
 
+// Helper function to format active days
+function formatActiveDays(activeDaysString) {
+    if (!activeDaysString) return null;
+
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const activeDays = activeDaysString.split(',').map(d => parseInt(d)).sort((a, b) => a - b);
+
+    // If all 7 days are selected, don't show anything (it's the default)
+    if (activeDays.length === 7) return null;
+
+    return activeDays.map(day => dayNames[day]).join(', ');
+}
+
 // Create goal card HTML
 function createGoalCard(goal, showAppOrCategory = false, isToday = true) {
     const progress = goal.progress_percentage || 0;
@@ -79,6 +93,13 @@ function createGoalCard(goal, showAppOrCategory = false, isToday = true) {
     if (showAppOrCategory && goal.reference_name) {
         const icon = goal.reference_type === 'app' ? '💻' : '📁';
         referenceBadge = `<span class="goal-reference-badge">${icon} ${goal.reference_name}</span>`;
+    }
+
+    // Build active days badge if applicable
+    let activeDaysBadge = '';
+    const formattedDays = formatActiveDays(goal.active_days);
+    if (formattedDays) {
+        activeDaysBadge = `<span class="goal-active-days-badge" title="Active on these days">📆 ${formattedDays}</span>`;
     }
 
     // Only show edit/delete buttons for today
@@ -111,6 +132,7 @@ function createGoalCard(goal, showAppOrCategory = false, isToday = true) {
         <div class="goal-card-meta">
           <span class="goal-frequency-badge">📅 ${goal.frequency}</span>
           ${referenceBadge}
+          ${activeDaysBadge}
         </div>
 
         <div class="goal-card-progress">

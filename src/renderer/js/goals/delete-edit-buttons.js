@@ -112,6 +112,19 @@ async function populateFormWithGoal(goal) {
             minSessionDuration.value = goal.min_session_duration || 25;
         }
     }
+
+    // Set active days checkboxes
+    const dayCheckboxes = document.querySelectorAll('.day-checkbox-input');
+    dayCheckboxes.forEach(checkbox => checkbox.checked = false); // Clear all first
+
+    if (goal.active_days) {
+        const activeDays = goal.active_days.split(',');
+        dayCheckboxes.forEach(checkbox => {
+            if (activeDays.includes(checkbox.value)) {
+                checkbox.checked = true;
+            }
+        });
+    }
 }
 
 // Handle delete goal

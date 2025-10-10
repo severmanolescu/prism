@@ -52,6 +52,10 @@
       </div>
 
       <div class="goals-header-actions">
+        <button class="secondary-btn" id="showInactiveGoalsBtn" title="Show goals not active today">
+          <span id="inactiveGoalsIcon">👁️</span>
+          <span id="inactiveGoalsText">Show Inactive</span>
+        </button>
         <button class="secondary-btn" id="browseTemplatesBtn" title="Browse goal templates">
           Browse Templates
         </button>
@@ -315,6 +319,49 @@
             <option value="weekly">Weekly</option>
             <option value="monthly">Monthly</option>
           </select>
+        </div>
+
+        <!-- Active Days (Optional - for daily goals) -->
+        <div class="form-section" id="activeDaysSection">
+          <label class="form-label">
+            Active Days (Optional)
+            <span style="font-size: 12px; color: #8f98a0; font-weight: normal;">
+              - Select which days this goal is active
+            </span>
+          </label>
+          <div class="days-selector" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+            <label class="day-checkbox" style="display: flex; align-items: center; cursor: pointer; user-select: none;">
+              <input type="checkbox" value="0" class="day-checkbox-input" style="margin-right: 4px;" />
+              <span>Sun</span>
+            </label>
+            <label class="day-checkbox" style="display: flex; align-items: center; cursor: pointer; user-select: none;">
+              <input type="checkbox" value="1" class="day-checkbox-input" style="margin-right: 4px;" />
+              <span>Mon</span>
+            </label>
+            <label class="day-checkbox" style="display: flex; align-items: center; cursor: pointer; user-select: none;">
+              <input type="checkbox" value="2" class="day-checkbox-input" style="margin-right: 4px;" />
+              <span>Tue</span>
+            </label>
+            <label class="day-checkbox" style="display: flex; align-items: center; cursor: pointer; user-select: none;">
+              <input type="checkbox" value="3" class="day-checkbox-input" style="margin-right: 4px;" />
+              <span>Wed</span>
+            </label>
+            <label class="day-checkbox" style="display: flex; align-items: center; cursor: pointer; user-select: none;">
+              <input type="checkbox" value="4" class="day-checkbox-input" style="margin-right: 4px;" />
+              <span>Thu</span>
+            </label>
+            <label class="day-checkbox" style="display: flex; align-items: center; cursor: pointer; user-select: none;">
+              <input type="checkbox" value="5" class="day-checkbox-input" style="margin-right: 4px;" />
+              <span>Fri</span>
+            </label>
+            <label class="day-checkbox" style="display: flex; align-items: center; cursor: pointer; user-select: none;">
+              <input type="checkbox" value="6" class="day-checkbox-input" style="margin-right: 4px;" />
+              <span>Sat</span>
+            </label>
+          </div>
+          <p style="font-size: 12px; color: #8f98a0; margin-top: 8px;">
+            Leave all unchecked to make this goal active every day. Check specific days to limit when it's active.
+          </p>
         </div>
 
         <!-- Additional Config (shown conditionally) -->

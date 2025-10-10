@@ -125,6 +125,9 @@ async function initDatabase() {
       -- Frequency
       frequency TEXT NOT NULL CHECK(frequency IN ('daily', 'weekly', 'monthly')),
 
+      -- Active Days (optional - comma-separated days: 0=Sun,1=Mon,...,6=Sat)
+      active_days TEXT,
+
       -- Status (soft delete)
       is_active INTEGER DEFAULT 1,
       deleted_at INTEGER DEFAULT NULL,
@@ -161,8 +164,23 @@ async function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_goals_active ON goals(is_active);
   `);
 
+  // Run migrations
+  runMigrations(db);
+
   console.log('Database initialized successfully');
   return db;
+}
+
+function runMigrations(db) {
+  // Check if active_days column exists in goals table
+  const columns = db.prepare("PRAGMA table_info(goals)").all();
+  const hasActiveDays = columns.some(col => col.name === 'active_days');
+
+  if (!hasActiveDays) {
+    console.log('Running migration: Adding active_days column to goals table');
+    db.exec('ALTER TABLE goals ADD COLUMN active_days TEXT');
+    console.log('Migration completed successfully');
+  }
 }
 
 function getDb() {
