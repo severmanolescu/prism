@@ -6,7 +6,9 @@ const { initializeSessionHandlers } = require('./sessions');
 const { initializeStatsHandlers } = require('./stats');
 const { initializeSettingsHandlers } = require('./settings');
 const { initializeGoalHandlers } = require('./goals');
-const { initializeExportHandlers } = require('./exporters/export');
+const { initializeAnalyticsExporter } = require('./exporters/export_analytics');
+const { initializeProductivityExporter } = require('./exporters/export_productivity');
+const { initializeGoalsExporter } = require('./exporters/export_goals');
 
 function initializeIpcHandlers(window) {
   initializeWindowHandlers(window);
@@ -17,7 +19,9 @@ function initializeIpcHandlers(window) {
   initializeStatsHandlers();
   initializeSettingsHandlers();
   initializeGoalHandlers();
-  initializeExportHandlers();
+  initializeAnalyticsExporter();
+  initializeProductivityExporter();
+  initializeGoalsExporter();
 }
 
 module.exports = { initializeIpcHandlers };

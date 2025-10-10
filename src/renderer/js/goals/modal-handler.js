@@ -85,10 +85,20 @@ function setupModalListeners() {
         });
     }
 
-    // ESC key to close
     document.addEventListener('keydown', (e) => {
+        const searchInput = document.getElementById('goal-search');
+
         if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
             closeModal();
+            return;
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            if (searchInput) {
+                searchInput.focus();
+                searchInput.select();
+            }
         }
     });
 
@@ -322,6 +332,11 @@ async function handleFormSubmit(e) {
         return;
     }
 
+    // Get selected active days
+    const selectedDays = Array.from(document.querySelectorAll('.day-checkbox-input:checked'))
+        .map(checkbox => checkbox.value)
+        .join(',');
+
     const formData = {
         type: selectedType.dataset.type,
         name: document.getElementById('goalName').value,
@@ -331,6 +346,7 @@ async function handleFormSubmit(e) {
         target_unit: targetUnitValue,
         target_type: document.getElementById('targetType').value,
         frequency: document.getElementById('frequency').value,
+        active_days: selectedDays || null,
         reference_type: null,
         reference_id: null,
         min_session_duration: null
@@ -363,8 +379,6 @@ async function handleFormSubmit(e) {
     const modal = document.getElementById('addGoalModal');
     const isEditMode = modal && modal.dataset.editMode === 'true';
     const editGoalId = modal ? modal.dataset.editGoalId : null;
-
-    console.log(isEditMode ? 'Updating goal:' : 'Creating goal:', formData);
 
     // Save to database via IPC (access through parent for iframe)
     const api = window.electronAPI || parent.electronAPI;

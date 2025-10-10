@@ -24,8 +24,8 @@ function setUpShortcuts() {
             return;
         }
 
-        // Get all goal items
-        const goalItems = Array.from(document.querySelectorAll('.goals-list .goal-card'));
+        // Get all goal items (from all sections)
+        const goalItems = Array.from(document.querySelectorAll('.goals-grid .goal-card'));
 
         switch (e.key) {
             case 'n':
@@ -59,8 +59,10 @@ function setUpShortcuts() {
                     }
                     // Move down
                     selectedGoalIndex = Math.min(selectedGoalIndex + 1, goalItems.length - 1);
-                    goalItems[selectedGoalIndex].classList.add('keyboard-selected');
-                    goalItems[selectedGoalIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    if (goalItems[selectedGoalIndex]) {
+                        goalItems[selectedGoalIndex].classList.add('keyboard-selected');
+                        goalItems[selectedGoalIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
                 }
                 break;
             case 'ArrowUp':
@@ -72,15 +74,17 @@ function setUpShortcuts() {
                     }
                     // Move up
                     selectedGoalIndex = Math.max(selectedGoalIndex - 1, 0);
-                    goalItems[selectedGoalIndex].classList.add('keyboard-selected');
-                    goalItems[selectedGoalIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    if (goalItems[selectedGoalIndex]) {
+                        goalItems[selectedGoalIndex].classList.add('keyboard-selected');
+                        goalItems[selectedGoalIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
                 }
                 break;
             case 'Enter':
                 e.preventDefault();
                 if (selectedGoalIndex >= 0 && goalItems[selectedGoalIndex]) {
                     // Find edit button and click it
-                    const editBtn = goalItems[selectedGoalIndex].querySelector('.icon-btn[title="Edit goal"]');
+                    const editBtn = goalItems[selectedGoalIndex].querySelector('.goal-action-btn[title="Edit goal"]');
                     if (editBtn) {
                         editBtn.click();
                     }
@@ -91,7 +95,7 @@ function setUpShortcuts() {
                 e.preventDefault();
                 if (selectedGoalIndex >= 0 && goalItems[selectedGoalIndex]) {
                     // Find delete button and click it
-                    const deleteBtn = goalItems[selectedGoalIndex].querySelector('.icon-btn[title="Delete goal"]');
+                    const deleteBtn = goalItems[selectedGoalIndex].querySelector('.goal-action-btn[title="Delete goal"]');
                     if (deleteBtn) {
                         deleteBtn.click();
                     }
@@ -140,6 +144,36 @@ function setUpShortcuts() {
                 if(insightsSection){
                     insightsSection.classList.toggle('collapsed');
                 }
+                break;
+            case "z":
+                // All Goals
+                e.preventDefault();
+                const allGoalsBtn = document.querySelector('.filter-btn[data-filter="all"]');
+                if (allGoalsBtn) allGoalsBtn.click();
+                break;
+            case "x":
+                // All Goals
+                e.preventDefault();
+                const achievedGoalsBtn = document.querySelector('.filter-btn[data-filter="achieved"]');
+                if (achievedGoalsBtn) achievedGoalsBtn.click();
+                break;
+            case "c":
+                // All Goals
+                e.preventDefault();
+                const inProgressGoalsBtn = document.querySelector('.filter-btn[data-filter="in_progress"]');
+                if (inProgressGoalsBtn) inProgressGoalsBtn.click();
+                break;
+            case "v":
+                // All Goals
+                e.preventDefault();
+                const warningGoalsBtn = document.querySelector('.filter-btn[data-filter="warning"]');
+                if (warningGoalsBtn) warningGoalsBtn.click();
+                break;
+            case "b":
+                // All Goals
+                e.preventDefault();
+                const failedGoalsBtn = document.querySelector('.filter-btn[data-filter="failed"]');
+                if (failedGoalsBtn) failedGoalsBtn.click();
                 break;
         }
     });

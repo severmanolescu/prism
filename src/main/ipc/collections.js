@@ -6,7 +6,7 @@ const {
   updateCategorySortPreference,
   deleteCategory,
   moveAppToCategory
-} = require('../services/data-access');
+} = require('../services/data_access/categories');
 
 function initializeCollectionHandlers() {
   ipcMain.handle('get-categories', async () => {

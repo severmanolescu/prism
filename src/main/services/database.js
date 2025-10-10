@@ -125,6 +125,9 @@ async function initDatabase() {
       -- Frequency
       frequency TEXT NOT NULL CHECK(frequency IN ('daily', 'weekly', 'monthly')),
 
+      -- Active Days (optional - comma-separated days: 0=Sun,1=Mon,...,6=Sat)
+      active_days TEXT,
+
       -- Status (soft delete)
       is_active INTEGER DEFAULT 1,
       deleted_at INTEGER DEFAULT NULL,

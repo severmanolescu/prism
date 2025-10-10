@@ -110,7 +110,7 @@ async function handleAddFromTemplate(templateId) {
         }
     } catch (error) {
         console.error('Error adding goal from template:', error);
-        showFeedback(`Failed to add goal: ${error.message}`, false);
+        showFeedback(`Failed to add goal!`, false);
     }
 }
 
@@ -126,4 +126,3 @@ function closeTemplatesModalFunc() {
 function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
-

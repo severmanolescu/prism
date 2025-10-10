@@ -3,7 +3,7 @@ const {
   getFavorites,
   addFavorite,
   removeFavorite
-} = require('../services/data-access');
+} = require('../services/data_access/apps');
 
 function initializeFavoriteHandlers() {
   ipcMain.handle('get-favorites', async () => {

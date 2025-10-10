@@ -667,6 +667,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, '*');
                 }
             }
+        } else if (event.data.type === 'EXPORT_GOALS_PDF') {
+            // Handle PDF export request from goals iframe
+            const { date, dateFormatted } = event.data;
+            const goalsIframe = document.querySelector('.goals-iframe-wrapper iframe');
+
+            try {
+                const result = await window.electronAPI.exportGoalsPDF({
+                    date: date,
+                    dateFormatted: dateFormatted
+                });
+
+                // Send response back to goals iframe
+                if (goalsIframe && goalsIframe.contentWindow) {
+                    goalsIframe.contentWindow.postMessage({
+                        type: 'EXPORT_PDF_RESPONSE',
+                        result: result
+                    }, '*');
+                }
+            } catch (error) {
+                console.error('Error exporting goals PDF:', error);
+                if (goalsIframe && goalsIframe.contentWindow) {
+                    goalsIframe.contentWindow.postMessage({
+                        type: 'EXPORT_PDF_RESPONSE',
+                        result: { success: false, error: error.message }
+                    }, '*');
+                }
+            }
         } 
     });
 });

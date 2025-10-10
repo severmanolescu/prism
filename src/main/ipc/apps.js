@@ -10,7 +10,7 @@ const {
   restoreApp,
   deleteAppAndSessions,
   addToBlacklist,
-} = require('../services/data-access');
+} = require('../services/data_access/apps');
 
 const { formatTime, formatLastUsed } = require('../utils/utils');
 const { getDb } = require('../services/database');
@@ -160,7 +160,7 @@ function initializeAppHandlers() {
         throw new Error('Database not available');
       }
 
-      const { getAppById } = require('../services/data-access');
+      const { getAppById } = require('../services/data_access/apps');
       const app = await getAppById(appId);
       
       if (!app) {
@@ -191,7 +191,7 @@ function initializeAppHandlers() {
         throw new Error('Database not available');
       }
 
-      const { getAppById } = require('../services/data-access');
+      const { getAppById } = require('../services/data_access/apps');
       const app = await getAppById(appId);
 
       if (!app) {
@@ -217,7 +217,7 @@ function initializeAppHandlers() {
         throw new Error('Database not available');
       }
 
-      const { getAppById } = require('../services/data-access');
+      const { getAppById } = require('../services/data_access/apps');
       const app = await getAppById(appId);
       
       if (!app || !app.path) {
