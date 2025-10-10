@@ -1,14 +1,17 @@
 const { ipcMain } = require('electron');
 const {
-  getTodayStats,
-  getAnalyticsData,
-  getHourlyAppBreakdown,
   setCategoryProductivityLevel,
   getCategoryProductivityLevel,
   setAppProductivityOverride,
   getAppProductivityLevel,
   getProductivityStats
-} = require('../services/data-access');
+} = require('../services/data_access/productivity');
+
+const {
+  getTodayStats,
+  getAnalyticsData,
+  getHourlyAppBreakdown,
+} = require('../services/data_access/analytics');
 
 function initializeStatsHandlers() {
   console.log('Initializing stats handlers...');

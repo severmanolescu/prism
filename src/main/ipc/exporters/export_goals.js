@@ -518,4 +518,4 @@ async function getGoalInsightsData(db, days = 7) {
     return dailySuccessRate;
 }
 
-module.exports = { initializeGoalsExporter }
+module.exports = { initializeGoalsExporter };

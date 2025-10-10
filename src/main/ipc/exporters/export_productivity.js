@@ -13,7 +13,7 @@ function initializeProductivityExporter() {
         const { dateRange } = data;
 
         // Fetch productivity data using the existing service
-        const { getProductivityStats } = require('../../services/data-access');
+        const { getProductivityStats } = require('../../services/data_access/productivity');
         const productivityData = await getProductivityStats(dateRange.start, dateRange.end);
 
         // Show save dialog

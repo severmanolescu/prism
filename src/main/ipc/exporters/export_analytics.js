@@ -14,7 +14,7 @@ function initializeAnalyticsExporter() {
       const { dateRange } = data;
 
       // Fetch analytics data using the existing service
-      const { getAnalyticsData } = require('../../services/data-access');
+      const { getAnalyticsData } = require('../../services/data_access/analytics');
       const analyticsData = await getAnalyticsData(dateRange.start, dateRange.end);
 
       // Show save dialog
@@ -216,3 +216,4 @@ function initializeAnalyticsExporter() {
 }
 
 module.exports = { initializeAnalyticsExporter };
+

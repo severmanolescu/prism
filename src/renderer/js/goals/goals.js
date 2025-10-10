@@ -99,7 +99,6 @@ async function loadGoalsForDate(date) {
     // Cache inactive goals for toggling
     cachedInactiveGoals = data.inactiveGoals || [];
 
-    updateDateDisplay(date);
     updateStats(data.stats);
     renderGoalsFromDatabase(data.goals, data.isToday);
 
@@ -109,7 +108,6 @@ async function loadGoalsForDate(date) {
     console.error('Error loading goals for date:', error);
 
     // Show empty state on error
-    updateDateDisplay(date);
     updateStats({
       activeGoals: 0,
       achievedToday: 0,
@@ -120,36 +118,6 @@ async function loadGoalsForDate(date) {
     cachedInactiveGoals = [];
     updateInactiveGoalsButton();
   }
-}
-
-// Update date display
-function updateDateDisplay(date) {
-  const dateInfo = document.getElementById('dateInfo');
-
-  if (!dateInfo) return;
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const selectedDate = new Date(date);
-  selectedDate.setHours(0, 0, 0, 0);
-
-  const isToday = selectedDate.getTime() === today.getTime();
-
-  let displayText = '';
-  if (isToday) {
-    displayText = "Viewing today's goals";
-  } else {
-    const daysAgo = Math.floor((today - selectedDate) / (1000 * 60 * 60 * 24));
-    if (daysAgo === 1) {
-      displayText = "Viewing yesterday's goals";
-    } else if (daysAgo > 1) {
-      displayText = `Viewing goals from ${daysAgo} days ago`;
-    } else {
-      displayText = `Viewing goals for ${formatDateLong(date)}`;
-    }
-  }
-
-  dateInfo.textContent = displayText;
 }
 
 // Update stats
@@ -499,4 +467,3 @@ function renderCalendarHeatmap(data) {
 
   container.innerHTML = html.join('');
 }
-
