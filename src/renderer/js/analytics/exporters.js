@@ -1,20 +1,56 @@
 // Export analytics data using shared export utilities
 
-function exportAnalytics() {
+// Initialize export menu once on page load
+function initializeExportMenu() {
+  setupExportMenu({
+    triggerSelector: '.export-btn',
+    onCSVExport: exportAnalyticsAsCSV,
+    onJSONExport: exportAnalyticsAsJSON,
+    onPDFExport: exportAnalyticsAsPDF
+  });
+}
+
+async function exportAnalyticsAsPDF() {
   if (!currentAnalyticsData) {
     alert('No data to export');
     return;
   }
 
-  // Setup export menu using shared utility
-  setupExportMenu({
-    triggerSelector: '.export-btn',
-    onCSVExport: exportAnalyticsAsCSV,
-    onJSONExport: exportAnalyticsAsJSON
-  });
+  const data = currentAnalyticsData;
+
+  // Send message to parent window to handle PDF export
+  window.parent.postMessage({
+    type: 'EXPORT_ANALYTICS_PDF',
+    dateRange: {
+      start: data.dateRange.start,
+      end: data.dateRange.end
+    }
+  }, '*');
 }
 
+// Listen for PDF export response from parent window
+window.addEventListener('message', (event) => {
+  if (event.source !== window.parent) {
+    return;
+  }
+
+  if (event.data.type === 'EXPORT_PDF_RESPONSE') {
+    const result = event.data.result;
+
+    if (result.success) {
+      showFeedback('PDF exported successfully!', true);
+    } else if (!result.canceled) {
+      showFeedback(`Failed to export PDF: ${result.error}`, false);
+    }
+  }
+});
+
 function exportAnalyticsAsCSV() {
+  if (!currentAnalyticsData) {
+    alert('No data to export');
+    return;
+  }
+
   const data = currentAnalyticsData;
   const dateRange = `${data.dateRange.start}_to_${data.dateRange.end}`;
 
@@ -46,6 +82,11 @@ function exportAnalyticsAsCSV() {
 }
 
 function exportAnalyticsAsJSON() {
+  if (!currentAnalyticsData) {
+    alert('No data to export');
+    return;
+  }
+
   const data = currentAnalyticsData;
   const dateRange = `${data.dateRange.start}_to_${data.dateRange.end}`;
 
