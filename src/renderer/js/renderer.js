@@ -529,14 +529,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Verify message comes from our analytics or productivity iframe
+        // Verify message comes from our analytics, productivity, or goals iframe
         const analyticsIframe = document.querySelector('.analytics-iframe-wrapper iframe');
         const productivityIframe = document.querySelector('.productivity-iframe-wrapper iframe');
+        const goalsIframe = document.querySelector('.goals-iframe-wrapper iframe');
 
         const isAnalyticsSource = analyticsIframe && event.source === analyticsIframe.contentWindow;
         const isProductivitySource = productivityIframe && event.source === productivityIframe.contentWindow;
+        const isGoalsSource = goalsIframe && event.source === goalsIframe.contentWindow;
 
-        if (!isAnalyticsSource && !isProductivitySource) {
+        if (!isAnalyticsSource && !isProductivitySource && !isGoalsSource) {
             return;
         }
 
@@ -615,6 +617,56 @@ document.addEventListener('DOMContentLoaded', () => {
             if (appName && typeof showAppDetails === 'function') {
                 showAppDetails(appName);
             }
-        }
+        } else if (event.data.type === 'EXPORT_ANALYTICS_PDF') {
+            // Handle PDF export request from analytics iframe
+            const { dateRange } = event.data;
+
+            try {
+                const result = await window.electronAPI.exportAnalyticsPDF({
+                    dateRange: dateRange
+                });
+
+                // Send response back to analytics iframe
+                if (analyticsIframe && analyticsIframe.contentWindow) {
+                    analyticsIframe.contentWindow.postMessage({
+                        type: 'EXPORT_PDF_RESPONSE',
+                        result: result
+                    }, '*');
+                }
+            } catch (error) {
+                console.error('Error exporting analytics PDF:', error);
+                if (analyticsIframe && analyticsIframe.contentWindow) {
+                    analyticsIframe.contentWindow.postMessage({
+                        type: 'EXPORT_PDF_RESPONSE',
+                        result: { success: false, error: error.message }
+                    }, '*');
+                }
+            }
+        } else if (event.data.type === 'EXPORT_PRODUCTIVITY_PDF') {
+            // Handle PDF export request from productivity iframe
+            const { dateRange } = event.data;
+
+            try {
+                const result = await window.electronAPI.exportProductivityPDF({
+                    dateRange: dateRange
+                });
+
+                // Send response back to productivity iframe
+                if (productivityIframe && productivityIframe.contentWindow) {
+                    productivityIframe.contentWindow.postMessage({
+                        type: 'EXPORT_PDF_RESPONSE',
+                        result: result
+                    }, '*');
+                }
+            } catch (error) {
+                console.error('Error exporting productivity PDF:', error);
+                if (productivityIframe && productivityIframe.contentWindow) {
+                    productivityIframe.contentWindow.postMessage({
+                        type: 'EXPORT_PDF_RESPONSE',
+                        result: { success: false, error: error.message }
+                    }, '*');
+                }
+            }
+        } 
     });
 });
