@@ -951,21 +951,31 @@ async function getGoalInsightsData(db, days = 7) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // Helper function to format date consistently
+  const getLocalDateString = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayString = getLocalDateString(today);
   const dailySuccessRate = [];
 
-  // Calculate success rate for each of the last N days
+  // Calculate success rate for each of the last N days (including today)
   for (let i = days - 1; i >= 0; i--) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
-    const dateString = date.toISOString().split('T')[0];
+    const dateString = getLocalDateString(date);  // Use getLocalDateString consistently
+    const dayOfWeek = date.getDay();
 
-    // Get goals that existed on this date
-    const goals = db.prepare(`
-      SELECT id, frequency FROM goals
+    // Get all goals that existed on this date (including active_days info)
+    const allGoals = db.prepare(`
+      SELECT id, frequency, active_days FROM goals
       WHERE is_active = 1 AND DATE(created_at/1000, 'unixepoch', 'localtime') <= ?
     `).all(dateString);
 
-    if (goals.length === 0) {
+    if (allGoals.length === 0) {
       dailySuccessRate.push({
         date: dateString,
         successRate: null,
@@ -975,8 +985,18 @@ async function getGoalInsightsData(db, days = 7) {
       continue;
     }
 
-    // Get progress for daily goals on this date
-    const dailyGoals = goals.filter(g => g.frequency === 'daily');
+    // Filter goals to only include daily goals that are active on this specific day
+    const dailyGoals = allGoals.filter(g => {
+      if (g.frequency !== 'daily') return false;
+
+      // Check if goal has active_days restriction
+      if (g.active_days) {
+        const activeDays = g.active_days.split(',').map(d => parseInt(d));
+        return activeDays.includes(dayOfWeek);
+      }
+
+      return true; // No active_days restriction
+    });
 
     if (dailyGoals.length === 0) {
       dailySuccessRate.push({
@@ -988,13 +1008,34 @@ async function getGoalInsightsData(db, days = 7) {
       continue;
     }
 
-    const progress = db.prepare(`
-      SELECT status FROM goal_progress
-      WHERE date = ? AND goal_id IN (${dailyGoals.map(() => '?').join(',')})
-    `).all(dateString, ...dailyGoals.map(g => g.id));
+    let achieved = 0;
+    let total = dailyGoals.length;
 
-    const achieved = progress.filter(p => p.status === 'achieved').length;
-    const total = dailyGoals.length;
+    // Special case for today: calculate progress in real-time
+    if (dateString === todayString) {
+      // Get the goals module to access calculation functions
+      const { calculateGoalProgress, determineGoalStatus } = require('./../goals');
+
+      // Get full goal objects with progress
+      const goalsWithProgress = dailyGoals.map(goalInfo => {
+        const goal = db.prepare(`SELECT * FROM goals WHERE id = ?`).get(goalInfo.id);
+        // Use the exported functions from goals module
+        const currentValue = calculateGoalProgress(db, goal, dateString);
+        const status = determineGoalStatus(goal, currentValue);
+        return { ...goal, status };
+      });
+
+      achieved = goalsWithProgress.filter(g => g.status === 'achieved').length;
+    } else {
+      // For past dates: use saved progress
+      const progress = db.prepare(`
+        SELECT status FROM goal_progress
+        WHERE date = ? AND goal_id IN (${dailyGoals.map(() => '?').join(',')})
+      `).all(dateString, ...dailyGoals.map(g => g.id));
+
+      achieved = progress.filter(p => p.status === 'achieved').length;
+    }
+
     const successRate = total > 0 ? Math.round((achieved / total) * 100) : 0;
 
     dailySuccessRate.push({

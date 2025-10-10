@@ -29,40 +29,58 @@
   <div class="goals-container">
     <!-- Header -->
     <div class="goals-header">
-      <div class="date-range-controls">
-        <div class="time-range-selector">
-          <button class="time-range-btn active" data-period="today">Today</button>
-          <button class="time-range-btn" data-period="yesterday">Yesterday</button>
-          <button class="time-range-btn" data-period="2days">2 Days Ago</button>
-          <button class="time-range-btn" data-period="3days">3 Days Ago</button>
+      <div class="goals-header-top">
+        <div class="date-range-controls">
+          <div class="time-range-selector">
+            <button class="time-range-btn active" data-period="today">Today</button>
+            <button class="time-range-btn" data-period="yesterday">Yesterday</button>
+            <button class="time-range-btn" data-period="2days">2 Days Ago</button>
+            <button class="time-range-btn" data-period="3days">3 Days Ago</button>
+          </div>
+
+          <div class="custom-date-picker">
+            <span>Custom: </span>
+            <input type="date" id="goalDatePicker" />
+          </div>
+
+          <div class="date-info" id="dateInfo">
+            Viewing today's goals
+          </div>
+
+          <button class="export-btn" id="exportBtn" title="Export goals data">
+            <span>📥 Export</span>
+          </button>
         </div>
 
-        <div class="custom-date-picker">
-          <span>Custom: </span>
-          <input type="date" id="goalDatePicker" />
+        <div class="goals-header-actions">
+          <button class="secondary-btn" id="showInactiveGoalsBtn" title="Show goals not active today">
+            <span id="inactiveGoalsIcon">👁️</span>
+            <span id="inactiveGoalsText">Show Inactive</span>
+          </button>
+          <button class="secondary-btn" id="browseTemplatesBtn" title="Browse goal templates">
+            Browse Templates
+          </button>
+          <button class="primary-btn" id="addGoalBtn">
+            <span class="btn-icon">+</span>
+            Add New Goal
+          </button>
         </div>
-
-        <div class="date-info" id="dateInfo">
-          Viewing today's goals
-        </div>
-
-        <button class="export-btn" id="exportBtn" title="Export goals data">
-          <span>📥 Export</span>
-        </button>
       </div>
 
-      <div class="goals-header-actions">
-        <button class="secondary-btn" id="showInactiveGoalsBtn" title="Show goals not active today">
-          <span id="inactiveGoalsIcon">👁️</span>
-          <span id="inactiveGoalsText">Show Inactive</span>
-        </button>
-        <button class="secondary-btn" id="browseTemplatesBtn" title="Browse goal templates">
-          Browse Templates
-        </button>
-        <button class="primary-btn" id="addGoalBtn">
-          <span class="btn-icon">+</span>
-          Add New Goal
-        </button>
+      <!-- Filter Bar inside header -->
+      <div class="goals-filter-bar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="goal-search" placeholder="Search goals...">
+        </div>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="achieved">✅ Achieved</button>
+          <button class="filter-btn" data-filter="in_progress">⏳ In Progress</button>
+          <button class="filter-btn" data-filter="warning">⚠️ Warning</button>
+          <button class="filter-btn" data-filter="failed">❌ Failed</button>
+          <button class="filter-btn" data-filter="pending">⏸️ Pending</button>
+        </div>
       </div>
     </div>
 
@@ -408,6 +426,7 @@
   <script src="js/index-page/confirmation-dialog.js"></script>
   <script src="js/goals/delete-edit-buttons.js"></script>
   <script src="js/goals/export.js"></script>
+  <script src="js/goals/filter.js"></script>
   <script src="js/goals/goals-renderers.js"></script>
   <script src="js/goals/goals.js"></script>
   <script src="js/goals/modal-handler.js"></script>

@@ -1156,8 +1156,6 @@ ipcMain.handle('goals:getInsights', async (event, days = 30) => {
       const dateString = getLocalDateString(date);  // Use getLocalDateString consistently
       const dayOfWeek = date.getDay();
 
-      console.log(`[Insights] Processing date: ${dateString} (day ${dayOfWeek}), isToday: ${dateString === todayString}`);
-
       // Get all goals that existed on this date (including active_days info)
       const allGoals = db.prepare(`
         SELECT id, frequency, active_days FROM goals
@@ -1194,22 +1192,17 @@ ipcMain.handle('goals:getInsights', async (event, days = 30) => {
       let achieved = 0;
       let total = dailyGoals.length;
 
-      console.log(`[Insights] ${dateString}: Found ${total} daily goals active on this day`);
-
       // Special case for today: calculate progress in real-time
       if (dateString === todayString) {
-        console.log(`[Insights] ${dateString} is TODAY - calculating real-time progress`);
         // Get full goal objects with progress
         const goalsWithProgress = dailyGoals.map(goalInfo => {
           const goal = db.prepare(`SELECT * FROM goals WHERE id = ?`).get(goalInfo.id);
           const currentValue = calculateGoalProgress(db, goal, dateString);
           const status = determineGoalStatus(goal, currentValue);
-          console.log(`[Insights]   Goal "${goal.name}": ${status} (${currentValue}/${goal.target_value})`);
           return { ...goal, status };
         });
 
         achieved = goalsWithProgress.filter(g => g.status === 'achieved').length;
-        console.log(`[Insights] ${dateString}: ${achieved}/${total} achieved`);
       } else {
         // For past dates: use saved progress
         if (dailyGoals.length > 0) {
@@ -1219,12 +1212,10 @@ ipcMain.handle('goals:getInsights', async (event, days = 30) => {
           `).all(dateString, ...dailyGoals.map(g => g.id));
 
           achieved = progress.filter(p => p.status === 'achieved').length;
-          console.log(`[Insights] ${dateString}: ${achieved}/${total} achieved (from saved progress)`);
         }
       }
 
       const successRate = total > 0 ? Math.round((achieved / total) * 100) : 0;
-      console.log(`[Insights] ${dateString}: Success rate = ${successRate}%`);
 
       insights.dailySuccessRate.push({
         date: dateString,
@@ -1264,9 +1255,10 @@ ipcMain.handle('goals:getInsights', async (event, days = 30) => {
 function getGoalsDataForDate(date) {
   const db = getDb();
   const today = getLocalDateString(new Date());
+  const dayOfWeek = new Date(date).getDay();
 
   // Get all active goals with app/category names
-  const goals = db.prepare(`
+  const allGoals = db.prepare(`
     SELECT
       g.*,
       CASE
@@ -1280,6 +1272,18 @@ function getGoalsDataForDate(date) {
     WHERE g.is_active = 1
     ORDER BY g.type, g.created_at DESC
   `).all();
+
+  // Filter goals by active_days for this specific date
+  const goals = allGoals.filter(goal => {
+    // If no active_days restriction, goal is active every day
+    if (!goal.active_days) {
+      return true;
+    }
+
+    // Check if the day of week is in the active_days list
+    const activeDays = goal.active_days.split(',').map(d => parseInt(d));
+    return activeDays.includes(dayOfWeek);
+  });
 
   // Get progress for the specific date
   const goalsWithProgress = goals.map(goal => {
@@ -1348,5 +1352,7 @@ module.exports = {
   scheduleMidnightSave,
   saveProgressForDate,
   cleanupOrphanedProgress,
-  getGoalsDataForDate
+  getGoalsDataForDate,
+  calculateGoalProgress,
+  determineGoalStatus
 };
