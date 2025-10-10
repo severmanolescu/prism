@@ -323,11 +323,13 @@ function getAnalyticsData(startDate, endDate) {
         WHEN LOWER(a.category) = 'uncategorized' THEN 'Uncategorized'
         ELSE a.category
       END as category,
+      c.color as color,
       SUM(s.duration) as total_time,
       COUNT(DISTINCT a.id) as app_count,
       COUNT(s.id) as session_count
     FROM apps a
     INNER JOIN sessions s ON a.id = s.app_id
+    LEFT JOIN categories c ON a.category = c.name
     WHERE s.start_time >= ? AND s.start_time <= ?
       AND s.end_time IS NOT NULL
       AND s.duration > 0
