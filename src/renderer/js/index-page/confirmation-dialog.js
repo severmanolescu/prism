@@ -90,19 +90,19 @@ class ConfirmationDialog {
         this.overlay.innerHTML = `
             <div class="confirmation-dialog">
                 <div class="confirmation-header">
-                    <div class="confirmation-icon" style="${iconStyle}">${options.icon}</div>
-                    <h3 class="confirmation-title">${options.title}</h3>
+                    <div class="confirmation-icon" style="${escapeHtml(iconStyle)}">${escapeHtml(options.icon)}</div>
+                    <h3 class="confirmation-title">${escapeHtml(options.title)}</h3>
                 </div>
                 <div class="confirmation-body">
                     <div class="confirmation-message">
-                        ${options.message}
+                        ${escapeHtml(options.message)}
                     </div>
-                    ${extraContentHTML}
-                    ${dontAskHTML}
+                        ${escapeHtml(extraContentHTML)}
+                        ${escapeHtml(dontAskHTML)}
                 </div>
                 <div class="confirmation-footer">
-                    <button class="confirmation-btn btn-cancel" id="confirmCancel">${options.cancelText}</button>
-                    <button class="confirmation-btn ${confirmButtonClass}" id="confirmOk">${options.confirmText}</button>
+                    <button class="confirmation-btn btn-cancel" id="confirmCancel">${escapeHtml(options.cancelText)}</button>
+                    <button class="confirmation-btn ${escapeHtml(confirmButtonClass)}" id="confirmOk">${escapeHtml(options.confirmText)}</button>
                 </div>
             </div>
         `;
