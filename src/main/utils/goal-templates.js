@@ -78,7 +78,7 @@ const templates = [
     target_value: 3,
     target_unit: 'sessions',
     target_type: 'minimum',
-    reference_type: 'productive',
+    reference_type: null,
     reference_id: null,
     min_session_duration: 25,
     frequency: 'daily'
@@ -93,7 +93,7 @@ const templates = [
     target_value: 15,
     target_unit: 'sessions',
     target_type: 'minimum',
-    reference_type: 'productive',
+    reference_type: null,
     reference_id: null,
     min_session_duration: 25,
     frequency: 'weekly'
@@ -108,7 +108,7 @@ const templates = [
     target_value: 8,
     target_unit: 'sessions',
     target_type: 'minimum',
-    reference_type: 'productive',
+    reference_type: null,
     reference_id: null,
     min_session_duration: 25,
     frequency: 'daily'

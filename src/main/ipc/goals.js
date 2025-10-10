@@ -59,8 +59,6 @@ function initializeGoalHandlers() {
         goalData.active_days || null
       );
 
-      console.log(`Created goal from template: "${goalData.name}" (ID: ${result.lastInsertRowid})`);
-
       return {
         success: true,
         goalId: result.lastInsertRowid,
