@@ -49,7 +49,8 @@ function setupExportMenu(options) {
   const {
     triggerSelector = '#exportBtn',
     onCSVExport,
-    onJSONExport
+    onJSONExport,
+    onPDFExport
   } = options;
 
   const exportBtn = document.querySelector(triggerSelector);
@@ -58,18 +59,18 @@ function setupExportMenu(options) {
   exportBtn.addEventListener('click', (e) => {
     e.stopPropagation();
 
-    // Remove any existing menu
+    // Remove any existing menu and toggle
     const existingMenu = document.querySelector('.export-dropdown-menu');
     if (existingMenu) {
       existingMenu.remove();
-      return;
     }
 
+    // Always create new menu (removed toggle behavior)
     // Create dropdown menu
     const menu = document.createElement('div');
     menu.className = 'export-dropdown-menu';
     menu.style.cssText = `
-      position: absolute;
+      position: fixed;
       background: #1b2838;
       border: 1px solid rgba(102, 192, 244, 0.3);
       border-radius: 3px;
@@ -81,9 +82,10 @@ function setupExportMenu(options) {
     menu.innerHTML = `
       <div class="export-menu-item" data-type="csv">Export as CSV</div>
       <div class="export-menu-item" data-type="json">Export as JSON</div>
+      <div class="export-menu-item" data-type="pdf">Export as PDF</div>
     `;
 
-    // Position menu below button
+    // Position menu below button (using fixed positioning)
     const rect = exportBtn.getBoundingClientRect();
     menu.style.top = `${rect.bottom + 4}px`;
     menu.style.left = `${rect.left}px`;
@@ -100,6 +102,8 @@ function setupExportMenu(options) {
           onCSVExport();
         } else if (type === 'json' && onJSONExport) {
           onJSONExport();
+        } else if(type === 'pdf' && onPDFExport){
+          onPDFExport();
         }
 
         menu.remove();

@@ -274,11 +274,8 @@ function initAnalytics() {
   // Load default period (today)
   loadAnalyticsData(currentPeriod);
 
-  // Add export button handler
-  const exportBtn = document.querySelector('.export-btn');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', exportAnalytics);
-  }
+  // Initialize export menu
+  initializeExportMenu();
 
   // Add click handler for app cards
   document.addEventListener('click', (e) => {

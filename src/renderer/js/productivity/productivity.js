@@ -230,11 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load default data (today)
   loadProductivityData(currentPeriod);
 
-  // Setup export button
-  const exportBtn = document.getElementById('exportBtn');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', handleExportProductivity);
-  }
+  // Initialize export menu
+  initializeExportMenu();
 
   // Add smooth scroll behavior
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {

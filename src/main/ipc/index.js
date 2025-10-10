@@ -6,6 +6,7 @@ const { initializeSessionHandlers } = require('./sessions');
 const { initializeStatsHandlers } = require('./stats');
 const { initializeSettingsHandlers } = require('./settings');
 const { initializeGoalHandlers } = require('./goals');
+const { initializeExportHandlers } = require('./exporters/export');
 
 function initializeIpcHandlers(window) {
   initializeWindowHandlers(window);
@@ -16,6 +17,7 @@ function initializeIpcHandlers(window) {
   initializeStatsHandlers();
   initializeSettingsHandlers();
   initializeGoalHandlers();
+  initializeExportHandlers();
 }
 
 module.exports = { initializeIpcHandlers };

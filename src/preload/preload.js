@@ -92,4 +92,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Goal Insights API
   getGoalInsights: (days) => ipcRenderer.invoke('goals:getInsights', days),
+
+  // Export API
+  exportAnalyticsPDF: (data) => ipcRenderer.invoke('export-analytics-pdf', data),
+  exportProductivityPDF: (data) => ipcRenderer.invoke('export-productivity-pdf', data),
+  exportGoalsPDF: (data) => ipcRenderer.invoke('export-goals-pdf', data),
 });

@@ -519,7 +519,8 @@ function calculateDayStats(db, date, goals) {
   const successRate = activeGoals > 0 ? Math.round((achievedToday / activeGoals) * 100) : 0;
 
   // Calculate streak - count consecutive days with 100% success rate
-  const streak = calculateStreak(db, date);
+  // Pass goals so streak calculation can use live data for today
+  const streak = calculateStreak(db, date, goals);
 
   return {
     activeGoals,
@@ -530,9 +531,11 @@ function calculateDayStats(db, date, goals) {
 }
 
 // Calculate streak of consecutive days with all goals achieved
-function calculateStreak(db, date) {
+function calculateStreak(db, date, todayGoals = null) {
   let streak = 0;
   let currentDate = new Date(date);
+  const today = getLocalDateString(new Date());
+  const dateString = typeof date === 'string' ? date : getLocalDateString(currentDate);
 
   // Get all active goals to know their frequencies
   const allGoals = db.prepare(`
@@ -551,7 +554,7 @@ function calculateStreak(db, date) {
 
   // Go backwards from the given date
   while (true) {
-    const dateString = currentDate.toISOString().split('T')[0];
+    const checkDateString = currentDate.toISOString().split('T')[0];
     const dayOfWeek = currentDate.getDay();
 
     // For streak calculation:
@@ -563,20 +566,32 @@ function calculateStreak(db, date) {
 
     // 1. Check daily goals (every day)
     if (dailyGoals.length > 0) {
-      const dailyProgress = db.prepare(`
-        SELECT goal_id, status FROM goal_progress
-        WHERE date = ? AND goal_id IN (${dailyGoals.map(() => '?').join(',')})
-      `).all(dateString, ...dailyGoals.map(g => g.id));
+      // Special case: if checking today and we have live goal data, use that instead
+      if (checkDateString === today && todayGoals) {
+        const dailyTodayGoals = todayGoals.filter(g => g.frequency === 'daily');
+        const achievedCount = dailyTodayGoals.filter(g => g.status === 'achieved').length;
 
-      // If we don't have progress for all daily goals on this date, streak ends
-      if (dailyProgress.length < dailyGoals.length) {
-        break;
-      }
+        if (achievedCount < dailyGoals.length) {
+          // Not all goals achieved today, streak ends
+          break;
+        }
+      } else {
+        // Check saved progress
+        const dailyProgress = db.prepare(`
+          SELECT goal_id, status FROM goal_progress
+          WHERE date = ? AND goal_id IN (${dailyGoals.map(() => '?').join(',')})
+        `).all(checkDateString, ...dailyGoals.map(g => g.id));
 
-      // Check if all daily goals were achieved
-      const dailyAchieved = dailyProgress.every(record => record.status === 'achieved');
-      if (!dailyAchieved) {
-        allAchievedForThisDay = false;
+        // If we don't have progress for all daily goals on this date, streak ends
+        if (dailyProgress.length < dailyGoals.length) {
+          break;
+        }
+
+        // Check if all daily goals were achieved
+        const dailyAchieved = dailyProgress.every(record => record.status === 'achieved');
+        if (!dailyAchieved) {
+          allAchievedForThisDay = false;
+        }
       }
     }
 
@@ -1001,7 +1016,7 @@ ipcMain.handle('goals:getInsights', async (event, days = 30) => {
       // Get goals that existed on this date
       const goals = db.prepare(`
         SELECT id, frequency FROM goals
-        WHERE is_active = 1 AND DATE(created_at) <= ?
+        WHERE is_active = 1 AND DATE(created_at/1000, 'unixepoch', 'localtime') <= ?
       `).all(dateString);
 
       if (goals.length === 0) {
@@ -1063,10 +1078,93 @@ ipcMain.handle('goals:getInsights', async (event, days = 30) => {
   }
 });
 
+// Export function to get goals data (used by PDF export)
+function getGoalsDataForDate(date) {
+  const db = getDb();
+  const today = getLocalDateString(new Date());
+
+  // Get all active goals with app/category names
+  const goals = db.prepare(`
+    SELECT
+      g.*,
+      CASE
+        WHEN g.reference_type = 'app' THEN a.name
+        WHEN g.reference_type = 'category' THEN c.name
+        ELSE NULL
+      END as reference_name
+    FROM goals g
+    LEFT JOIN apps a ON g.reference_type = 'app' AND g.reference_id = a.id
+    LEFT JOIN categories c ON g.reference_type = 'category' AND g.reference_id = c.name
+    WHERE g.is_active = 1
+    ORDER BY g.type, g.created_at DESC
+  `).all();
+
+  // Get progress for the specific date
+  const goalsWithProgress = goals.map(goal => {
+    // Get the date range for this goal based on frequency
+    const { startDate, endDate } = getDateRangeForGoal(goal, date);
+
+    // Check if the goal existed on the date we're viewing
+    const goalCreatedDate = getLocalDateString(new Date(goal.created_at));
+    if (goalCreatedDate > date) {
+      // Goal didn't exist on this date, skip it
+      return null;
+    }
+
+    // For weekly/monthly goals, check if we're viewing the current period
+    const isCurrentPeriod = date >= startDate && endDate >= today;
+
+    // For saved progress, use the end date of the period as the key
+    const progressKey = endDate;
+
+    const progress = db.prepare(`
+      SELECT * FROM goal_progress
+      WHERE goal_id = ? AND date = ?
+    `).get(goal.id, progressKey);
+
+    let currentValue = 0;
+    let status = 'pending';
+
+    if (date === today || (isCurrentPeriod && date < today)) {
+      // For today or dates within current period: calculate in real-time
+      const calculateUpTo = (goal.frequency === 'weekly' || goal.frequency === 'monthly') && isCurrentPeriod ? today : date;
+      currentValue = calculateGoalProgress(db, goal, calculateUpTo);
+      status = determineGoalStatus(goal, currentValue);
+    } else if (progress) {
+      // For past periods with saved progress: use saved data
+      currentValue = progress.current_value;
+      status = progress.status;
+    } else {
+      // For past periods without saved progress: skip this goal
+      return null;
+    }
+
+    return {
+      ...goal,
+      current_value: currentValue,
+      status: status,
+      progress_percentage: calculateProgressPercentage(goal, currentValue),
+      streak_days: calculateStreak(db, date),
+      period_start: startDate,
+      period_end: endDate
+    };
+  }).filter(goal => goal !== null);
+
+  // Calculate stats for the day
+  const stats = calculateDayStats(db, date, goalsWithProgress);
+
+  return {
+    goals: goalsWithProgress,
+    stats: stats,
+    isToday: date === today
+  };
+}
+
 module.exports = {
   initializeGoalHandlers,
   autoSaveYesterdayProgress,
   scheduleMidnightSave,
   saveProgressForDate,
-  cleanupOrphanedProgress
+  cleanupOrphanedProgress,
+  getGoalsDataForDate
 };
