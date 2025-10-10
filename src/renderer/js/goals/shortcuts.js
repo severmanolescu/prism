@@ -145,6 +145,36 @@ function setUpShortcuts() {
                     insightsSection.classList.toggle('collapsed');
                 }
                 break;
+            case "z":
+                // All Goals
+                e.preventDefault();
+                const allGoalsBtn = document.querySelector('.filter-btn[data-filter="all"]');
+                if (allGoalsBtn) allGoalsBtn.click();
+                break;
+            case "x":
+                // All Goals
+                e.preventDefault();
+                const achievedGoalsBtn = document.querySelector('.filter-btn[data-filter="achieved"]');
+                if (achievedGoalsBtn) achievedGoalsBtn.click();
+                break;
+            case "c":
+                // All Goals
+                e.preventDefault();
+                const inProgressGoalsBtn = document.querySelector('.filter-btn[data-filter="in_progress"]');
+                if (inProgressGoalsBtn) inProgressGoalsBtn.click();
+                break;
+            case "v":
+                // All Goals
+                e.preventDefault();
+                const warningGoalsBtn = document.querySelector('.filter-btn[data-filter="warning"]');
+                if (warningGoalsBtn) warningGoalsBtn.click();
+                break;
+            case "b":
+                // All Goals
+                e.preventDefault();
+                const failedGoalsBtn = document.querySelector('.filter-btn[data-filter="failed"]');
+                if (failedGoalsBtn) failedGoalsBtn.click();
+                break;
         }
     });
 }

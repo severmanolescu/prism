@@ -85,7 +85,6 @@ function setupModalListeners() {
         });
     }
 
-    // ESC key to close
     document.addEventListener('keydown', (e) => {
         const searchInput = document.getElementById('goal-search');
 

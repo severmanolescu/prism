@@ -140,12 +140,36 @@
                                 <span>Expand/Colapse Insights & Analytics</span>
                             </div>
                             <div class="shortcut-item">
+                                <kbd>Z</kbd>
+                                <span>Show all goals</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>X</kbd>
+                                <span>Show Achieved Goals</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>C</kbd>
+                                <span>Show In Progress Goals</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>V</kbd>
+                                <span>Show Warning Goals</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>B</kbd>
+                                <span>show Failed Goals</span>
+                            </div>
+                            <div class="shortcut-item">
                                 <kbd>↑</kbd> <kbd>↓</kbd>
                                 <span>Navigate Goals</span>
                             </div>
                             <div class="shortcut-item">
                                 <kbd>Enter</kbd>
                                 <span>Edit Selected Goal</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>Ctrl</kbd> + <kbd>F</kbd>
+                                <span>Focus Search</span>
                             </div>
                             <div class="shortcut-item">
                                 <kbd>Delete</kbd> / <kbd>Backspace</kbd>
