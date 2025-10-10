@@ -605,10 +605,6 @@ function calculateStreak(db, date, todayGoals = null) {
     return !earliest || goalDate < earliest ? goalDate : earliest;
   }, null);
 
-  if (earliestGoalDate) {
-    console.log(`[Streak] Earliest goal created: ${getLocalDateString(earliestGoalDate)}`);
-  }
-
   // Go backwards from the given date
   while (true) {
     const checkDateString = getLocalDateString(currentDate);
@@ -616,7 +612,6 @@ function calculateStreak(db, date, todayGoals = null) {
 
     // Stop if we've gone back before any goals existed
     if (earliestGoalDate && currentDate < earliestGoalDate) {
-      console.log(`[Streak] Reached date before any goals existed (${checkDateString}), stopping`);
       break;
     }
 
@@ -658,7 +653,6 @@ function calculateStreak(db, date, todayGoals = null) {
 
     // If no goals should be checked on this date, continue streak (don't break)
     if (goalsActiveOnThisDate.length === 0) {
-      console.log(`[Streak] No goals active on ${checkDateString}, continuing`);
       streak++;
       currentDate.setDate(currentDate.getDate() - 1);
 
@@ -698,7 +692,6 @@ function calculateStreak(db, date, todayGoals = null) {
           );
 
           if (failedGoals.length > 0) {
-            console.log(`[Streak] ${failedGoals.length} goal(s) failed today, streak ends`);
             break;
           }
 
@@ -708,7 +701,6 @@ function calculateStreak(db, date, todayGoals = null) {
           );
 
           if (goalsWithProgress.some(g => g.status !== 'achieved')) {
-            console.log(`[Streak] Some goals with activity weren't achieved today, streak ends`);
             allAchievedForThisDay = false;
           }
         } else {
@@ -727,12 +719,8 @@ function calculateStreak(db, date, todayGoals = null) {
           );
 
           if (failedProgress.length > 0) {
-            console.log(`[Streak] ${failedProgress.length} goal(s) failed on ${checkDateString}, streak ends`);
             allAchievedForThisDay = false;
           }
-
-          // Note: Missing progress records don't break the streak
-          // (goal might not have existed yet, or had no activity)
         }
       }
     }
@@ -754,9 +742,6 @@ function calculateStreak(db, date, todayGoals = null) {
         console.log(`[Streak] ${failedWeeklyProgress.length} weekly goal(s) failed on ${checkDateString}, streak ends`);
         allAchievedForThisDay = false;
       }
-
-      // Note: Missing progress records don't break the streak
-      // (goal might not have existed yet during this week)
     }
 
     // 3. Check monthly goals (only on last day of month)
@@ -781,9 +766,6 @@ function calculateStreak(db, date, todayGoals = null) {
           console.log(`[Streak] ${failedMonthlyProgress.length} monthly goal(s) failed on ${checkDateString}, streak ends`);
           allAchievedForThisDay = false;
         }
-
-        // Note: Missing progress records don't break the streak
-        // (goal might not have existed yet during this month)
       }
     }
 
@@ -1160,25 +1142,29 @@ ipcMain.handle('goals:getInsights', async (event, days = 30) => {
     const db = getDb();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const todayString = getLocalDateString(today);
 
     const insights = {
       dailySuccessRate: [],
       calendarHeatmap: []
     };
 
-    // Calculate success rate for each of the last N days
+    // Calculate success rate for each of the last N days (including today)
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      const dateString = date.toISOString().split('T')[0];
+      const dateString = getLocalDateString(date);  // Use getLocalDateString consistently
+      const dayOfWeek = date.getDay();
 
-      // Get goals that existed on this date
-      const goals = db.prepare(`
-        SELECT id, frequency FROM goals
+      console.log(`[Insights] Processing date: ${dateString} (day ${dayOfWeek}), isToday: ${dateString === todayString}`);
+
+      // Get all goals that existed on this date (including active_days info)
+      const allGoals = db.prepare(`
+        SELECT id, frequency, active_days FROM goals
         WHERE is_active = 1 AND DATE(created_at/1000, 'unixepoch', 'localtime') <= ?
       `).all(dateString);
 
-      if (goals.length === 0) {
+      if (allGoals.length === 0) {
         insights.dailySuccessRate.push({
           date: dateString,
           successRate: null, // No goals yet
@@ -1192,16 +1178,53 @@ ipcMain.handle('goals:getInsights', async (event, days = 30) => {
         continue;
       }
 
-      // Get progress for daily goals on this date
-      const dailyGoals = goals.filter(g => g.frequency === 'daily');
-      const progress = db.prepare(`
-        SELECT status FROM goal_progress
-        WHERE date = ? AND goal_id IN (${dailyGoals.map(() => '?').join(',')})
-      `).all(dateString, ...dailyGoals.map(g => g.id));
+      // Filter goals to only include daily goals that are active on this specific day
+      const dailyGoals = allGoals.filter(g => {
+        if (g.frequency !== 'daily') return false;
 
-      const achieved = progress.filter(p => p.status === 'achieved').length;
-      const total = dailyGoals.length;
+        // Check if goal has active_days restriction
+        if (g.active_days) {
+          const activeDays = g.active_days.split(',').map(d => parseInt(d));
+          return activeDays.includes(dayOfWeek);
+        }
+
+        return true; // No active_days restriction
+      });
+
+      let achieved = 0;
+      let total = dailyGoals.length;
+
+      console.log(`[Insights] ${dateString}: Found ${total} daily goals active on this day`);
+
+      // Special case for today: calculate progress in real-time
+      if (dateString === todayString) {
+        console.log(`[Insights] ${dateString} is TODAY - calculating real-time progress`);
+        // Get full goal objects with progress
+        const goalsWithProgress = dailyGoals.map(goalInfo => {
+          const goal = db.prepare(`SELECT * FROM goals WHERE id = ?`).get(goalInfo.id);
+          const currentValue = calculateGoalProgress(db, goal, dateString);
+          const status = determineGoalStatus(goal, currentValue);
+          console.log(`[Insights]   Goal "${goal.name}": ${status} (${currentValue}/${goal.target_value})`);
+          return { ...goal, status };
+        });
+
+        achieved = goalsWithProgress.filter(g => g.status === 'achieved').length;
+        console.log(`[Insights] ${dateString}: ${achieved}/${total} achieved`);
+      } else {
+        // For past dates: use saved progress
+        if (dailyGoals.length > 0) {
+          const progress = db.prepare(`
+            SELECT status FROM goal_progress
+            WHERE date = ? AND goal_id IN (${dailyGoals.map(() => '?').join(',')})
+          `).all(dateString, ...dailyGoals.map(g => g.id));
+
+          achieved = progress.filter(p => p.status === 'achieved').length;
+          console.log(`[Insights] ${dateString}: ${achieved}/${total} achieved (from saved progress)`);
+        }
+      }
+
       const successRate = total > 0 ? Math.round((achieved / total) * 100) : 0;
+      console.log(`[Insights] ${dateString}: Success rate = ${successRate}%`);
 
       insights.dailySuccessRate.push({
         date: dateString,
