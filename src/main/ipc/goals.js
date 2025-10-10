@@ -533,9 +533,11 @@ function calculateDayStats(db, date, goals) {
 // Calculate streak of consecutive days with all goals achieved
 function calculateStreak(db, date, todayGoals = null) {
   let streak = 0;
-  let currentDate = new Date(date);
+  // Ensure we're working with a Date object
+  let currentDate = typeof date === 'string' ? new Date(date + 'T00:00:00') : new Date(date);
   const today = getLocalDateString(new Date());
-  const dateString = typeof date === 'string' ? date : getLocalDateString(currentDate);
+
+  console.log(`[Streak] Starting streak calculation from date: ${getLocalDateString(currentDate)}, today: ${today}`);
 
   // Get all active goals to know their frequencies
   const allGoals = db.prepare(`
@@ -544,6 +546,7 @@ function calculateStreak(db, date, todayGoals = null) {
 
   // If there are no goals, return 0 streak
   if (allGoals.length === 0) {
+    console.log('[Streak] No active goals, returning 0');
     return 0;
   }
 
@@ -552,10 +555,14 @@ function calculateStreak(db, date, todayGoals = null) {
   const weeklyGoals = allGoals.filter(g => g.frequency === 'weekly');
   const monthlyGoals = allGoals.filter(g => g.frequency === 'monthly');
 
+  console.log(`[Streak] Goal counts - Daily: ${dailyGoals.length}, Weekly: ${weeklyGoals.length}, Monthly: ${monthlyGoals.length}`);
+
   // Go backwards from the given date
   while (true) {
-    const checkDateString = currentDate.toISOString().split('T')[0];
+    const checkDateString = getLocalDateString(currentDate);
     const dayOfWeek = currentDate.getDay();
+
+    console.log(`[Streak] Checking date: ${checkDateString}, day of week: ${dayOfWeek}`);
 
     // For streak calculation:
     // - Daily goals: check every day
@@ -568,11 +575,15 @@ function calculateStreak(db, date, todayGoals = null) {
     if (dailyGoals.length > 0) {
       // Special case: if checking today and we have live goal data, use that instead
       if (checkDateString === today && todayGoals) {
+        console.log(`[Streak] Using live data for today`);
         const dailyTodayGoals = todayGoals.filter(g => g.frequency === 'daily');
         const achievedCount = dailyTodayGoals.filter(g => g.status === 'achieved').length;
 
+        console.log(`[Streak] Today: ${achievedCount}/${dailyGoals.length} daily goals achieved`);
+
         if (achievedCount < dailyGoals.length) {
           // Not all goals achieved today, streak ends
+          console.log(`[Streak] Not all goals achieved today, streak ends`);
           break;
         }
       } else {
@@ -582,13 +593,17 @@ function calculateStreak(db, date, todayGoals = null) {
           WHERE date = ? AND goal_id IN (${dailyGoals.map(() => '?').join(',')})
         `).all(checkDateString, ...dailyGoals.map(g => g.id));
 
+        console.log(`[Streak] Found ${dailyProgress.length}/${dailyGoals.length} saved progress records for ${checkDateString}`);
+
         // If we don't have progress for all daily goals on this date, streak ends
         if (dailyProgress.length < dailyGoals.length) {
+          console.log(`[Streak] Missing progress records, streak ends`);
           break;
         }
 
         // Check if all daily goals were achieved
         const dailyAchieved = dailyProgress.every(record => record.status === 'achieved');
+        console.log(`[Streak] All daily goals achieved: ${dailyAchieved}`);
         if (!dailyAchieved) {
           allAchievedForThisDay = false;
         }
@@ -600,7 +615,7 @@ function calculateStreak(db, date, todayGoals = null) {
       const weeklyProgress = db.prepare(`
         SELECT goal_id, status FROM goal_progress
         WHERE date = ? AND goal_id IN (${weeklyGoals.map(() => '?').join(',')})
-      `).all(dateString, ...weeklyGoals.map(g => g.id));
+      `).all(checkDateString, ...weeklyGoals.map(g => g.id));
 
       // If we don't have progress for all weekly goals on this Sunday, streak ends
       if (weeklyProgress.length < weeklyGoals.length) {
@@ -624,7 +639,7 @@ function calculateStreak(db, date, todayGoals = null) {
         const monthlyProgress = db.prepare(`
           SELECT goal_id, status FROM goal_progress
           WHERE date = ? AND goal_id IN (${monthlyGoals.map(() => '?').join(',')})
-        `).all(dateString, ...monthlyGoals.map(g => g.id));
+        `).all(checkDateString, ...monthlyGoals.map(g => g.id));
 
         // If we don't have progress for all monthly goals on month-end, streak ends
         if (monthlyProgress.length < monthlyGoals.length) {

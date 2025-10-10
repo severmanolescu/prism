@@ -116,7 +116,8 @@ async function populateFormWithGoal(goal) {
 
 // Handle delete goal
 async function handleDeleteGoal(goalCard) {
-    const goalName = goalCard.querySelector('.goal-name').textContent;
+    const goalNameElement = goalCard.querySelector('.goal-card-name') || goalCard.querySelector('.goal-name');
+    const goalName = goalNameElement ? goalNameElement.textContent : 'this goal';
     const goalId = goalCard.dataset.goalId;
 
     if (!goalId) {
