@@ -32,7 +32,7 @@ Just like a prism breaks white light into a beautiful spectrum of colors, **Pris
 - **AI-Powered Insights** - Smart suggestions based on your usage patterns
 - **Hourly Activity Heatmap** - Hour-by-hour breakdown of which apps you use when
 - **Custom Date Ranges** - View data for today, week, month, year, or custom periods
-- **Export Functionality** - Export analytics data to CSV or JSON
+- **Export Functionality** - Export analytics data to CSV, JSON or PDF
 
 ### 🎯 Productivity
 - **Productivity Score** - Overall score (0-100) based on productive, neutral, and unproductive time
@@ -53,7 +53,7 @@ Just like a prism breaks white light into a beautiful spectrum of colors, **Pris
   - Productivity by time of day
 - **Productivity Heatmap** - Hour-by-hour productivity breakdown
 - **Custom Productivity Levels** - Mark apps as productive, neutral, or unproductive
-- **Export Functionality** - Export productivity data to CSV or JSON
+- **Export Functionality** - Export productivity data to CSV, JSON or PDF
 
 ### 🎯 Goals
 - **5 Goal Types**:
@@ -70,7 +70,7 @@ Just like a prism breaks white light into a beautiful spectrum of colors, **Pris
 - **Goal Templates** - Pre-made templates for common productivity goals
 - **Historical Data** - View goal progress for past dates
 - **Auto-Save & Backfill** - Automatic progress tracking even when app was closed
-- **Export Functionality** - Export goals data to CSV or JSON
+- **Export Functionality** - Export goals data to CSV, JSON or PDF
 - **Quick Stats** - Active goals, achieved today, current streak, and success rate
 
 ### 📱 App Details
@@ -123,24 +123,26 @@ prism/
 ├── src/
 │   ├── main/                    # Main process (Electron/Node.js)
 │   │   ├── ipc/                 # IPC handlers organized by domain
+│   │   │   └── exporters/       # IPC handlers for exporting PDF files
 │   │   ├── services/            # Business logic (tracking, database, storage)
+│   │   │   └── data_access/     # Data base access handlers
 │   │   └── utils/               # Helper functions
 │   ├── preload/                 # Preload script for IPC bridge
 │   └── renderer/                # Renderer process (UI)
 │       ├── styles/              # Modular CSS files
 │       │   ├── analytics/       # Analytics page styles
 │       │   ├── app-details/     # App details page styles
-│       │   └── global/          # Global page styles
-│       │   └── goals/           # Goals page styles
-│       │   └── index-page/      # Main page styles
-│       │   └── productivity/    # Productivity page styles
+│       │   ├── global/          # Global page styles
+│       │   ├── goals/           # Goals page styles
+│       │   ├── index-page/      # Main page styles
+│       │   ├── productivity/    # Productivity page styles
 │       │   └── shared/          # Shared page styles
 │       └── js/                  # Frontend JavaScript modules
 │           ├── analytics/       # Analytics page logic
 │           ├── app-details/     # App details page logic
 │           ├── goals/           # Goals page logic
-│           └── index-page/      # Main page logic
-│           └── productivity/    # Productivity page Logic
+│           ├── index-page/      # Main page logic
+│           ├── productivity/    # Productivity page Logic
 │           └── shared/          # Shared src 
 ├── assets/                      # Images and icons
 └── main.js                      # Main Electron entry point
