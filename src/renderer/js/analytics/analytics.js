@@ -75,7 +75,7 @@ function updateAnalyticsUI(data) {
   // Update insights
   updateInsights(data);
   // Update date info
-  updateDateInfo(data.dateRange);
+  updateDateInfo(data.dailyBreakdown.length);
   // Show loading state for heatmap
   showHeatmapLoading();
 }
@@ -242,12 +242,12 @@ function updateCategoryBreakdown(categoryBreakdown) {
 
 function updateDateInfo(dateRange) {
   const dateInfo = document.querySelector('.date-info');
-  if (dateInfo) {
-    if (dateRange.days === 1){
-        dateInfo.textContent = `${dateRange.days} day of data available`;
+  if (dateRange) {
+    if (dateRange === 1){
+      dateInfo.textContent = `${dateRange} day of data available`;
     }
     else{
-        dateInfo.textContent = `${dateRange.days} days of data available`;
+      dateInfo.textContent = `${dateRange} days of data available`;
     }
   }
 }
