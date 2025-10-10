@@ -87,8 +87,19 @@ function setupModalListeners() {
 
     // ESC key to close
     document.addEventListener('keydown', (e) => {
+        const searchInput = document.getElementById('goal-search');
+
         if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
             closeModal();
+            return;
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            if (searchInput) {
+                searchInput.focus();
+                searchInput.select();
+            }
         }
     });
 

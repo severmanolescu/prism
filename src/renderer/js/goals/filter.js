@@ -14,6 +14,26 @@ function initializeFilters() {
       currentSearchQuery = e.target.value.toLowerCase().trim();
       applyFilters();
     });
+
+    // Handle search navigation with arrow keys
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (e.target.value.trim() === '') {
+          // If empty, unfocus the search input
+          e.target.value = '';
+          currentSearchQuery = '';
+          
+          e.target.blur();
+          applyFilters();
+        } else {
+          // If has text, clear it
+          e.target.value = '';
+          currentSearchQuery = '';
+          applyFilters();
+        }
+        return;
+      }
+    });
   }
 
   // Filter button listeners
