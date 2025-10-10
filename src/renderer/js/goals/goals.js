@@ -241,11 +241,8 @@ function setupEventListeners() {
     addGoalBtn.addEventListener('click', handleAddGoal);
   }
 
-  // Setup export button
-  const exportBtn = document.getElementById('exportBtn');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', handleExportGoals);
-  }
+  // Setup export menu
+  initializeExportMenu();
 
   const browseTemplatesBtn = document.getElementById('browseTemplatesBtn');
   if (browseTemplatesBtn) {
@@ -273,8 +270,9 @@ function attachGoalEventListeners(section) {
   if (!section) return;
 
   // Edit buttons
-  section.querySelectorAll('.icon-btn[title="Edit goal"]').forEach(btn => {
+  section.querySelectorAll('.goal-action-btn[title="Edit goal"]').forEach(btn => {
     btn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent card click
       const goalCard = e.target.closest('.goal-card');
       if (goalCard) {
         handleEditGoal(goalCard);
@@ -283,8 +281,9 @@ function attachGoalEventListeners(section) {
   });
 
   // Delete buttons
-  section.querySelectorAll('.icon-btn[title="Delete goal"]').forEach(btn => {
+  section.querySelectorAll('.goal-action-btn[title="Delete goal"]').forEach(btn => {
     btn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent card click
       const goalCard = e.target.closest('.goal-card');
       if (goalCard) {
         handleDeleteGoal(goalCard);
@@ -310,6 +309,14 @@ function setupInsightsSection() {
   if (insightsToggle && insightsSection) {
     insightsToggle.addEventListener('click', () => {
       insightsSection.classList.toggle('collapsed');
+
+      // Re-render chart when section is expanded (to fix canvas sizing issues)
+      if (!insightsSection.classList.contains('collapsed')) {
+        // Re-load insights to refresh the chart
+        setTimeout(() => {
+          loadInsights();
+        }, 300); // Small delay to allow CSS transition to complete
+      }
     });
   }
 }

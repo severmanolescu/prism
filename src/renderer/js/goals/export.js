@@ -1,6 +1,14 @@
-// Export goals for current date using shared export utilities
+// Setup export menu once on page load
+function initializeExportMenu() {
+    setupExportMenu({
+        triggerSelector: '#exportBtn',
+        onCSVExport: handleExportGoalsCSV,
+        onJSONExport: handleExportGoalsJSON,
+        onPDFExport: handleExportGoalsPDF
+    });
+}
 
-async function handleExportGoals() {
+async function handleExportGoalsCSV() {
     try {
         const dateString = formatDateString(currentDate);
         const api = window.electronAPI || parent.electronAPI;
@@ -11,17 +19,68 @@ async function handleExportGoals() {
             return;
         }
 
-        // Setup export menu using shared utility
-        setupExportMenu({
-            triggerSelector: '#exportBtn',
-            onCSVExport: () => exportGoalsAsCSV(data, dateString),
-            onJSONExport: () => exportGoalsAsJSON(data, dateString)
-        });
+        exportGoalsAsCSV(data, dateString);
     } catch (error) {
-        console.error('Error preparing export:', error);
-        alert('Failed to prepare export. Please try again.');
+        console.error('Error preparing CSV export:', error);
+        alert('Failed to export. Please try again.');
     }
 }
+
+async function handleExportGoalsJSON() {
+    try {
+        const dateString = formatDateString(currentDate);
+        const api = window.electronAPI || parent.electronAPI;
+        const data = await api.getGoalsForDate(dateString);
+
+        if (!data || !data.goals) {
+            alert('No data to export');
+            return;
+        }
+
+        exportGoalsAsJSON(data, dateString);
+    } catch (error) {
+        console.error('Error preparing JSON export:', error);
+        alert('Failed to export. Please try again.');
+    }
+}
+
+async function handleExportGoalsPDF() {
+    try {
+        const dateString = formatDateString(currentDate);
+
+        // Send message to parent window to handle PDF export
+        window.parent.postMessage({
+            type: 'EXPORT_GOALS_PDF',
+            date: dateString,
+            dateFormatted: currentDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            })
+        }, '*');
+    } catch (error) {
+        console.error('Error exporting PDF:', error);
+        showFeedback('Failed to export PDF', false);
+    }
+}
+
+// Listen for PDF export response from parent window
+window.addEventListener('message', (event) => {
+    if (event.source !== window.parent) {
+        return;
+    }
+
+    if (event.data.type === 'EXPORT_PDF_RESPONSE') {
+        const result = event.data.result;
+
+        if (result.success) {
+            showFeedback('PDF exported successfully!', true);
+        } else if (!result.canceled) {
+            showFeedback(`Failed to export PDF: ${result.error}`, false);
+        }
+    }
+});
 
 function exportGoalsAsCSV(data, dateString) {
     // Prepare CSV content
