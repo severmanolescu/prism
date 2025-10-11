@@ -113,9 +113,6 @@ async function loadCategoryInsights() {
         // Update quick stats
         updateQuickStats(stats);
 
-        // Update usage chart (analytics style - no tabs)
-        updateCategoryUsageChart(categoryData);
-
         // Update monthly calendar
         updateMonthlyCalendar(categoryData);
 
@@ -123,7 +120,7 @@ async function loadCategoryInsights() {
         updateTopApps(categoryData.topApps || [], category.color);
 
         // Update day of week chart
-        updateDayOfWeekChart(categoryData.dayOfWeekUsage || []);
+        updateDailyUsageChart(categoryData.dayOfWeekUsage || []);
 
         // Update heatmap
         updateHeatmap(categoryData.heatmapData || []);

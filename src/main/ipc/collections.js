@@ -210,13 +210,13 @@ function initializeCollectionHandlers() {
       // Get day of week usage
       const dayOfWeekUsage = db.prepare(`
         SELECT
-          CAST(strftime('%w', s.start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as day,
-          SUM(s.duration) as total_duration
+          DATE(start_time/1000, 'unixepoch', 'localtime') as date,
+          SUM(s.duration) as total_time
         FROM sessions s
         INNER JOIN apps a ON s.app_id = a.id
         WHERE a.category = ?
-        GROUP BY day
-        ORDER BY day
+        GROUP BY date
+        ORDER BY date
       `).all([categoryName]);
 
       // Get heatmap data (hour of day × day of week)

@@ -1,13 +1,79 @@
-// Usage chart for category insights - using analytics chart style
+// Render a single-day chart using Canvas
+function renderSingleDayCanvasChart(ctx, canvas, dayData) {
+    const width = canvas.width;
+    const height = canvas.height;
 
-function updateCategoryUsageChart(categoryData) {
-    const canvas = document.getElementById('usage-line-chart');
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+
+    // Draw background
+    ctx.fillStyle = '#16202d';
+    ctx.fillRect(0, 0, width, height);
+
+    const padding = { top: 40, right: 50, bottom: 60, left: 50 };
+    const barWidth = 100;
+    const centerX = width / 2;
+
+    // Calculate bar height (max 70% of available height)
+    const maxBarHeight = height - padding.top - padding.bottom;
+    const barHeight = maxBarHeight * 0.7;
+    const barY = padding.top + (maxBarHeight - barHeight);
+
+    // Create gradient for bar
+    const gradient = ctx.createLinearGradient(centerX, barY, centerX, barY + barHeight);
+    gradient.addColorStop(0, '#66c0f4');
+    gradient.addColorStop(1, '#417a9b');
+
+    // Draw the bar
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.roundRect(centerX - barWidth / 2, barY, barWidth, barHeight, 4);
+    ctx.fill();
+
+    // Draw top cap
+    ctx.fillStyle = '#66c0f4';
+    ctx.beginPath();
+    ctx.roundRect(centerX - barWidth / 2, barY - 3, barWidth, 6, 3);
+    ctx.fill();
+
+    // Value label on top
+    ctx.fillStyle = '#66c0f4';
+    ctx.font = 'bold 24px "Motiva Sans", Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(formatTime(dayData.total_time), centerX, barY - 20);
+
+    // Date label at bottom
+    const date = new Date(dayData.date);
+    ctx.fillStyle = '#8f98a0';
+    ctx.font = '14px "Motiva Sans", Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+    }), centerX, height - padding.bottom + 10);
+
+    // Session count label
+    ctx.fillStyle = '#66c0f4';
+    ctx.font = '12px "Motiva Sans", Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${dayData.session_count || 0} sessions`, centerX, height - padding.bottom + 30);
+
+    // Remove any existing event listeners
+    canvas.onmousemove = null;
+    canvas.onmouseleave = null;
+}
+
+function updateDailyUsageChart(dailyBreakdown) {
+    const canvas = document.getElementById('daily-usage-canvas');
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
 
-    // Check if we have data - category insights uses weeklyUsage (last 7 days)
-    const dailyBreakdown = categoryData.weeklyUsage || [];
+    // Check if we have data
     if (!dailyBreakdown || dailyBreakdown.length === 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = '#16202d';
@@ -19,10 +85,16 @@ function updateCategoryUsageChart(categoryData) {
         return;
     }
 
-    // Prepare data points - category insights uses total_duration instead of total_time
+    // Special handling for single day
+    if (dailyBreakdown.length === 1) {
+        renderSingleDayCanvasChart(ctx, canvas, dailyBreakdown[0]);
+        return;
+    }
+
+    // Prepare data points
     const dataPoints = dailyBreakdown.map(item => ({
         date: item.date,
-        duration: item.total_duration || 0,
+        duration: item.total_time || 0,
         label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     }));
 
@@ -151,17 +223,21 @@ function updateCategoryUsageChart(categoryData) {
         if (hoveredPoint) {
             hoveredPoint = null;
             canvas.style.cursor = 'default';
+            // Redraw without hover state
             drawChartWithoutHover(ctx, width, height, padding, chartWidth, chartHeight, dataPoints, maxDuration, points, gradient);
         }
     };
 }
 
 function drawChartWithoutHover(ctx, width, height, padding, chartWidth, chartHeight, dataPoints, maxDuration, points, gradient) {
+    // Clear and redraw everything
     ctx.clearRect(0, 0, width, height);
 
+    // Draw background
     ctx.fillStyle = '#16202d';
     ctx.fillRect(0, 0, width, height);
 
+    // Draw grid lines
     ctx.strokeStyle = '#1a3548';
     ctx.lineWidth = 1;
     for (let i = 0; i <= 5; i++) {
@@ -172,6 +248,7 @@ function drawChartWithoutHover(ctx, width, height, padding, chartWidth, chartHei
         ctx.stroke();
     }
 
+    // Draw Y-axis labels
     ctx.fillStyle = '#8f98a0';
     ctx.font = '12px "Motiva Sans", Arial';
     ctx.textAlign = 'right';
@@ -182,6 +259,7 @@ function drawChartWithoutHover(ctx, width, height, padding, chartWidth, chartHei
         ctx.fillText(formatTime(value), padding.left - 10, y);
     }
 
+    // Draw area under the line
     ctx.fillStyle = gradient;
     ctx.beginPath();
     ctx.moveTo(points[0].x, height - padding.bottom);
@@ -190,6 +268,7 @@ function drawChartWithoutHover(ctx, width, height, padding, chartWidth, chartHei
     ctx.closePath();
     ctx.fill();
 
+    // Draw the line
     ctx.strokeStyle = '#66c0f4';
     ctx.lineWidth = 3;
     ctx.lineJoin = 'round';
@@ -199,17 +278,21 @@ function drawChartWithoutHover(ctx, width, height, padding, chartWidth, chartHei
     points.forEach(point => ctx.lineTo(point.x, point.y));
     ctx.stroke();
 
+    // Draw points
     points.forEach((point) => {
+        // Draw point with ring
         ctx.fillStyle = '#66c0f4';
         ctx.beginPath();
         ctx.arc(point.x, point.y, 7, 0, Math.PI * 2);
         ctx.fill();
 
+        // Draw inner dot
         ctx.fillStyle = '#16202d';
         ctx.beginPath();
         ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
         ctx.fill();
 
+        // Draw X-axis label
         ctx.fillStyle = '#8f98a0';
         ctx.font = '11px "Motiva Sans", Arial';
         ctx.textAlign = 'center';
@@ -219,11 +302,14 @@ function drawChartWithoutHover(ctx, width, height, padding, chartWidth, chartHei
 }
 
 function redrawChartWithHover(ctx, width, height, padding, chartWidth, chartHeight, dataPoints, maxDuration, points, closestPoint, gradient) {
+    // Clear and redraw everything
     ctx.clearRect(0, 0, width, height);
 
+    // Draw background
     ctx.fillStyle = '#16202d';
     ctx.fillRect(0, 0, width, height);
 
+    // Draw grid lines
     ctx.strokeStyle = '#1a3548';
     ctx.lineWidth = 1;
     for (let i = 0; i <= 5; i++) {
@@ -234,6 +320,7 @@ function redrawChartWithHover(ctx, width, height, padding, chartWidth, chartHeig
         ctx.stroke();
     }
 
+    // Draw Y-axis labels
     ctx.fillStyle = '#8f98a0';
     ctx.font = '12px "Motiva Sans", Arial';
     ctx.textAlign = 'right';
@@ -244,6 +331,7 @@ function redrawChartWithHover(ctx, width, height, padding, chartWidth, chartHeig
         ctx.fillText(formatTime(value), padding.left - 10, y);
     }
 
+    // Draw area under the line
     ctx.fillStyle = gradient;
     ctx.beginPath();
     ctx.moveTo(points[0].x, height - padding.bottom);
@@ -252,6 +340,7 @@ function redrawChartWithHover(ctx, width, height, padding, chartWidth, chartHeig
     ctx.closePath();
     ctx.fill();
 
+    // Draw vertical line to hovered point
     if (closestPoint) {
         ctx.strokeStyle = 'rgba(102, 192, 244, 0.3)';
         ctx.lineWidth = 1;
@@ -263,6 +352,7 @@ function redrawChartWithHover(ctx, width, height, padding, chartWidth, chartHeig
         ctx.setLineDash([]);
     }
 
+    // Draw the line
     ctx.strokeStyle = '#66c0f4';
     ctx.lineWidth = 3;
     ctx.lineJoin = 'round';
@@ -272,20 +362,24 @@ function redrawChartWithHover(ctx, width, height, padding, chartWidth, chartHeig
     points.forEach(point => ctx.lineTo(point.x, point.y));
     ctx.stroke();
 
+    // Draw points
     points.forEach((point) => {
         const isHovered = point === closestPoint;
         const radius = isHovered ? 9 : 7;
 
+        // Outer circle
         ctx.fillStyle = isHovered ? '#ffffff' : '#66c0f4';
         ctx.beginPath();
         ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
         ctx.fill();
 
+        // Inner dot
         ctx.fillStyle = isHovered ? '#66c0f4' : '#16202d';
         ctx.beginPath();
         ctx.arc(point.x, point.y, isHovered ? 4 : 3, 0, Math.PI * 2);
         ctx.fill();
 
+        // Draw X-axis label (highlight if hovered)
         ctx.fillStyle = isHovered ? '#ffffff' : '#8f98a0';
         ctx.font = isHovered ? 'bold 12px "Motiva Sans", Arial' : '11px "Motiva Sans", Arial';
         ctx.textAlign = 'center';
@@ -293,6 +387,7 @@ function redrawChartWithHover(ctx, width, height, padding, chartWidth, chartHeig
         ctx.fillText(point.label, point.x, height - padding.bottom + 10);
     });
 
+    // Draw tooltip if hovering over a point
     if (closestPoint) {
         const tooltipText = formatTime(closestPoint.duration);
         ctx.font = 'bold 14px "Motiva Sans", Arial';
@@ -302,15 +397,18 @@ function redrawChartWithHover(ctx, width, height, padding, chartWidth, chartHeig
         let tooltipX = closestPoint.x - tooltipWidth / 2;
         let tooltipY = closestPoint.y - tooltipHeight - tooltipPadding;
 
+        // Keep tooltip in bounds
         if (tooltipX < padding.left) tooltipX = padding.left;
         if (tooltipX + tooltipWidth > width - padding.right) tooltipX = width - padding.right - tooltipWidth;
         if (tooltipY < padding.top) tooltipY = closestPoint.y + tooltipPadding;
 
+        // Draw tooltip shadow
         ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
         ctx.beginPath();
         ctx.roundRect(tooltipX + 2, tooltipY + 2, tooltipWidth, tooltipHeight, 6);
         ctx.fill();
 
+        // Draw tooltip background
         ctx.fillStyle = 'rgba(17, 37, 52, 0.98)';
         ctx.strokeStyle = '#66c0f4';
         ctx.lineWidth = 2;
@@ -319,6 +417,7 @@ function redrawChartWithHover(ctx, width, height, padding, chartWidth, chartHeig
         ctx.fill();
         ctx.stroke();
 
+        // Draw tooltip text
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
