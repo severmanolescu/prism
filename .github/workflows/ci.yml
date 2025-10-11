@@ -43,12 +43,11 @@ jobs:
         retention-days: 7
 
   build-linux:
-    name: Build Linux ${{ matrix.arch }} (Node ${{ matrix.node-version }})
+    name: Build Linux (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        arch: [x64, arm64]
         node-version: [18.x, 20.x]
 
     steps:
@@ -61,22 +60,16 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
 
-    - name: Set up QEMU for ARM64
-      if: matrix.arch == 'arm64'
-      uses: docker/setup-qemu-action@v3
-      with:
-        platforms: arm64
+    - name: Install system dependencies (Linux)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential python3
 
     - name: Install dependencies
       run: npm ci
 
-    - name: Build Linux ${{ matrix.arch }}
-      run: |
-        if [ "${{ matrix.arch }}" = "arm64" ]; then
-          npx electron-builder --linux --arm64
-        else
-          npx electron-builder --linux --x64
-        fi
+    - name: Build Linux x64
+      run: npx electron-builder --linux --x64
       env:
         CI: true
         CSC_IDENTITY_AUTO_DISCOVERY: false
@@ -85,8 +78,45 @@ jobs:
       if: matrix.node-version == '20.x'
       uses: actions/upload-artifact@v4
       with:
-        name: prism-linux-${{ matrix.arch }}-build
+        name: prism-linux-build
         path: |
           dist/*.AppImage
           dist/*.deb
+        retention-days: 7
+
+  build-macos:
+    name: Build macOS (Node ${{ matrix.node-version }})
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v5
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build macOS (Universal)
+      run: npx electron-builder --mac --x64 --arm64
+      env:
+        CI: true
+        CSC_IDENTITY_AUTO_DISCOVERY: false
+
+    - name: Upload macOS artifacts
+      if: matrix.node-version == '20.x'
+      uses: actions/upload-artifact@v4
+      with:
+        name: prism-macos-build
+        path: |
+          dist/*.dmg
+          dist/*.zip
         retention-days: 7

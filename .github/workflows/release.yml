@@ -56,12 +56,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-linux:
-    name: Build Linux ${{ matrix.arch }}
+    name: Build Linux
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        arch: [x64, arm64]
 
     steps:
     - name: Checkout code
@@ -73,22 +69,16 @@ jobs:
         node-version: '20.x'
         cache: 'npm'
 
-    - name: Set up QEMU for ARM64
-      if: matrix.arch == 'arm64'
-      uses: docker/setup-qemu-action@v3
-      with:
-        platforms: arm64
+    - name: Install system dependencies (Linux)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential python3
 
     - name: Install dependencies
       run: npm ci
 
-    - name: Build Linux ${{ matrix.arch }}
-      run: |
-        if [ "${{ matrix.arch }}" = "arm64" ]; then
-          npx electron-builder --linux --arm64
-        else
-          npx electron-builder --linux --x64
-        fi
+    - name: Build Linux x64
+      run: npx electron-builder --linux --x64
       env:
         CI: true
         CSC_IDENTITY_AUTO_DISCOVERY: false
@@ -96,7 +86,7 @@ jobs:
     - name: Upload Linux artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: prism-linux-${{ matrix.arch }}
+        name: prism-linux
         path: |
           dist/*.AppImage
           dist/*.deb
@@ -109,5 +99,47 @@ jobs:
         files: |
           dist/*.AppImage
           dist/*.deb
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    name: Build macOS
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v5
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build macOS (Universal)
+      run: npx electron-builder --mac --x64 --arm64
+      env:
+        CI: true
+        CSC_IDENTITY_AUTO_DISCOVERY: false
+
+    - name: Upload macOS artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: prism-macos
+        path: |
+          dist/*.dmg
+          dist/*.zip
+        retention-days: 30
+
+    - name: Upload to GitHub Release
+      if: github.event_name == 'release'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          dist/*.dmg
+          dist/*.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
