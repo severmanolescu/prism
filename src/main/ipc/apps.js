@@ -284,7 +284,7 @@ function initializeAppHandlers() {
       const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
       const weeklyUsage = db.prepare(`
         SELECT
-          DATE(start_time / 1000, 'unixepoch') as date,
+          DATE(start_time / 1000, 'unixepoch', 'localtime') as date,
           SUM(duration) as total_duration
         FROM sessions
         WHERE app_id = ? AND start_time >= ?
@@ -336,7 +336,7 @@ function initializeAppHandlers() {
 
       const monthlyUsage = db.prepare(`
         SELECT
-          DATE(start_time / 1000, 'unixepoch') as date,
+          DATE(start_time / 1000, 'unixepoch', 'localtime') as date,
           SUM(duration) as total_duration,
           COUNT(*) as session_count
         FROM sessions
@@ -440,7 +440,7 @@ function initializeAppHandlers() {
 
 function calculateStreak(db, appId) {
   const sessions = db.prepare(`
-    SELECT DISTINCT DATE(start_time / 1000, 'unixepoch') as date
+    SELECT DISTINCT DATE(start_time / 1000, 'unixepoch', 'localtime') as date
     FROM sessions
     WHERE app_id = ?
     ORDER BY date DESC
@@ -478,7 +478,7 @@ function calculateStreak(db, appId) {
 
 function calculateStreakHistory(db, appId) {
   const sessions = db.prepare(`
-    SELECT DISTINCT DATE(start_time / 1000, 'unixepoch') as date
+    SELECT DISTINCT DATE(start_time / 1000, 'unixepoch', 'localtime') as date
     FROM sessions
     WHERE app_id = ?
     ORDER BY date DESC

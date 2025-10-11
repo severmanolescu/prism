@@ -27,7 +27,7 @@ function getDailyStats(days = 7) {
 
     return db.prepare(`
     SELECT
-      DATE(start_time/1000, 'unixepoch') as date,
+      DATE(start_time/1000, 'unixepoch', 'localtime') as date,
       SUM(duration) as total_time,
       COUNT(*) as session_count
     FROM sessions
