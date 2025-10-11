@@ -113,17 +113,14 @@ async function loadCategoryInsights() {
         // Update quick stats
         updateQuickStats(stats);
 
-        // Update usage chart
-        updateUsageChart(categoryData, currentChartPeriod);
-
-        // Setup chart tabs
-        setupChartTabs(categoryData);
+        // Update usage chart (analytics style - no tabs)
+        updateCategoryUsageChart(categoryData);
 
         // Update monthly calendar
         updateMonthlyCalendar(categoryData);
 
         // Update top apps
-        updateTopApps(categoryData.topApps || []);
+        updateTopApps(categoryData.topApps || [], category.color);
 
         // Update day of week chart
         updateDayOfWeekChart(categoryData.dayOfWeekUsage || []);
@@ -187,17 +184,7 @@ function updateQuickStats(stats) {
     if (statValues[5]) statValues[5].textContent = `${(stats.usagePercentage || 0).toFixed(1)}%`;
 }
 
-function setupChartTabs(data) {
-    const tabs = document.querySelectorAll('.chart-tab');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            currentChartPeriod = tab.dataset.period;
-            updateUsageChart(data, currentChartPeriod);
-        });
-    });
-}
+// Removed chart tabs - now using analytics style single chart
 
 function updateMonthlyCalendar(data) {
     const calendar = document.querySelector('.monthly-calendar');

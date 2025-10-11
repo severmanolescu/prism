@@ -1,138 +1,48 @@
-// Usage chart for category insights (Similar to app-details usage-over-time-chart.js)
+// Usage chart for category insights - using analytics chart style
 
-function updateUsageChart(categoryData, period) {
-    let data, labelFormat;
-
-    switch(period) {
-        case 'daily':
-            data = getLast7DaysData(categoryData.weeklyUsage || []);
-            labelFormat = (date) => {
-                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                const d = new Date(date);
-                return `${days[d.getDay()]} ${d.getDate()}`;
-            };
-            break;
-        case 'weekly':
-            data = getLast12WeeksData(categoryData);
-            labelFormat = (date) => {
-                const d = new Date(date);
-                return `Week ${getWeekNumber(d)}`;
-            };
-            break;
-        case 'monthly':
-            data = getLast12MonthsData(categoryData);
-            labelFormat = (date) => {
-                const d = new Date(date);
-                return d.toLocaleDateString('en-US', { month: 'short' });
-            };
-            break;
-    }
-
-    drawChart(data, labelFormat);
-}
-
-function getLast7DaysData(weeklyData) {
-    const last7Days = [];
-    for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString().split('T')[0];
-        const dayData = weeklyData.find(d => d.date === dateStr);
-        last7Days.push({
-            date: dateStr,
-            duration: dayData?.total_duration || 0
-        });
-    }
-    return last7Days;
-}
-
-function getLast12WeeksData(categoryData) {
-    const weeks = [];
-    const monthlyUsage = categoryData.monthlyUsage || [];
-
-    for (let i = 11; i >= 0; i--) {
-        const endDate = new Date();
-        endDate.setDate(endDate.getDate() - (i * 7));
-        const startDate = new Date(endDate);
-        startDate.setDate(startDate.getDate() - 6);
-
-        let weekDuration = 0;
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-            const dateStr = d.toISOString().split('T')[0];
-            const dayData = monthlyUsage.find(m => m.date === dateStr);
-            if (dayData) weekDuration += dayData.total_duration;
-        }
-
-        weeks.push({
-            date: endDate.toISOString().split('T')[0],
-            duration: weekDuration
-        });
-    }
-    return weeks;
-}
-
-function getLast12MonthsData(categoryData) {
-    const months = [];
-    const monthlyUsage = categoryData.monthlyUsage || [];
-
-    for (let i = 11; i >= 0; i--) {
-        const date = new Date();
-        date.setMonth(date.getMonth() - i);
-        date.setDate(1);
-
-        const year = date.getFullYear();
-        const month = date.getMonth();
-
-        let monthDuration = 0;
-        monthlyUsage.forEach(dayData => {
-            const dayDate = new Date(dayData.date);
-            if (dayDate.getFullYear() === year && dayDate.getMonth() === month) {
-                monthDuration += dayData.total_duration;
-            }
-        });
-
-        months.push({
-            date: date.toISOString().split('T')[0],
-            duration: monthDuration
-        });
-    }
-    return months;
-}
-
-function getWeekNumber(date) {
-    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-    const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
-    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-}
-
-function drawChart(chartData, labelFormat) {
+function updateCategoryUsageChart(categoryData) {
     const canvas = document.getElementById('usage-line-chart');
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const container = canvas.parentElement;
-    const containerWidth = container.clientWidth;
-    canvas.width = containerWidth;
-    canvas.height = containerWidth * 0.4;
 
-    const dataPoints = chartData.map(item => ({
+    // Check if we have data - category insights uses weeklyUsage (last 7 days)
+    const dailyBreakdown = categoryData.weeklyUsage || [];
+    if (!dailyBreakdown || dailyBreakdown.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#16202d';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#8f98a0';
+        ctx.font = '14px "Motiva Sans", Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('No data available for this period', canvas.width / 2, canvas.height / 2);
+        return;
+    }
+
+    // Prepare data points - category insights uses total_duration instead of total_time
+    const dataPoints = dailyBreakdown.map(item => ({
         date: item.date,
-        duration: item.duration,
-        label: labelFormat(item.date)
+        duration: item.total_duration || 0,
+        label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     }));
 
     const maxDuration = Math.max(...dataPoints.map(d => d.duration), 1);
+
+    // Canvas dimensions
     const width = canvas.width;
     const height = canvas.height;
-    const padding = { top: 30, right: 20, bottom: 40, left: 50 };
+    const padding = { top: 30, right: 20, bottom: 40, left: 70 };
     const chartWidth = width - padding.left - padding.right;
     const chartHeight = height - padding.top - padding.bottom;
 
+    // Clear canvas
     ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = '#0a1e2f';
+
+    // Draw background
+    ctx.fillStyle = '#16202d';
     ctx.fillRect(0, 0, width, height);
 
-    // Draw grid and labels
+    // Draw grid lines
     ctx.strokeStyle = '#1a3548';
     ctx.lineWidth = 1;
     for (let i = 0; i <= 5; i++) {
@@ -143,8 +53,9 @@ function drawChart(chartData, labelFormat) {
         ctx.stroke();
     }
 
+    // Draw Y-axis labels
     ctx.fillStyle = '#8f98a0';
-    ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+    ctx.font = '12px "Motiva Sans", Arial';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
     for (let i = 0; i <= 5; i++) {
@@ -153,6 +64,7 @@ function drawChart(chartData, labelFormat) {
         ctx.fillText(formatTime(value), padding.left - 10, y);
     }
 
+    // Calculate points for the line and area
     const points = dataPoints.map((point, index) => ({
         x: padding.left + (chartWidth / (dataPoints.length - 1)) * index,
         y: padding.top + chartHeight - (point.duration / maxDuration) * chartHeight,
@@ -160,7 +72,7 @@ function drawChart(chartData, labelFormat) {
         label: point.label
     }));
 
-    // Draw area gradient
+    // Draw area under the line (gradient)
     const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
     gradient.addColorStop(0, 'rgba(102, 192, 244, 0.3)');
     gradient.addColorStop(1, 'rgba(102, 192, 244, 0.05)');
@@ -173,7 +85,7 @@ function drawChart(chartData, labelFormat) {
     ctx.closePath();
     ctx.fill();
 
-    // Draw line
+    // Draw the line
     ctx.strokeStyle = '#66c0f4';
     ctx.lineWidth = 3;
     ctx.lineJoin = 'round';
@@ -183,22 +95,233 @@ function drawChart(chartData, labelFormat) {
     points.forEach(point => ctx.lineTo(point.x, point.y));
     ctx.stroke();
 
-    // Draw points and labels
+    // Draw points
     points.forEach((point) => {
+        // Draw point with ring
         ctx.fillStyle = '#66c0f4';
         ctx.beginPath();
-        ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+        ctx.arc(point.x, point.y, 7, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = '#0a1e2f';
+        // Draw inner dot
+        ctx.fillStyle = '#16202d';
         ctx.beginPath();
-        ctx.arc(point.x, point.y, 2, 0, Math.PI * 2);
+        ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
         ctx.fill();
 
+        // Draw X-axis label
         ctx.fillStyle = '#8f98a0';
-        ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+        ctx.font = '11px "Motiva Sans", Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         ctx.fillText(point.label, point.x, height - padding.bottom + 10);
     });
+
+    // Add hover interaction
+    let hoveredPoint = null;
+
+    canvas.style.cursor = 'default';
+    canvas.onmousemove = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const mouseX = (e.clientX - rect.left) * scaleX;
+        const mouseY = (e.clientY - rect.top) * scaleY;
+
+        // Find closest point
+        let closestPoint = null;
+        let minDist = Infinity;
+        points.forEach(point => {
+            const dist = Math.sqrt(Math.pow(mouseX - point.x, 2) + Math.pow(mouseY - point.y, 2));
+            if (dist < minDist && dist < 40) {
+                minDist = dist;
+                closestPoint = point;
+            }
+        });
+
+        // Only redraw if hover state changed
+        if (hoveredPoint !== closestPoint) {
+            hoveredPoint = closestPoint;
+            canvas.style.cursor = closestPoint ? 'pointer' : 'default';
+            redrawChartWithHover(ctx, width, height, padding, chartWidth, chartHeight, dataPoints, maxDuration, points, closestPoint, gradient);
+        }
+    };
+
+    canvas.onmouseleave = () => {
+        if (hoveredPoint) {
+            hoveredPoint = null;
+            canvas.style.cursor = 'default';
+            drawChartWithoutHover(ctx, width, height, padding, chartWidth, chartHeight, dataPoints, maxDuration, points, gradient);
+        }
+    };
+}
+
+function drawChartWithoutHover(ctx, width, height, padding, chartWidth, chartHeight, dataPoints, maxDuration, points, gradient) {
+    ctx.clearRect(0, 0, width, height);
+
+    ctx.fillStyle = '#16202d';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.strokeStyle = '#1a3548';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 5; i++) {
+        const y = padding.top + (chartHeight / 5) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
+        ctx.stroke();
+    }
+
+    ctx.fillStyle = '#8f98a0';
+    ctx.font = '12px "Motiva Sans", Arial';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i <= 5; i++) {
+        const value = maxDuration * (1 - i / 5);
+        const y = padding.top + (chartHeight / 5) * i;
+        ctx.fillText(formatTime(value), padding.left - 10, y);
+    }
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, height - padding.bottom);
+    points.forEach(point => ctx.lineTo(point.x, point.y));
+    ctx.lineTo(points[points.length - 1].x, height - padding.bottom);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = '#66c0f4';
+    ctx.lineWidth = 3;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    points.forEach(point => ctx.lineTo(point.x, point.y));
+    ctx.stroke();
+
+    points.forEach((point) => {
+        ctx.fillStyle = '#66c0f4';
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 7, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#16202d';
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#8f98a0';
+        ctx.font = '11px "Motiva Sans", Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(point.label, point.x, height - padding.bottom + 10);
+    });
+}
+
+function redrawChartWithHover(ctx, width, height, padding, chartWidth, chartHeight, dataPoints, maxDuration, points, closestPoint, gradient) {
+    ctx.clearRect(0, 0, width, height);
+
+    ctx.fillStyle = '#16202d';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.strokeStyle = '#1a3548';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 5; i++) {
+        const y = padding.top + (chartHeight / 5) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
+        ctx.stroke();
+    }
+
+    ctx.fillStyle = '#8f98a0';
+    ctx.font = '12px "Motiva Sans", Arial';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i <= 5; i++) {
+        const value = maxDuration * (1 - i / 5);
+        const y = padding.top + (chartHeight / 5) * i;
+        ctx.fillText(formatTime(value), padding.left - 10, y);
+    }
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, height - padding.bottom);
+    points.forEach(point => ctx.lineTo(point.x, point.y));
+    ctx.lineTo(points[points.length - 1].x, height - padding.bottom);
+    ctx.closePath();
+    ctx.fill();
+
+    if (closestPoint) {
+        ctx.strokeStyle = 'rgba(102, 192, 244, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(closestPoint.x, padding.top);
+        ctx.lineTo(closestPoint.x, height - padding.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    ctx.strokeStyle = '#66c0f4';
+    ctx.lineWidth = 3;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    points.forEach(point => ctx.lineTo(point.x, point.y));
+    ctx.stroke();
+
+    points.forEach((point) => {
+        const isHovered = point === closestPoint;
+        const radius = isHovered ? 9 : 7;
+
+        ctx.fillStyle = isHovered ? '#ffffff' : '#66c0f4';
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = isHovered ? '#66c0f4' : '#16202d';
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, isHovered ? 4 : 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = isHovered ? '#ffffff' : '#8f98a0';
+        ctx.font = isHovered ? 'bold 12px "Motiva Sans", Arial' : '11px "Motiva Sans", Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(point.label, point.x, height - padding.bottom + 10);
+    });
+
+    if (closestPoint) {
+        const tooltipText = formatTime(closestPoint.duration);
+        ctx.font = 'bold 14px "Motiva Sans", Arial';
+        const tooltipWidth = ctx.measureText(tooltipText).width + 24;
+        const tooltipHeight = 36;
+        const tooltipPadding = 12;
+        let tooltipX = closestPoint.x - tooltipWidth / 2;
+        let tooltipY = closestPoint.y - tooltipHeight - tooltipPadding;
+
+        if (tooltipX < padding.left) tooltipX = padding.left;
+        if (tooltipX + tooltipWidth > width - padding.right) tooltipX = width - padding.right - tooltipWidth;
+        if (tooltipY < padding.top) tooltipY = closestPoint.y + tooltipPadding;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.beginPath();
+        ctx.roundRect(tooltipX + 2, tooltipY + 2, tooltipWidth, tooltipHeight, 6);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(17, 37, 52, 0.98)';
+        ctx.strokeStyle = '#66c0f4';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(tooltipText, tooltipX + tooltipWidth / 2, tooltipY + tooltipHeight / 2);
+    }
 }

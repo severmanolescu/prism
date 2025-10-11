@@ -6,12 +6,14 @@ async function displayAllApps(apps) {
     const recentSection = document.querySelector('.recent-section');
     const categoryOverview = document.querySelector('.category-overview');
     const detailsIframe = document.querySelector('.app-details-iframe-wrapper');
+    const categoryInsightsContainer = document.querySelector('.category-insights-iframe-wrapper');
 
     // Show all apps section and recent section, hide others
     if (allAppsSection) allAppsSection.style.display = 'block';
     if (recentSection) recentSection.style.display = 'block';
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (detailsIframe) detailsIframe.style.display = 'none';
+    if (categoryInsightsContainer) categoryInsightsContainer.style.display = 'none';
 
     if (!appsContainer) {
         console.error('Apps container not found!');

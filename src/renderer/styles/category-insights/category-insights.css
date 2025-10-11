@@ -1,17 +1,28 @@
 /* Category Insights Page Styles */
 
+body {
+    background: linear-gradient(to bottom, #1b2838 0%, #171d25 100%);
+    background-attachment: fixed;
+    padding: 0px;
+}
+
 .details-container {
-    background: #1b2838;
+    max-width: 1400px;
+    margin: 0 auto;
+    background: transparent;
     min-height: 100vh;
-    padding-bottom: 40px;
+    padding: 10px 20px 40px 20px;
 }
 
 /* Category Header with Date Controls */
 .category-header {
-    background: #16202d;
-    border-bottom: 1px solid #1a3548;
-    padding: 20px 40px;
-    margin-bottom: 40px;
+    background: rgba(27, 40, 56, 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 0 rgba(102, 192, 244, 0.3);
+    margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .category-header .date-range-controls {
@@ -30,6 +41,10 @@
     overflow: hidden;
     margin-bottom: 16px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    /* Break out of container to span full width */
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+    width: 100vw;
 }
 
 .category-hero-bg {
@@ -100,81 +115,9 @@
     padding: 24px;
 }
 
-/* Top Apps Grid */
+/* Top Apps Grid - uses standard apps.css styles */
 .top-apps-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
     margin-top: 20px;
-}
-
-.top-app-card {
-    background: #1a2c3e;
-    border: 1px solid #1e3a52;
-    border-radius: 6px;
-    padding: 16px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    transition: all 0.2s ease;
-}
-
-.top-app-card:hover {
-    border-color: #66c0f4;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.top-app-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 6px;
-    background: #0a1e2f;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
-}
-
-.top-app-icon img {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-    border-radius: 4px;
-}
-
-.top-app-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.top-app-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #ffffff;
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.top-app-time {
-    font-size: 13px;
-    color: #66c0f4;
-}
-
-.top-app-sessions {
-    font-size: 12px;
-    color: #8f98a0;
-}
-
-.top-app-rank {
-    font-size: 20px;
-    font-weight: 700;
-    color: #66c0f4;
-    opacity: 0.5;
-    flex-shrink: 0;
 }
 
 /* Day of Week Chart */
