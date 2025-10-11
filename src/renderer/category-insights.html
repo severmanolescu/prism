@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Category Insights - Time Tracker</title>
+
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="styles/shared/base.css">
+  <link rel="stylesheet" href="styles/shared/section-headers.css">
+  <link rel="stylesheet" href="styles/shared/buttons.css">
+  <link rel="stylesheet" href="styles/shared/date-controls.css">
+
+  <!-- Page-Specific Styles -->
+  <link rel="stylesheet" href="styles/category-insights/category-insights.css">
+  <link rel="stylesheet" href="styles/app-details/calendar.css">
+  <link rel="stylesheet" href="styles/app-details/chart.css">
+  <link rel="stylesheet" href="styles/app-details/quick-stats.css">
+  <link rel="stylesheet" href="styles/global/scrollbar.css">
+</head>
+<body>
+  <div class="details-container">
+    <!-- Hero Section -->
+    <div class="category-hero">
+      <div class="category-hero-bg">
+        <div class="category-icon-large">📁</div>
+      </div>
+      <div class="category-hero-content">
+        <div class="category-title">Category Name</div>
+        <div class="category-subtitle">Collection</div>
+      </div>
+    </div>
+
+    <!-- Date Range Controls -->
+    <div class="category-header">
+      <div class="date-range-controls">
+        <div class="time-range-selector">
+          <button class="time-range-btn">Today</button>
+          <button class="time-range-btn">Week</button>
+          <button class="time-range-btn active">Month</button>
+          <button class="time-range-btn">Year</button>
+          <button class="time-range-btn">All Time</button>
+        </div>
+
+        <div class="custom-date-picker">
+          <span>Custom:</span>
+          <input type="date" id="start-date">
+          <span>to</span>
+          <input type="date" id="end-date">
+        </div>
+
+        <div class="date-info">
+          30 days of data available
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="section-title">Overview</div>
+    <div class="quick-stats">
+      <div class="quick-stat-card">
+        <div class="quick-stat-icon">⏱️</div>
+        <div class="quick-stat-content">
+          <div class="quick-stat-label">Total Time</div>
+          <div class="quick-stat-value">0h</div>
+        </div>
+      </div>
+      <div class="quick-stat-card">
+        <div class="quick-stat-icon">📱</div>
+        <div class="quick-stat-content">
+          <div class="quick-stat-label">Apps in Category</div>
+          <div class="quick-stat-value">0</div>
+        </div>
+      </div>
+      <div class="quick-stat-card">
+        <div class="quick-stat-icon">📊</div>
+        <div class="quick-stat-content">
+          <div class="quick-stat-label">Average Daily</div>
+          <div class="quick-stat-value">0h</div>
+        </div>
+      </div>
+      <div class="quick-stat-card">
+        <div class="quick-stat-icon">📅</div>
+        <div class="quick-stat-content">
+          <div class="quick-stat-label">Total Sessions</div>
+          <div class="quick-stat-value">0</div>
+        </div>
+      </div>
+      <div class="quick-stat-card">
+        <div class="quick-stat-icon">⚡</div>
+        <div class="quick-stat-content">
+          <div class="quick-stat-label">Avg Session</div>
+          <div class="quick-stat-value">0h</div>
+        </div>
+      </div>
+      <div class="quick-stat-card">
+        <div class="quick-stat-icon">📈</div>
+        <div class="quick-stat-content">
+          <div class="quick-stat-label">Usage Share</div>
+          <div class="quick-stat-value">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Over Time & Monthly Calendar -->
+    <div class="content-grid">
+      <div class="content-section">
+        <div class="section-header-with-tabs">
+          <div class="section-title">Usage Over Time</div>
+          <div class="chart-tabs">
+            <button class="chart-tab active" data-period="daily">Daily</button>
+            <button class="chart-tab" data-period="weekly">Weekly</button>
+            <button class="chart-tab" data-period="monthly">Monthly</button>
+          </div>
+        </div>
+        <div class="usage-chart-container">
+          <canvas id="usage-line-chart"></canvas>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-title">Usage Calendar</div>
+        <div class="trends-container">
+          <div class="monthly-calendar"></div>
+          <div class="trend-stats">
+            <div class="trend-stat">
+              <div class="trend-label">This Week</div>
+              <div class="trend-value">0h</div>
+              <div class="trend-change positive">+0%</div>
+            </div>
+            <div class="trend-stat">
+              <div class="trend-label">Last Week</div>
+              <div class="trend-value">0h</div>
+              <div class="trend-change">previous</div>
+            </div>
+            <div class="trend-stat">
+              <div class="trend-label">Peak Day</div>
+              <div class="trend-value">0h</div>
+              <div class="trend-change">highest</div>
+            </div>
+            <div class="trend-stat">
+              <div class="trend-label">All Categories</div>
+              <div class="trend-value">0%</div>
+              <div class="trend-change">of total</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Apps in Category -->
+    <div class="full-width-section">
+      <div class="section-title">Top Apps in this Category</div>
+      <div class="top-apps-grid"></div>
+    </div>
+
+    <!-- Usage Insights & Category Comparison -->
+    <div class="content-grid">
+      <div class="content-section">
+        <div class="section-title">Usage Insights</div>
+        <div class="usage-insights-grid">
+          <!-- Best Days -->
+          <div class="insight-box">
+            <div class="insight-header">
+              <span class="insight-icon">🏆</span>
+              <span class="insight-title">Most Active Days</span>
+            </div>
+            <div class="best-days-list"></div>
+          </div>
+
+          <!-- Peak Times -->
+          <div class="insight-box">
+            <div class="insight-header">
+              <span class="insight-icon">🌟</span>
+              <span class="insight-title">Peak Usage Times</span>
+            </div>
+            <div class="peak-times-list"></div>
+          </div>
+
+          <!-- Time of Day Breakdown -->
+          <div class="insight-box">
+            <div class="insight-header">
+              <span class="insight-icon">🕐</span>
+              <span class="insight-title">Time of Day</span>
+            </div>
+            <div class="time-of-day-breakdown"></div>
+          </div>
+
+          <!-- Productivity Breakdown -->
+          <div class="insight-box">
+            <div class="insight-header">
+              <span class="insight-icon">✅</span>
+              <span class="insight-title">Productivity Level</span>
+            </div>
+            <div class="productivity-breakdown"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-title">Category Comparison</div>
+        <div class="category-comparison-chart"></div>
+      </div>
+    </div>
+
+    <!-- Time Patterns -->
+    <div class="content-grid">
+      <div class="content-section">
+        <div class="section-title">Usage by Day of Week</div>
+        <div class="day-of-week-chart"></div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-title">Time of Day Heatmap</div>
+        <div class="heatmap-container"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="./js/utils.js"></script>
+  <script src="./js/shared/date-range.js"></script>
+  <script src="./js/category-insights/category-insights.js"></script>
+  <script src="./js/category-insights/usage-chart.js"></script>
+  <script src="./js/category-insights/day-of-week-chart.js"></script>
+  <script src="./js/category-insights/heatmap.js"></script>
+  <script src="./js/category-insights/top-apps.js"></script>
+  <script src="./js/category-insights/insights.js"></script>
+
+  <!-- Keyboard Shortcuts -->
+  <script src="./js/shared/keyboard-shortcuts.js"></script>
+  <script src="./js/shared/data-range-shortcuts.js"></script>
+  <script src="./js/shared/help-modal.js"></script>
+</body>
+</html>

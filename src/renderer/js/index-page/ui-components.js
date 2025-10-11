@@ -198,10 +198,82 @@ function createCategoryCard(categoryName, apps, color = '#4a90e2') {
             <div class="collection-title">${escapeHtml(categoryName.toUpperCase())}</div>
             <div class="collection-count">( ${apps.length} )</div>
         </div>
+        <div class="collection-card-actions">
+            <button class="collection-action-btn insights-btn" title="View Insights" data-action="insights">
+                <span>📊</span>
+            </button>
+            <button class="collection-action-btn edit-btn" title="Edit Collection" data-action="edit">
+                <span>✏️</span>
+            </button>
+            <button class="collection-action-btn delete-btn" title="Delete Collection" data-action="delete" ${categoryName === 'Uncategorized' || categoryName === 'Favorites' ? 'disabled' : ''}>
+                <span>🗑️</span>
+            </button>
+        </div>
     `;
 
-    // Add click handler
-    card.addEventListener('click', () => {
+    // Add click handler for action buttons
+    const insightsBtn = card.querySelector('.insights-btn');
+    const editBtn = card.querySelector('.edit-btn');
+    const deleteBtn = card.querySelector('.delete-btn');
+
+    insightsBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showCategoryInsights(categoryName);
+    });
+
+    editBtn?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const categories = await window.electronAPI.getCategories();
+        const currentCategory = categories.find(cat => cat.name === categoryName);
+        if (currentCategory) {
+            const success = await showEditCollectionModal(currentCategory);
+            if (success) {
+                await loadAppData();
+                showCategoryOverview();
+            }
+        }
+    });
+
+    deleteBtn?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (categoryName !== 'Uncategorized' && categoryName !== 'Favorites') {
+            const confirmed = await window.confirmationDialog.show({
+                title: 'Delete Collection',
+                message: `Are you sure you want to delete "${categoryName}"? All apps will be moved to Uncategorized.`,
+                icon: '🗑️',
+                iconColor: '#e74c3c',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                dangerMode: true
+            });
+
+            if (confirmed) {
+                try {
+                    const result = await window.electronAPI.deleteCollection(categoryName);
+                    if (result.success) {
+                        const allApps = await window.electronAPI.getAllApps();
+                        allAppsCache = allApps;
+                        await createCategoryNavigation(allApps);
+                        showCategoryOverview();
+                        showFeedback("Collection deleted successfully!", true);
+                    } else {
+                        showFeedback(result.error || 'Failed to delete collection', false);
+                    }
+                } catch (error) {
+                    console.error('Error deleting collection:', error);
+                    showFeedback('Failed to delete collection', false);
+                }
+            }
+        }
+    });
+
+    // Add click handler for card body (excluding action buttons)
+    card.addEventListener('click', (e) => {
+        // Don't trigger if clicking on action buttons
+        if (e.target.closest('.collection-card-actions')) {
+            return;
+        }
+
         currentCategory = categoryName;
         if (categoryName === 'Favorites') {
             loadFavoriteApps();
@@ -237,12 +309,14 @@ function showHiddenView() {
     const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
     const productivityContainer = document.querySelector('.productivity-iframe-wrapper');
     const goalsContainer = document.querySelector('.goals-iframe-wrapper');
+    const categoryInsightsContainer = document.querySelector('.category-insights-iframe-wrapper');
 
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (analyticsContainer) analyticsContainer.style.display = 'none';
     if (detailsContainer) detailsContainer.style.display = 'none';
     if (productivityContainer) productivityContainer.style.display = 'none';
     if (goalsContainer) goalsContainer.style.display = 'none';
+    if (categoryInsightsContainer) categoryInsightsContainer.style.display = 'none';
 
     // Reset view state
     toggleView('grid');
@@ -283,12 +357,14 @@ function showHomeView() {
     const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
     const productivityContainer = document.querySelector('.productivity-iframe-wrapper');
     const goalsContainer = document.querySelector('.goals-iframe-wrapper');
+    const categoryInsightsContainer = document.querySelector('.category-insights-iframe-wrapper');
 
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (analyticsContainer) analyticsContainer.style.display = 'none';
     if (detailsContainer) detailsContainer.style.display = 'none';
     if (productivityContainer) productivityContainer.style.display = 'none';
     if (goalsContainer) goalsContainer.style.display = 'none';
+    if (categoryInsightsContainer) categoryInsightsContainer.style.display = 'none';
 
     // Reset view state
     toggleView('grid');
@@ -357,6 +433,7 @@ function showAnalyticsView() {
     const sidebar = document.querySelector('.sidebar');
     const productivityContainer = document.querySelector('.productivity-iframe-wrapper');
     const goalsContainer = document.querySelector('.goals-iframe-wrapper');
+    const categoryInsightsContainer = document.querySelector('.category-insights-iframe-wrapper');
 
     if (recentSection) recentSection.style.display = 'none';
     if (allAppsSection) allAppsSection.style.display = 'none';
@@ -365,6 +442,7 @@ function showAnalyticsView() {
     if (detailsContainer) detailsContainer.style.display = 'none';
     if (productivityContainer) productivityContainer.style.display = 'none';
     if (goalsContainer) goalsContainer.style.display = 'none';
+    if (categoryInsightsContainer) categoryInsightsContainer.style.display = 'none';
 
     // Adjust main-content
     const mainContent = document.querySelector('.main-content');
@@ -433,6 +511,7 @@ function showProductivityView() {
     const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
     const goalsContainer = document.querySelector('.goals-iframe-wrapper');
     const sidebar = document.querySelector('.sidebar');
+    const categoryInsightsContainer = document.querySelector('.category-insights-iframe-wrapper');
     
     if (recentSection) recentSection.style.display = 'none';
     if (allAppsSection) allAppsSection.style.display = 'none';
@@ -441,6 +520,7 @@ function showProductivityView() {
     if (detailsContainer) detailsContainer.style.display = 'none';
     if (goalsContainer) goalsContainer.style.display = 'none';
     if (analyticsContainer) analyticsContainer.style.display = 'none';
+    if (categoryInsightsContainer) categoryInsightsContainer.style.display = 'none';
     
     // Adjust main-content
     const mainContent = document.querySelector('.main-content');
@@ -503,6 +583,7 @@ function showGoalsView(){
     const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
     const productivityContainer = document.querySelector('.productivity-iframe-wrapper');
     const sidebar = document.querySelector('.sidebar');
+    const categoryInsightsContainer = document.querySelector('.category-insights-iframe-wrapper');
 
     if (recentSection) recentSection.style.display = 'none';
     if (allAppsSection) allAppsSection.style.display = 'none';
@@ -511,7 +592,7 @@ function showGoalsView(){
     if (detailsContainer) detailsContainer.style.display = 'none';
     if (productivityContainer) productivityContainer.style.display = 'none';
     if (analyticsContainer) analyticsContainer.style.display = 'none';
-
+    if (categoryInsightsContainer) categoryInsightsContainer.style.display = 'none';
 
     // Adjust main-content
     const mainContent = document.querySelector('.main-content');
@@ -565,6 +646,145 @@ function showGoalsView(){
     }, 100);
 }
 
+async function showCategoryInsights(categoryName) {
+    console.log('Opening category insights for:', categoryName);
+
+    try {
+        // Fetch category insights data (placeholder - will need backend support)
+        const categoryData = await fetchCategoryInsights(categoryName);
+
+        // Hide current content
+        const recentSection = document.querySelector('.recent-section');
+        const allAppsSection = document.querySelector('.all-apps-section');
+        const categoryOverview = document.querySelector('.category-overview');
+        const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
+        const detailsContainer = document.querySelector('.app-details-iframe-wrapper');
+        const productivityContainer = document.querySelector('.productivity-iframe-wrapper');
+        const goalsContainer = document.querySelector('.goals-iframe-wrapper');
+        const sidebar = document.querySelector('.sidebar');
+
+        if (recentSection) recentSection.style.display = 'none';
+        if (allAppsSection) allAppsSection.style.display = 'none';
+        if (categoryOverview) categoryOverview.style.display = 'none';
+        if (analyticsContainer) analyticsContainer.style.display = 'none';
+        if (detailsContainer) detailsContainer.style.display = 'none';
+        if (productivityContainer) productivityContainer.style.display = 'none';
+        if (goalsContainer) goalsContainer.style.display = 'none';
+
+        // Show sidebar
+        if (sidebar) sidebar.style.display = 'flex';
+
+        const mainContent = document.querySelector('.main-content');
+
+        // Reset main-content margin
+        if (mainContent) {
+            mainContent.style.marginLeft = '';
+            mainContent.style.width = '';
+        }
+
+        // Create or show category insights iframe
+        let insightsContainer = document.querySelector('.category-insights-iframe-wrapper');
+
+        if (!insightsContainer) {
+            insightsContainer = document.createElement('div');
+            insightsContainer.className = 'category-insights-iframe-wrapper';
+            insightsContainer.style.width = '100%';
+            insightsContainer.style.height = '100%';
+            insightsContainer.style.overflow = 'hidden';
+
+            const iframe = document.createElement('iframe');
+            iframe.id = 'category-insights-iframe';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.style.display = 'block';
+            iframe.src = 'category-insights.html';
+
+            // Send data to iframe when it loads
+            iframe.onload = () => {
+                iframe.contentWindow.postMessage({
+                    type: 'CATEGORY_INSIGHTS',
+                    categoryName: categoryName,
+                    data: categoryData
+                }, '*');
+            };
+
+            insightsContainer.appendChild(iframe);
+
+            if (mainContent) {
+                mainContent.appendChild(insightsContainer);
+            }
+        } else {
+            const iframe = insightsContainer.querySelector('iframe');
+            if (iframe) {
+                // If iframe already exists, just send new data
+                iframe.contentWindow.postMessage({
+                    type: 'CATEGORY_INSIGHTS',
+                    categoryName: categoryName,
+                    data: categoryData
+                }, '*');
+            }
+            insightsContainer.style.display = 'block';
+        }
+
+        // Clear selections
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        document.querySelectorAll('.library-submenu-item').forEach(item => item.classList.remove('active'));
+        document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
+
+        // Update nav tab
+        document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+        const libraryTab = document.querySelector('.nav-tab[data-tab="library"]');
+        if (libraryTab) libraryTab.classList.add('active');
+
+        // Focus iframe for keyboard shortcuts
+        setTimeout(() => {
+            const iframe = insightsContainer.querySelector('iframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.focus();
+            }
+        }, 100);
+
+    } catch (error) {
+        console.error('Error showing category insights:', error);
+        showFeedback('Failed to load category insights', false);
+    }
+}
+
+async function fetchCategoryInsights(categoryName) {
+    // Placeholder function - will need to implement IPC handler in backend
+    // For now, return mock data structure
+    console.log('Fetching category insights for:', categoryName);
+
+    // Get category color
+    const categories = await window.electronAPI.getCategories();
+    const category = categories.find(cat => cat.name === categoryName);
+
+    return {
+        category: {
+            name: categoryName,
+            color: category?.color || '#4a90e2',
+            icon: getCategoryIcon(categoryName)
+        },
+        stats: {
+            totalTime: 0,
+            appCount: 0,
+            avgDaily: 0,
+            thisWeek: 0,
+            lastWeek: 0,
+            sessionCount: 0,
+            avgSession: 0,
+            usagePercentage: 0,
+            peakDay: 0
+        },
+        weeklyUsage: [],
+        monthlyUsage: [],
+        topApps: [],
+        dayOfWeekUsage: [],
+        heatmapData: []
+    };
+}
+
 async function showAppDetails(appName) {
 
     // Get the app ID from the clicked element or find it
@@ -595,11 +815,13 @@ async function showAppDetails(appName) {
     const categoryOverview = document.querySelector('.category-overview');
     const analyticsContainer = document.querySelector('.analytics-iframe-wrapper');
     const sidebar = document.querySelector('.sidebar');
+    const categoryInsightsContainer = document.querySelector('.category-insights-iframe-wrapper');
 
     if (recentSection) recentSection.style.display = 'none';
     if (allAppsSection) allAppsSection.style.display = 'none';
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (analyticsContainer) analyticsContainer.style.display = 'none';
+    if (categoryInsightsContainer) categoryInsightsContainer.style.display = 'none';
 
     // Show sidebar (in case it was hidden by analytics view)
     if (sidebar) sidebar.style.display = 'flex';

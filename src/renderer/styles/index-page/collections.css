@@ -294,3 +294,68 @@
 .grid-3x3 .bg-icon {
     font-size: 14px;
 }
+
+/* Collection Card Action Buttons */
+.collection-card-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.collection-card:hover .collection-card-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.collection-action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 16px;
+}
+
+.collection-action-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+}
+
+.collection-action-btn:active {
+    transform: scale(0.95);
+}
+
+.collection-action-btn.insights-btn:hover {
+    background: #4a9ece;
+}
+
+.collection-action-btn.edit-btn:hover {
+    background: #5b9bd5;
+}
+
+.collection-action-btn.delete-btn:hover:not(:disabled) {
+    background: #e74c3c;
+}
+
+.collection-action-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.collection-action-btn:disabled:hover {
+    background: rgba(0, 0, 0, 0.7);
+    transform: none;
+}

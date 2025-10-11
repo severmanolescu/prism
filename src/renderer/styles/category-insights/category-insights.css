@@ -1,0 +1,430 @@
+/* Category Insights Page Styles */
+
+.details-container {
+    background: #1b2838;
+    min-height: 100vh;
+    padding-bottom: 40px;
+}
+
+/* Category Header with Date Controls */
+.category-header {
+    background: #16202d;
+    border-bottom: 1px solid #1a3548;
+    padding: 20px 40px;
+    margin-bottom: 40px;
+}
+
+.category-header .date-range-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Category Hero Section */
+.category-hero {
+    position: relative;
+    height: 350px;
+    background: linear-gradient(135deg, #092442 0%, #04131f 80%);
+    border-radius: 0;
+    overflow: hidden;
+    margin-bottom: 16px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.category-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.category-icon-large {
+    font-size: 120px;
+    color: white;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+    opacity: 0.9;
+}
+
+.category-hero-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 24px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.95) 60%);
+}
+
+.category-title {
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+    letter-spacing: 0.5px;
+}
+
+.category-subtitle {
+    color: #66c0f4;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 400;
+}
+
+/* Content Layout */
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin: 0 40px 30px;
+}
+
+.content-section {
+    background: #16202d;
+    border: 1px solid #1a3548;
+    border-radius: 8px;
+    padding: 24px;
+}
+
+.full-width-section {
+    margin: 0 40px 30px;
+    background: #16202d;
+    border: 1px solid #1a3548;
+    border-radius: 8px;
+    padding: 24px;
+}
+
+/* Top Apps Grid */
+.top-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.top-app-card {
+    background: #1a2c3e;
+    border: 1px solid #1e3a52;
+    border-radius: 6px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.2s ease;
+}
+
+.top-app-card:hover {
+    border-color: #66c0f4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.top-app-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    background: #0a1e2f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.top-app-icon img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.top-app-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.top-app-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.top-app-time {
+    font-size: 13px;
+    color: #66c0f4;
+}
+
+.top-app-sessions {
+    font-size: 12px;
+    color: #8f98a0;
+}
+
+.top-app-rank {
+    font-size: 20px;
+    font-weight: 700;
+    color: #66c0f4;
+    opacity: 0.5;
+    flex-shrink: 0;
+}
+
+/* Day of Week Chart */
+.day-of-week-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.day-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.day-label {
+    width: 45px;
+    font-size: 13px;
+    color: #8f98a0;
+    text-align: right;
+}
+
+.day-bar-wrapper {
+    flex: 1;
+    height: 32px;
+    background: #0a1e2f;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.day-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4a9ece 0%, #66c0f4 100%);
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    min-width: 60px;
+}
+
+.day-bar-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+}
+
+/* Usage Insights Grid */
+.usage-insights-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.insight-box {
+    background: #1a2c3e;
+    border: 1px solid #1e3a52;
+    border-radius: 6px;
+    padding: 16px;
+}
+
+.insight-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.insight-icon {
+    font-size: 20px;
+}
+
+.insight-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.best-days-list,
+.peak-times-list,
+.time-of-day-breakdown,
+.productivity-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.insight-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: #0a1e2f;
+    border-radius: 4px;
+}
+
+.insight-item-label {
+    font-size: 13px;
+    color: #c6d4df;
+}
+
+.insight-item-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #66c0f4;
+}
+
+/* Category Comparison Chart */
+.category-comparison-chart {
+    margin-top: 20px;
+}
+
+.comparison-bar-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.comparison-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.comparison-label {
+    width: 120px;
+    font-size: 13px;
+    color: #c6d4df;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.comparison-bar-wrapper {
+    flex: 1;
+    height: 28px;
+    background: #0a1e2f;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.comparison-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4a9ece 0%, #66c0f4 100%);
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.comparison-bar.current {
+    background: linear-gradient(90deg, #f39c12 0%, #f1c40f 100%);
+}
+
+.comparison-bar-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+}
+
+.comparison-percentage {
+    width: 50px;
+    text-align: right;
+    font-size: 12px;
+    color: #8f98a0;
+}
+
+/* Trends Container */
+.trends-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.trend-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.trend-stat {
+    background: #1a2c3e;
+    border: 1px solid #1e3a52;
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.trend-label {
+    font-size: 12px;
+    color: #8f98a0;
+    margin-bottom: 4px;
+}
+
+.trend-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.trend-change {
+    font-size: 11px;
+    color: #8f98a0;
+}
+
+.trend-change.positive {
+    color: #26de81;
+}
+
+.trend-change.negative {
+    color: #e74c3c;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .usage-insights-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .content-grid,
+    .full-width-section {
+        margin: 0 20px 20px;
+    }
+
+    .category-hero {
+        height: 220px;
+    }
+
+    .category-title {
+        font-size: 32px;
+    }
+
+    .category-icon-large {
+        font-size: 60px;
+    }
+
+    .top-apps-grid {
+        grid-template-columns: 1fr;
+    }
+}
