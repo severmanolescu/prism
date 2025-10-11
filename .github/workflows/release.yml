@@ -105,6 +105,10 @@ jobs:
         docker run --rm --platform linux/arm64 \
           -v ${{ github.workspace }}:/workspace \
           -w /workspace \
+          -e CI=true \
+          -e CSC_IDENTITY_AUTO_DISCOVERY=false \
+          -e npm_config_arch=arm64 \
+          -e npm_config_target_arch=arm64 \
           node:20 \
           bash -c "
             apt-get update && \
@@ -112,8 +116,6 @@ jobs:
             npm ci && \
             npx electron-builder --linux --arm64
           "
-      env:
-        CI: true
 
     - name: Upload Linux ARM64 artifacts
       uses: actions/upload-artifact@v4
