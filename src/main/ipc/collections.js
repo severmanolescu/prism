@@ -107,7 +107,7 @@ function initializeCollectionHandlers() {
 
       // Get all apps in this category
       const apps = db.prepare(`
-        SELECT id, name, total_time, last_used
+        SELECT id, name, total_time, last_used, icon_path
         FROM apps
         WHERE category = ? AND hidden = 0
         ORDER BY total_time DESC
@@ -199,11 +199,12 @@ function initializeCollectionHandlers() {
       `).all([categoryName]);
 
       // Get top apps in category
-      const topApps = apps.slice(0, 10).map(app => ({
+      const topApps = apps.slice(0, 100).map(app => ({
         id: app.id,
         name: app.name,
         totalTime: app.total_time,
-        lastUsed: app.last_used
+        lastUsed: app.last_used,
+        icon_path: app.icon_path
       }));
 
       // Get day of week usage

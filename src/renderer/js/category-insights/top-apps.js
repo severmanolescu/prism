@@ -25,8 +25,14 @@ function updateTopApps(topApps, categoryColor) {
       ? getRelativeTime(app.lastUsed)
       : 'Never';
 
-    // Use emoji icon for now (can be enhanced with real icons later)
-    const iconHtml = `<div class="app-icon-small">${getAppIcon(app.name, '')}</div>`;
+    console.log(app);
+    const iconHtml = app.icon_path
+      ? (() => {
+        // Extract just the filename from the path (handles both full paths and relative paths)
+        const iconFilename = app.icon_path.replace(/^.*[\\\/]/, '').replace('icons/', '');
+        return `<img src="app-icon://${escapeHtml(iconFilename)}" alt="${escapeHtml(app.name)}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 4px;" onerror="this.style.display='none';">`;
+      })()
+      : `<div class="app-icon-small">${getAppIcon(app.name, app.category)}</div>`;
 
     item.innerHTML = `
       <div class="app-item-bg" style="background: ${bgColor};">
