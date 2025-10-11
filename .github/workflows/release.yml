@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
 
     steps:
     - name: Checkout code
@@ -60,6 +60,16 @@ jobs:
           dist/*.deb
         retention-days: 30
 
+    - name: Upload macOS artifacts
+      if: matrix.os == 'macos-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: prism-macos-installer
+        path: |
+          dist/*.dmg
+          dist/*.zip
+        retention-days: 30
+
     # Automatically attach to release if triggered by release event
     - name: Upload to GitHub Release
       if: github.event_name == 'release'
@@ -70,5 +80,6 @@ jobs:
           dist/*.zip
           dist/*.AppImage
           dist/*.deb
+          dist/*.dmg
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

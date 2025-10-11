@@ -55,10 +55,29 @@
     },
     "linux": {
       "target": [
-        { "target": "AppImage", "arch": ["x64"] },
-        { "target": "deb", "arch": ["x64"] }
+        { "target": "AppImage", "arch": ["x64", "arm64"] },
+        { "target": "deb", "arch": ["x64", "arm64"] }
       ],
-      "category": "Utility"
+      "category": "Utility",
+      "asarUnpack": [
+        "node_modules/active-win/**/*",
+        "node_modules/better-sqlite3/**/*"
+      ]
+    },
+    "mac": {
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] },
+        { "target": "zip", "arch": ["x64", "arm64"] }
+      ],
+      "category": "public.app-category.productivity",
+      "icon": "assets/prism.icns"
+    },
+    "dmg": {
+      "background": null,
+      "window": {
+        "width": 540,
+        "height": 380
+      }
     },
     "publish": null
   }
