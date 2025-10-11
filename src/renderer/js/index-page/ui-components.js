@@ -650,8 +650,8 @@ async function showCategoryInsights(categoryName) {
     console.log('Opening category insights for:', categoryName);
 
     try {
-        // Fetch category insights data (placeholder - will need backend support)
-        const categoryData = await fetchCategoryInsights(categoryName);
+        // Fetch category insights data from backend
+        const categoryData = await window.electronAPI.getCategoryDetails(categoryName);
 
         // Hide current content
         const recentSection = document.querySelector('.recent-section');
@@ -749,40 +749,6 @@ async function showCategoryInsights(categoryName) {
         console.error('Error showing category insights:', error);
         showFeedback('Failed to load category insights', false);
     }
-}
-
-async function fetchCategoryInsights(categoryName) {
-    // Placeholder function - will need to implement IPC handler in backend
-    // For now, return mock data structure
-    console.log('Fetching category insights for:', categoryName);
-
-    // Get category color
-    const categories = await window.electronAPI.getCategories();
-    const category = categories.find(cat => cat.name === categoryName);
-
-    return {
-        category: {
-            name: categoryName,
-            color: category?.color || '#4a90e2',
-            icon: getCategoryIcon(categoryName)
-        },
-        stats: {
-            totalTime: 0,
-            appCount: 0,
-            avgDaily: 0,
-            thisWeek: 0,
-            lastWeek: 0,
-            sessionCount: 0,
-            avgSession: 0,
-            usagePercentage: 0,
-            peakDay: 0
-        },
-        weeklyUsage: [],
-        monthlyUsage: [],
-        topApps: [],
-        dayOfWeekUsage: [],
-        heatmapData: []
-    };
 }
 
 async function showAppDetails(appName) {
