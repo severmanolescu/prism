@@ -105,6 +105,9 @@
   align-items: center;
   gap: 8px;
   margin-left: 12px;
+  margin-right: 24px;
+  padding-right: 24px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .btn-category-insights,
