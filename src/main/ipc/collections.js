@@ -277,7 +277,8 @@ function initializeCollectionHandlers() {
           id: category.id,
           name: category.name,
           color: category.color || '#092442',
-          icon: category.icon || '📁'
+          icon: category.icon || '📁',
+          productivity_level: category.productivity_level || 'neutral'
         },
         stats: {
           totalTime,

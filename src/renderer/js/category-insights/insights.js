@@ -11,15 +11,15 @@ function updateMostActiveDays(categoryData) {
   const container = document.querySelector('.best-days-list');
   if (!container) return;
 
-  const monthlyData = categoryData.monthlyUsage || [];
+  const dailyData = categoryData.dailyUsage || [];
 
-  if (monthlyData.length === 0) {
+  if (dailyData.length === 0) {
     container.innerHTML = '<div style="text-align: center; color: #8f98a0; padding: 10px; font-size: 11px;">No data</div>';
     return;
   }
 
   // Get top 3 most active days
-  const bestDays = [...monthlyData]
+  const bestDays = [...dailyData]
     .filter(d => d.total_duration > 0)
     .sort((a, b) => b.total_duration - a.total_duration)
     .slice(0, 3);
@@ -128,16 +128,86 @@ function updateTimeOfDay(categoryData) {
   `).join('');
 }
 
-// Productivity Breakdown (placeholder - would need productivity data from backend)
+// Usage Patterns
 function updateProductivityBreakdown(categoryData) {
   const container = document.querySelector('.productivity-breakdown');
   if (!container) return;
 
-  // This would require querying productivity levels of apps in the category
-  // For now, show a placeholder
+  const dailyData = categoryData.dailyUsage || [];
+  const stats = categoryData.stats || {};
+
+  if (dailyData.length === 0) {
+    container.innerHTML = '<div style="text-align: center; color: #8f98a0; padding: 10px; font-size: 11px;">No data</div>';
+    return;
+  }
+
+  // Calculate active days (days with usage > 0)
+  const activeDays = dailyData.filter(d => d.total_duration > 0).length;
+
+  // Calculate consistency score (percentage of days with activity)
+  const totalDays = dailyData.length;
+  const consistencyScore = totalDays > 0 ? Math.round((activeDays / totalDays) * 100) : 0;
+
+  // Calculate growth trend (compare first half vs second half)
+  const halfPoint = Math.floor(dailyData.length / 2);
+  const firstHalf = dailyData.slice(0, halfPoint);
+  const secondHalf = dailyData.slice(halfPoint);
+
+  const firstHalfTotal = firstHalf.reduce((sum, d) => sum + (d.total_duration || 0), 0);
+  const secondHalfTotal = secondHalf.reduce((sum, d) => sum + (d.total_duration || 0), 0);
+
+  let trendText = 'Stable';
+  let trendIcon = '➡️';
+  if (firstHalf.length > 0 && secondHalf.length > 0) {
+    const firstAvg = firstHalfTotal / firstHalf.length;
+    const secondAvg = secondHalfTotal / secondHalf.length;
+    const change = ((secondAvg - firstAvg) / firstAvg) * 100;
+
+    if (change > 10) {
+      trendText = `Growing +${Math.round(change)}%`;
+      trendIcon = '📈';
+    } else if (change < -10) {
+      trendText = `Declining ${Math.round(change)}%`;
+      trendIcon = '📉';
+    }
+  }
+
+  // Find busiest day of week
+  const dayOfWeekTotals = {
+    0: { name: 'Sunday', total: 0 },
+    1: { name: 'Monday', total: 0 },
+    2: { name: 'Tuesday', total: 0 },
+    3: { name: 'Wednesday', total: 0 },
+    4: { name: 'Thursday', total: 0 },
+    5: { name: 'Friday', total: 0 },
+    6: { name: 'Saturday', total: 0 }
+  };
+
+  dailyData.forEach(d => {
+    const date = new Date(d.date);
+    const dayOfWeek = date.getDay();
+    dayOfWeekTotals[dayOfWeek].total += d.total_duration || 0;
+  });
+
+  const busiestDay = Object.values(dayOfWeekTotals)
+    .sort((a, b) => b.total - a.total)[0];
+
   container.innerHTML = `
-    <div style="text-align: center; color: #8f98a0; padding: 20px; font-size: 11px;">
-      Productivity tracking coming soon
+    <div class="insight-item">
+      <span class="insight-item-label">📅 Active Days</span>
+      <span class="insight-item-value">${activeDays}/${totalDays}</span>
+    </div>
+    <div class="insight-item">
+      <span class="insight-item-label">🎯 Consistency</span>
+      <span class="insight-item-value">${consistencyScore}%</span>
+    </div>
+    <div class="insight-item">
+      <span class="insight-item-label">${trendIcon} Trend</span>
+      <span class="insight-item-value">${trendText}</span>
+    </div>
+    <div class="insight-item">
+      <span class="insight-item-label">⭐ Busiest Day</span>
+      <span class="insight-item-value">${busiestDay.name}</span>
     </div>
   `;
 }

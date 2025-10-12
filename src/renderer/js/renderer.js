@@ -596,6 +596,23 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error('Error fetching analytics data:', error);
             }
+        } else if (event.data.type === 'UPDATE_CATEGORY_PRODUCTIVITY') {
+            const { categoryId, productivityLevel } = event.data;
+
+            try {
+                // Update category productivity level
+                const result = await window.electronAPI.editCollection(categoryId, {
+                    productivityLevel: productivityLevel
+                });
+
+                if (result.success) {
+                    console.log('Category productivity level updated successfully');
+                } else {
+                    console.error('Failed to update category productivity level:', result.error);
+                }
+            } catch (error) {
+                console.error('Error updating category productivity level:', error);
+            }
         } else if (event.data.type === 'REQUEST_HEATMAP_DATA') {
             const { startDate, endDate } = event.data;
 

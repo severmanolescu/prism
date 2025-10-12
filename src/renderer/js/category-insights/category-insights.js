@@ -134,6 +134,15 @@ function updateHeroSection(category) {
             heroBg.style.background = gradient;
         }
     }
+
+    setTimeout(() => {
+        const dropdown = document.querySelector('.productivity-dropdown');
+        if (dropdown && category.productivity_level) {
+            dropdown.value = category.productivity_level;
+        }
+    }, 0);
+    // Setup productivity dropdown change handler
+    setupProductivityDropdown(category);
 }
 
 // Helper function to convert hex to RGB
@@ -272,4 +281,26 @@ function adjustBrightness(color, percent) {
         (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
         (B < 255 ? (B < 1 ? 0 : B) : 255)
     ).toString(16).slice(1);
+}
+
+// Setup productivity dropdown change handler
+function setupProductivityDropdown(category) {
+    const productivityDropdown = document.getElementById('productivity-level');
+    if (!productivityDropdown) return;
+
+    // Remove any existing listeners
+    const newDropdown = productivityDropdown.cloneNode(true);
+    productivityDropdown.parentNode.replaceChild(newDropdown, productivityDropdown);
+
+    // Add change listener
+    newDropdown.addEventListener('change', async () => {
+        const newLevel = newDropdown.value;
+
+        // Request update through parent window
+        window.parent.postMessage({
+            type: 'UPDATE_CATEGORY_PRODUCTIVITY',
+            categoryId: category.id,
+            productivityLevel: newLevel
+        }, '*');
+    });
 }
