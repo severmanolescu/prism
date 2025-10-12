@@ -613,6 +613,23 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error('Error updating category productivity level:', error);
             }
+        } else if (event.data.type === 'REQUEST_CATEGORIES_COMPARISON') {
+            const { startDate, endDate } = event.data;
+
+            try {
+                // Fetch categories comparison data
+                const categories = await window.electronAPI.getCategoriesComparison(startDate, endDate);
+
+                // Send response back to category insights iframe
+                if (categoryInsightsIframe && categoryInsightsIframe.contentWindow) {
+                    categoryInsightsIframe.contentWindow.postMessage({
+                        type: 'CATEGORIES_COMPARISON_RESPONSE',
+                        categories: categories
+                    }, '*');
+                }
+            } catch (error) {
+                console.error('Error fetching categories comparison:', error);
+            }
         } else if (event.data.type === 'REQUEST_HEATMAP_DATA') {
             const { startDate, endDate } = event.data;
 

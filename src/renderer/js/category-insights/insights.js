@@ -213,15 +213,68 @@ function updateProductivityBreakdown(categoryData) {
 }
 
 // Category Comparison Chart
-function updateCategoryComparison(categoryData) {
+async function updateCategoryComparison(categoryData, categories) {
   const container = document.querySelector('.category-comparison-chart');
   if (!container) return;
 
-  // This would require getting all categories data from backend
-  // For now, show a placeholder
+  if (!categories || categories.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; color: #8f98a0; padding: 40px;">
+        No category data available
+      </div>
+    `;
+    return;
+  }
+
+  // Get current category name
+  const currentCategoryName = categoryData?.category?.name;
+
+  // Find max time for scaling
+  const maxTime = Math.max(...categories.map(c => c.total_time));
+
+  // Limit to top 10 categories
+  const topCategories = categories.slice(0, 10);
+
+  // Get colors for all categories
+  const categoriesWithColors = await Promise.all(
+    topCategories.map(async (cat) => {
+      const color = cat.color || await getCategoryColor(cat.name) || '#66c0f4';
+      return { ...cat, color };
+    })
+  );
+
+  const html = categoriesWithColors.map(cat => {
+    const percentage = maxTime > 0 ? Math.round((cat.total_time / maxTime) * 100) : 0;
+    const isCurrent = cat.name === currentCategoryName;
+
+    // Convert hex to RGB for gradient
+    const rgb = hexToRgb(cat.color);
+    const lighterRgb = {
+      r: Math.min(255, rgb.r + 30),
+      g: Math.min(255, rgb.g + 30),
+      b: Math.min(255, rgb.b + 30)
+    };
+
+    const gradient = `linear-gradient(90deg, rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1) 0%, rgba(${lighterRgb.r}, ${lighterRgb.g}, ${lighterRgb.b}, 1) 100%)`;
+
+    return `
+      <div class="comparison-item">
+        <div class="comparison-label" title="${cat.name}">
+          ${cat.icon || '📁'} ${cat.name}
+        </div>
+        <div class="comparison-bar-wrapper">
+          <div class="comparison-bar ${isCurrent ? 'current' : ''}" style="width: ${percentage}%; background: ${gradient};">
+            <span class="comparison-bar-text">${formatTime(cat.total_time)}</span>
+          </div>
+        </div>
+        <div class="comparison-percentage">${percentage}%</div>
+      </div>
+    `;
+  }).join('');
+
   container.innerHTML = `
-    <div style="text-align: center; color: #8f98a0; padding: 40px;">
-      Category comparison coming soon
+    <div class="comparison-bar-container">
+      ${html}
     </div>
   `;
 }

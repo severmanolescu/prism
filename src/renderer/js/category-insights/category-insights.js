@@ -15,6 +15,8 @@ window.addEventListener('message', (event) => {
     } else if (event.data.type === 'CATEGORY_DATA_RESPONSE') {
         categoryData = event.data.data;
         loadCategoryInsights();
+    } else if (event.data.type === 'CATEGORIES_COMPARISON_RESPONSE') {
+        updateCategoryComparison(categoryData, event.data.categories);
     }
 });
 
@@ -105,8 +107,8 @@ async function loadCategoryInsights() {
         // Update insights
         updateInsights(categoryData);
 
-        // Update category comparison
-        updateCategoryComparison(categoryData);
+        // Request category comparison data
+        requestCategoryComparison();
     } catch (error) {
         console.error('Error loading category insights:', error);
     }
@@ -156,14 +158,42 @@ function hexToRgb(hex) {
 }
 
 function updateQuickStats(stats) {
-    const statValues = document.querySelectorAll('.quick-stat-value');
+    const statCards = document.querySelectorAll('.stat-card');
 
-    if (statValues[0]) statValues[0].textContent = formatTime(stats.totalTime || 0);
-    if (statValues[1]) statValues[1].textContent = stats.appCount || 0;
-    if (statValues[2]) statValues[2].textContent = formatTime(stats.avgDaily || 0);
-    if (statValues[3]) statValues[3].textContent = stats.sessionCount || 0;
-    if (statValues[4]) statValues[4].textContent = formatTime(stats.avgSession || 0);
-    if (statValues[5]) statValues[5].textContent = `${(stats.usagePercentage || 0).toFixed(1)}%`;
+    if (statCards[0]) {
+        statCards[0].querySelector('.stat-value').textContent = formatTime(stats.totalTime || 0);
+        // Calculate weekly change
+        const weeklyChange = stats.lastWeek > 0 ? Math.round(((stats.thisWeek - stats.lastWeek) / stats.lastWeek) * 100) : 0;
+        const arrow = weeklyChange >= 0 ? '↑' : '↓';
+        statCards[0].querySelector('.stat-subtitle').textContent = `${arrow} ${Math.abs(weeklyChange)}% from last week`;
+    }
+
+    if (statCards[1]) {
+        statCards[1].querySelector('.stat-value').textContent = stats.appCount || 0;
+        statCards[1].querySelector('.stat-subtitle').textContent = `${stats.appCount || 0} apps tracked`;
+    }
+
+    if (statCards[2]) {
+        statCards[2].querySelector('.stat-value').textContent = formatTime(stats.avgDaily || 0);
+        const activeDays = Math.round(stats.totalTime / (stats.avgDaily || 1));
+        statCards[2].querySelector('.stat-subtitle').textContent = `Across ${activeDays} day${activeDays !== 1 ? 's' : ''}`;
+    }
+
+    if (statCards[3]) {
+        statCards[3].querySelector('.stat-value').textContent = stats.sessionCount || 0;
+        const avgSessionMin = Math.round((stats.avgSession || 0) / 60);
+        statCards[3].querySelector('.stat-subtitle').textContent = `Avg. ${avgSessionMin} min`;
+    }
+
+    if (statCards[4]) {
+        statCards[4].querySelector('.stat-value').textContent = formatTime(stats.avgSession || 0);
+        statCards[4].querySelector('.stat-subtitle').textContent = 'Per session';
+    }
+
+    if (statCards[5]) {
+        statCards[5].querySelector('.stat-value').textContent = `${(stats.usagePercentage || 0).toFixed(1)}%`;
+        statCards[5].querySelector('.stat-subtitle').textContent = 'Of total time';
+    }
 }
 
 // Removed chart tabs - now using analytics style single chart
@@ -281,6 +311,32 @@ function adjustBrightness(color, percent) {
         (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
         (B < 255 ? (B < 1 ? 0 : B) : 255)
     ).toString(16).slice(1);
+}
+
+// Request category comparison data
+function requestCategoryComparison() {
+    if (!categoryData) return;
+
+    // Get current date range
+    const startInput = document.getElementById('start-date');
+    const endInput = document.getElementById('end-date');
+
+    let startDate, endDate;
+    if (startInput?.value && endInput?.value) {
+        startDate = startInput.value;
+        endDate = endInput.value;
+    } else {
+        const range = calculateDateRange(currentPeriod);
+        startDate = range.startDate;
+        endDate = range.endDate;
+    }
+
+    // Request comparison data from parent window
+    window.parent.postMessage({
+        type: 'REQUEST_CATEGORIES_COMPARISON',
+        startDate: startDate,
+        endDate: endDate
+    }, '*');
 }
 
 // Setup productivity dropdown change handler

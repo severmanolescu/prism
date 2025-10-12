@@ -92,6 +92,39 @@ function initializeCollectionHandlers() {
     }
   });
 
+  ipcMain.handle('get-categories-comparison', async (event, startDate, endDate) => {
+    const db = getDb();
+
+    try {
+      if (!startDate || !endDate) {
+        throw new Error('startDate and endDate are required');
+      }
+
+      // Get all categories with their total time in the date range
+      const categories = db.prepare(`
+        SELECT
+          c.id,
+          c.name,
+          c.color,
+          c.icon,
+          COALESCE(SUM(s.duration), 0) as total_time
+        FROM categories c
+        LEFT JOIN apps a ON a.category = c.name
+        LEFT JOIN sessions s ON s.app_id = a.id
+          AND DATE(s.start_time / 1000, 'unixepoch', 'localtime') BETWEEN ? AND ?
+        WHERE c.is_default = 0
+        GROUP BY c.id, c.name, c.color, c.icon
+        HAVING total_time > 0
+        ORDER BY total_time DESC
+      `).all([startDate, endDate]);
+
+      return categories;
+    } catch (error) {
+      console.error('Error fetching categories comparison:', error);
+      throw error;
+    }
+  });
+
   ipcMain.handle('get-category-details', async (event, categoryName, startDate, endDate) => {
     const db = getDb();
 

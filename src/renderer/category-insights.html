@@ -10,15 +10,18 @@
   <link rel="stylesheet" href="styles/shared/section-headers.css">
   <link rel="stylesheet" href="styles/shared/buttons.css">
   <link rel="stylesheet" href="styles/shared/date-controls.css">
+  <link rel="stylesheet" href="styles/shared/stats.css">
 
   <!-- Page-Specific Styles -->
-  <link rel="stylesheet" href="styles/category-insights/category-insights.css">
   <link rel="stylesheet" href="styles/app-details/calendar.css">
   <link rel="stylesheet" href="styles/app-details/chart.css">
   <link rel="stylesheet" href="styles/app-details/quick-stats.css">
   <link rel="stylesheet" href="styles/index-page/apps.css">
   <link rel="stylesheet" href="styles/productivity/pie_chart.css">
+  <link rel="stylesheet" href="styles/analytics/hourly-activity-heatmap.css">
   <link rel="stylesheet" href="styles/global/scrollbar.css">
+  <!-- Load category-insights.css LAST to override other styles -->
+  <link rel="stylesheet" href="styles/category-insights/category-insights.css">
 </head>
 <body>
   <div class="details-container">
@@ -66,49 +69,37 @@
     </div>
 
     <!-- Quick Stats -->
-    <div class="section-title">Overview</div>
-    <div class="quick-stats">
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">⏱️</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Total Time</div>
-          <div class="quick-stat-value">0h</div>
-        </div>
+    <h3 class="section-header">Overview</h3>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Time</div>
+        <div class="stat-value">0h</div>
+        <div class="stat-subtitle">↑ 0% from last week</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">📱</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Apps in Category</div>
-          <div class="quick-stat-value">0</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">Apps in Category</div>
+        <div class="stat-value">0</div>
+        <div class="stat-subtitle">0 new this week</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">📊</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Average Daily</div>
-          <div class="quick-stat-value">0h</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">Average Daily</div>
+        <div class="stat-value">0h</div>
+        <div class="stat-subtitle">Across selected days</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">📅</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Total Sessions</div>
-          <div class="quick-stat-value">0</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Sessions</div>
+        <div class="stat-value">0</div>
+        <div class="stat-subtitle">Avg. 0 min</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">⚡</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Avg Session</div>
-          <div class="quick-stat-value">0h</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Session</div>
+        <div class="stat-value">0h</div>
+        <div class="stat-subtitle">Per session</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">📈</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Usage Share</div>
-          <div class="quick-stat-value">0%</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">Usage Share</div>
+        <div class="stat-value">0%</div>
+        <div class="stat-subtitle">Of total time</div>
       </div>
     </div>
 
@@ -190,17 +181,10 @@
       </div>
     </div>
 
-    <!-- Time Patterns -->
-    <div class="content-grid">
-      <div class="content-section">
-        <div class="section-title">Usage by Day of Week</div>
-        <div class="day-of-week-chart"></div>
-      </div>
-
-      <div class="content-section">
-        <div class="section-title">Time of Day Heatmap</div>
-        <div class="heatmap-container"></div>
-      </div>
+    <!-- Time of Day Heatmap -->
+    <div class="full-width-section">
+      <div class="section-title">Time of Day Heatmap</div>
+      <div class="heatmap-container"></div>
     </div>
 
   </div>
