@@ -25,8 +25,7 @@ function updateTopApps(topApps, categoryColor) {
       ? getRelativeTime(app.lastUsed)
       : 'Never';
 
-    console.log(app);
-    const iconHtml = app.icon_path
+      const iconHtml = app.icon_path
       ? (() => {
         // Extract just the filename from the path (handles both full paths and relative paths)
         const iconFilename = app.icon_path.replace(/^.*[\\\/]/, '').replace('icons/', '');

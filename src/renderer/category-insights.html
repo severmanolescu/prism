@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="styles/app-details/chart.css">
   <link rel="stylesheet" href="styles/app-details/quick-stats.css">
   <link rel="stylesheet" href="styles/index-page/apps.css">
+  <link rel="stylesheet" href="styles/productivity/pie_chart.css">
   <link rel="stylesheet" href="styles/global/scrollbar.css">
 </head>
 <body>
@@ -36,9 +37,9 @@
     <div class="category-header">
       <div class="date-range-controls">
         <div class="time-range-selector">
-          <button class="time-range-btn">Today</button>
+          <button class="time-range-btn active">Today</button>
           <button class="time-range-btn">Week</button>
-          <button class="time-range-btn active">Month</button>
+          <button class="time-range-btn">Month</button>
           <button class="time-range-btn">Year</button>
           <button class="time-range-btn">All Time</button>
         </div>
@@ -103,12 +104,25 @@
       </div>
     </div>
 
-    <!-- Usage Over Time & Monthly Calendar -->
+    <!-- Usage Over Time & App Distribution -->
     <div class="charts-grid">
       <div class="chart-card">
         <h3 class="section-header">Daily Usage</h3>
         <div class="daily-usage-chart">
           <canvas id="daily-usage-canvas" width="800" height="350"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3 class="section-header">App Distribution</h3>
+        <div class="pie-chart" style="position: relative;">
+          <svg viewBox="-10 -10 220 220" style="width: 100%; max-width: 200px; margin: 0 auto; display: block; overflow: visible;">
+          </svg>
+          <div id="pie-tooltip" class="pie-tooltip" style="display: none;">
+            <div class="pie-tooltip-text"></div>
+          </div>
+          <div class="pie-legend">
+          </div>
         </div>
       </div>
     </div>
@@ -187,6 +201,7 @@
   <script src="./js/shared/date-range.js"></script>
   <script src="./js/category-insights/category-insights.js"></script>
   <script src="./js/category-insights/usage-chart.js"></script>
+  <script src="./js/category-insights/pie-chart.js"></script>
   <script src="./js/category-insights/heatmap.js"></script>
   <script src="./js/category-insights/top-apps.js"></script>
   <script src="./js/category-insights/insights.js"></script>

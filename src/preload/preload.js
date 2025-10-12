@@ -35,7 +35,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   moveAppToCollection: (appId, category) => ipcRenderer.invoke('move-app-to-collection', appId, category),
   updateCategorySort: (categoryName, sortPreference) => ipcRenderer.invoke('update-category-sort', categoryName, sortPreference),
-  getCategoryDetails: (categoryId) => ipcRenderer.invoke('get-category-details', categoryId),
+  getCategoryDetails: (categoryName, startDate, endDate) => ipcRenderer.invoke('get-category-details', categoryName, startDate, endDate),
 
   hideAppFromLibrary: (appId) => ipcRenderer.invoke('hide-app-from-library', appId),
   getHiddenApps: () => ipcRenderer.invoke('get-hidden-apps'),

@@ -650,9 +650,6 @@ async function showCategoryInsights(categoryName) {
     console.log('Opening category insights for:', categoryName);
 
     try {
-        // Fetch category insights data from backend
-        const categoryData = await window.electronAPI.getCategoryDetails(categoryName);
-
         // Hide current content
         const recentSection = document.querySelector('.recent-section');
         const allAppsSection = document.querySelector('.all-apps-section');
@@ -700,12 +697,11 @@ async function showCategoryInsights(categoryName) {
             iframe.style.display = 'block';
             iframe.src = 'category-insights.html';
 
-            // Send data to iframe when it loads
+            // Send category name to iframe when it loads
             iframe.onload = () => {
                 iframe.contentWindow.postMessage({
                     type: 'CATEGORY_INSIGHTS',
-                    categoryName: categoryName,
-                    data: categoryData
+                    categoryName: categoryName
                 }, '*');
             };
 
@@ -717,11 +713,10 @@ async function showCategoryInsights(categoryName) {
         } else {
             const iframe = insightsContainer.querySelector('iframe');
             if (iframe) {
-                // If iframe already exists, just send new data
+                // If iframe already exists, just send category name
                 iframe.contentWindow.postMessage({
                     type: 'CATEGORY_INSIGHTS',
-                    categoryName: categoryName,
-                    data: categoryData
+                    categoryName: categoryName
                 }, '*');
             }
             insightsContainer.style.display = 'block';

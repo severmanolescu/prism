@@ -92,7 +92,7 @@ function initializeCollectionHandlers() {
     }
   });
 
-  ipcMain.handle('get-category-details', async (event, categoryName) => {
+  ipcMain.handle('get-category-details', async (event, categoryName, startDate, endDate) => {
     const db = getDb();
 
     try {
@@ -105,6 +105,15 @@ function initializeCollectionHandlers() {
         throw new Error('Category not found');
       }
 
+      // startDate and endDate are REQUIRED
+      if (!startDate || !endDate) {
+        throw new Error('startDate and endDate are required');
+      }
+
+      // Prepare date filter conditions
+      const dateFilterCondition = `AND DATE(s.start_time / 1000, 'unixepoch', 'localtime') BETWEEN ? AND ?`;
+      const dateParams = [startDate, endDate];
+
       // Get all apps in this category
       const apps = db.prepare(`
         SELECT id, name, total_time, last_used, icon_path
@@ -115,8 +124,15 @@ function initializeCollectionHandlers() {
 
       const appCount = apps.length;
 
-      // Get total time for this category (all time)
-      const totalTime = apps.reduce((sum, app) => sum + (app.total_time || 0), 0);
+      // Get total time for this category
+      const totalTimeResult = db.prepare(`
+        SELECT SUM(s.duration) as total
+        FROM sessions s
+        INNER JOIN apps a ON s.app_id = a.id
+        WHERE a.category = ?
+        ${dateFilterCondition}
+      `).get([categoryName, ...dateParams]);
+      const totalTime = totalTimeResult?.total || 0;
 
       // Get session count for this category
       const sessionCountResult = db.prepare(`
@@ -124,7 +140,8 @@ function initializeCollectionHandlers() {
         FROM sessions s
         INNER JOIN apps a ON s.app_id = a.id
         WHERE a.category = ?
-      `).get([categoryName]);
+        ${dateFilterCondition}
+      `).get([categoryName, ...dateParams]);
       const sessionCount = sessionCountResult?.count || 0;
 
       // Get average session duration
@@ -133,73 +150,108 @@ function initializeCollectionHandlers() {
         FROM sessions s
         INNER JOIN apps a ON s.app_id = a.id
         WHERE a.category = ? AND s.duration > 0
-      `).get([categoryName]);
+        ${dateFilterCondition}
+      `).get([categoryName, ...dateParams]);
       const avgSession = Math.round(avgSessionResult?.avgDuration || 0);
 
       // Get total time across all categories for percentage calculation
       const totalAllTime = db.prepare(`
-        SELECT SUM(total_time) as total FROM apps WHERE hidden = 0
-      `).get();
+        SELECT SUM(s.duration) as total
+        FROM sessions s
+        INNER JOIN apps a ON s.app_id = a.id
+        WHERE a.hidden = 0
+        ${dateFilterCondition}
+      `).get([...dateParams]);
       const usagePercentage = totalAllTime.total > 0 ? (totalTime / totalAllTime.total) * 100 : 0;
 
-      // Get this week's usage (last 7 days)
+      // Calculate date ranges for weekly comparison
+      const endDateObj = new Date(endDate);
+      const startDateObj = new Date(startDate);
+      const daysDiff = Math.ceil((endDateObj - startDateObj) / (1000 * 60 * 60 * 24));
+
+      // This "week" is the last 7 days of the range (or entire range if less than 7 days)
+      const weekDays = Math.min(daysDiff, 7);
+      const thisWeekEnd = endDate;
+      const thisWeekStartObj = new Date(endDateObj);
+      thisWeekStartObj.setDate(thisWeekStartObj.getDate() - weekDays + 1);
+      const thisWeekStart = thisWeekStartObj.toISOString().split('T')[0];
+
+      // Last "week" is the 7 days before this week (if available)
+      let lastWeekStart = null;
+      let lastWeekEnd = null;
+      if (daysDiff > 7) {
+        lastWeekEnd = new Date(thisWeekStartObj);
+        lastWeekEnd.setDate(lastWeekEnd.getDate() - 1);
+        lastWeekEnd = lastWeekEnd.toISOString().split('T')[0];
+
+        const lastWeekStartObj = new Date(lastWeekEnd);
+        lastWeekStartObj.setDate(lastWeekStartObj.getDate() - 6);
+        lastWeekStart = new Date(Math.max(startDateObj, lastWeekStartObj)).toISOString().split('T')[0];
+      }
+
+      // Get this week's usage
       const thisWeekResult = db.prepare(`
         SELECT SUM(s.duration) as total
         FROM sessions s
         INNER JOIN apps a ON s.app_id = a.id
         WHERE a.category = ?
-        AND DATE(s.start_time / 1000, 'unixepoch', 'localtime') >= DATE('now', 'localtime', '-7 days')
-      `).get([categoryName]);
+        AND DATE(s.start_time / 1000, 'unixepoch', 'localtime') BETWEEN ? AND ?
+      `).get([categoryName, thisWeekStart, thisWeekEnd]);
       const thisWeek = thisWeekResult?.total || 0;
 
-      // Get last week's usage (7-14 days ago)
-      const lastWeekResult = db.prepare(`
-        SELECT SUM(s.duration) as total
-        FROM sessions s
-        INNER JOIN apps a ON s.app_id = a.id
-        WHERE a.category = ?
-        AND DATE(s.start_time / 1000, 'unixepoch', 'localtime') >= DATE('now', 'localtime', '-14 days')
-        AND DATE(s.start_time / 1000, 'unixepoch', 'localtime') < DATE('now', 'localtime', '-7 days')
-      `).get([categoryName]);
-      const lastWeek = lastWeekResult?.total || 0;
+      // Get last week's usage
+      let lastWeek = 0;
+      if (lastWeekStart && lastWeekEnd) {
+        const lastWeekResult = db.prepare(`
+          SELECT SUM(s.duration) as total
+          FROM sessions s
+          INNER JOIN apps a ON s.app_id = a.id
+          WHERE a.category = ?
+          AND DATE(s.start_time / 1000, 'unixepoch', 'localtime') BETWEEN ? AND ?
+        `).get([categoryName, lastWeekStart, lastWeekEnd]);
+        lastWeek = lastWeekResult?.total || 0;
+      }
 
-      // Get daily usage for last 30 days (for calendar and charts)
-      const monthlyUsage = db.prepare(`
+      // Get daily usage for the requested date range
+      const dailyUsage = db.prepare(`
         SELECT
           DATE(s.start_time / 1000, 'unixepoch', 'localtime') as date,
           SUM(s.duration) as total_duration
         FROM sessions s
         INNER JOIN apps a ON s.app_id = a.id
         WHERE a.category = ?
-        AND DATE(s.start_time / 1000, 'unixepoch', 'localtime') >= DATE('now', 'localtime', '-30 days')
+        ${dateFilterCondition}
         GROUP BY date
-        ORDER BY date DESC
-      `).all([categoryName]);
+        ORDER BY date ASC
+      `).all([categoryName, ...dateParams]);
 
-      // Calculate average daily from monthly usage
-      const activeDays = monthlyUsage.filter(d => d.total_duration > 0).length;
+      // Calculate average daily from daily usage
+      const activeDays = dailyUsage.filter(d => d.total_duration > 0).length;
       const avgDaily = activeDays > 0 ? totalTime / activeDays : 0;
 
       // Get peak day
-      const peakDay = monthlyUsage.length > 0
-        ? Math.max(...monthlyUsage.map(d => d.total_duration))
+      const peakDay = dailyUsage.length > 0
+        ? Math.max(...dailyUsage.map(d => d.total_duration))
         : 0;
 
-      // Get weekly usage for last 7 days (for daily chart)
-      const weeklyUsage = db.prepare(`
+      // Get top apps in category
+      const topAppsData = db.prepare(`
         SELECT
-          DATE(s.start_time / 1000, 'unixepoch', 'localtime') as date,
-          SUM(s.duration) as total_duration
+          a.id,
+          a.name,
+          a.icon_path,
+          a.last_used,
+          SUM(s.duration) as total_time
         FROM sessions s
         INNER JOIN apps a ON s.app_id = a.id
-        WHERE a.category = ?
-        AND DATE(s.start_time / 1000, 'unixepoch', 'localtime') >= DATE('now', 'localtime', '-7 days')
-        GROUP BY date
-        ORDER BY date ASC
-      `).all([categoryName]);
+        WHERE a.category = ? AND a.hidden = 0
+        ${dateFilterCondition}
+        GROUP BY a.id
+        ORDER BY total_time DESC
+        LIMIT 100
+      `).all([categoryName, ...dateParams]);
 
-      // Get top apps in category
-      const topApps = apps.slice(0, 100).map(app => ({
+      const topApps = topAppsData.map(app => ({
         id: app.id,
         name: app.name,
         totalTime: app.total_time,
@@ -207,19 +259,7 @@ function initializeCollectionHandlers() {
         icon_path: app.icon_path
       }));
 
-      // Get day of week usage
-      const dayOfWeekUsage = db.prepare(`
-        SELECT
-          DATE(start_time/1000, 'unixepoch', 'localtime') as date,
-          SUM(s.duration) as total_time
-        FROM sessions s
-        INNER JOIN apps a ON s.app_id = a.id
-        WHERE a.category = ?
-        GROUP BY date
-        ORDER BY date
-      `).all([categoryName]);
-
-      // Get heatmap data (hour of day × day of week)
+      // Get heatmap data (hour of day × day of week) - filtered by date range
       const heatmapData = db.prepare(`
         SELECT
           CAST(strftime('%w', s.start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as day,
@@ -228,8 +268,9 @@ function initializeCollectionHandlers() {
         FROM sessions s
         INNER JOIN apps a ON s.app_id = a.id
         WHERE a.category = ?
+        ${dateFilterCondition}
         GROUP BY day, hour
-      `).all([categoryName]);
+      `).all([categoryName, ...dateParams]);
 
       return {
         category: {
@@ -249,10 +290,8 @@ function initializeCollectionHandlers() {
           usagePercentage,
           peakDay
         },
-        weeklyUsage,
-        monthlyUsage,
+        dailyUsage,
         topApps,
-        dayOfWeekUsage,
         heatmapData
       };
 

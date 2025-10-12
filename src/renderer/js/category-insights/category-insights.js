@@ -1,100 +1,74 @@
 let categoryData = null;
-let currentChartPeriod = 'daily';
 let currentCategoryName = null;
+let currentPeriod = 'today';
 
 // Listen for messages from parent window
 window.addEventListener('message', (event) => {
+    if (event.source !== window.parent) {
+        return;
+    }
+
     if (event.data.type === 'CATEGORY_INSIGHTS') {
-        categoryData = event.data.data;
+        // Store category name but don't load the data yet
         currentCategoryName = event.data.categoryName;
+        initCategoryInsights();
+    } else if (event.data.type === 'CATEGORY_DATA_RESPONSE') {
+        categoryData = event.data.data;
         loadCategoryInsights();
-        initializeDateRange();
     }
 });
 
-// Initialize date range controls
-function initializeDateRange() {
-    // Set default dates
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 30);
-
-    const startInput = document.getElementById('start-date');
-    const endInput = document.getElementById('end-date');
-
-    if (startInput) startInput.value = startDate.toISOString().split('T')[0];
-    if (endInput) endInput.value = endDate.toISOString().split('T')[0];
-
-    // Add event listeners for date changes
-    startInput?.addEventListener('change', handleDateRangeChange);
-    endInput?.addEventListener('change', handleDateRangeChange);
-
-    // Add event listeners for preset buttons
-    document.querySelectorAll('.time-range-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.time-range-btn').forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-
-            const range = e.target.textContent.toLowerCase();
-            const { start, end } = getDateRangeFromPreset(range);
-
-            if (startInput) startInput.value = start;
-            if (endInput) endInput.value = end;
-
-            handleDateRangeChange();
-        });
+// Initialize category insights
+function initCategoryInsights() {
+    // Setup date range controls using shared utility
+    setupDateRangeControls({
+        onPeriodChange: (period, startDate, endDate) => {
+            currentPeriod = period;
+            loadCategoryData(period, startDate, endDate);
+        },
+        onCustomDateChange: (startDate, endDate) => {
+            currentPeriod = 'custom';
+            loadCategoryData('custom', startDate, endDate);
+        }
     });
+
+    // Load default period
+    loadCategoryData(currentPeriod);
 }
 
-function getDateRangeFromPreset(preset) {
-    const end = new Date();
-    const start = new Date();
+// Load category data for the selected period
+function loadCategoryData(period, customStartDate, customEndDate) {
+    if (!currentCategoryName) return;
 
-    switch (preset) {
-        case 'today':
-            // Today only
-            break;
-        case 'week':
-            start.setDate(end.getDate() - 7);
-            break;
-        case 'month':
-            start.setDate(end.getDate() - 30);
-            break;
-        case 'year':
-            start.setFullYear(end.getFullYear() - 1);
-            break;
-        case 'all time':
-            start.setFullYear(2020, 0, 1); // Arbitrary start date
-            break;
+    let startDate, endDate;
+
+    if (period === 'custom' && customStartDate && customEndDate) {
+        startDate = customStartDate;
+        endDate = customEndDate;
+    } else {
+        const range = calculateDateRange(period);
+        startDate = range.startDate;
+        endDate = range.endDate;
     }
 
-    return {
-        start: start.toISOString().split('T')[0],
-        end: end.toISOString().split('T')[0]
-    };
-}
-
-async function handleDateRangeChange() {
-    const startDate = document.getElementById('start-date')?.value;
-    const endDate = document.getElementById('end-date')?.value;
-
-    if (!startDate || !endDate || !currentCategoryName) return;
-
-    // Calculate days
+    // Calculate days for date info
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
     // Update date info
     const dateInfo = document.querySelector('.date-info');
     if (dateInfo) {
-        dateInfo.textContent = `${days} days of data available`;
+        dateInfo.textContent = `${days} day${days !== 1 ? 's' : ''} of data available`;
     }
 
-    // Request fresh data from parent with new date range
-    // This would need to be implemented in the parent window handler
-    // For now, we'll just reload with existing data filtered
-    loadCategoryInsights();
+    // Request data from parent window
+    window.parent.postMessage({
+        type: 'REQUEST_CATEGORY_DATA',
+        categoryName: currentCategoryName,
+        startDate: startDate,
+        endDate: endDate
+    }, '*');
 }
 
 // Load category insights
@@ -119,8 +93,11 @@ async function loadCategoryInsights() {
         // Update top apps
         updateTopApps(categoryData.topApps || [], category.color);
 
-        // Update day of week chart
-        updateDailyUsageChart(categoryData.dayOfWeekUsage || []);
+        // Update daily usage chart with the filtered data
+        updateDailyUsageChart(categoryData.dailyUsage || []);
+
+        // Update pie chart with app distribution
+        updateAppPieChart(categoryData.topApps || [], stats.totalTime || 0);
 
         // Update heatmap
         updateHeatmap(categoryData.heatmapData || []);
@@ -130,7 +107,6 @@ async function loadCategoryInsights() {
 
         // Update category comparison
         updateCategoryComparison(categoryData);
-
     } catch (error) {
         console.error('Error loading category insights:', error);
     }
@@ -187,21 +163,35 @@ function updateMonthlyCalendar(data) {
     const calendar = document.querySelector('.monthly-calendar');
     if (!calendar) return;
 
-    const monthlyData = data.monthlyUsage || [];
+    const dailyData = data.dailyUsage || [];
 
-    if (monthlyData.length === 0) {
-        calendar.innerHTML = '<div style="text-align: center; color: #8f98a0; padding: 20px; grid-column: 1 / -1;">No data available for the last 30 days</div>';
+    if (dailyData.length === 0) {
+        calendar.innerHTML = '<div style="text-align: center; color: #8f98a0; padding: 20px; grid-column: 1 / -1;">No data available for the selected period</div>';
         return;
     }
 
-    const maxDuration = Math.max(...monthlyData.map(d => d.total_duration || 0), 1);
+    const maxDuration = Math.max(...dailyData.map(d => d.total_duration || 0), 1);
 
-    // Get last 30 days
+    // Get date range from inputs or default to last 30 days
+    let startDate, endDate;
+    const startInput = document.getElementById('start-date');
+    const endInput = document.getElementById('end-date');
+
+    if (startInput?.value && endInput?.value) {
+        startDate = new Date(startInput.value);
+        endDate = new Date(endInput.value);
+    } else {
+        endDate = new Date();
+        startDate = new Date();
+        startDate.setDate(endDate.getDate() - 29);
+    }
+
+    // Generate all dates in range
     const days = [];
-    for (let i = 29; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        days.push(date.toISOString().split('T')[0]);
+    const currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+        days.push(currentDate.toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + 1);
     }
 
     let html = [];
@@ -220,7 +210,7 @@ function updateMonthlyCalendar(data) {
 
     // Add calendar days
     days.forEach(date => {
-        const dayData = monthlyData.find(d => d.date === date);
+        const dayData = dailyData.find(d => d.date === date);
         const duration = dayData?.total_duration || 0;
         const intensity = duration > 0 ? 0.2 + (duration / maxDuration) * 0.8 : 0.05;
         const day = new Date(date).getDate();

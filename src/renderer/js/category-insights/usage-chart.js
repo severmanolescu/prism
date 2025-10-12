@@ -36,12 +36,13 @@ function renderSingleDayCanvasChart(ctx, canvas, dayData) {
     ctx.roundRect(centerX - barWidth / 2, barY - 3, barWidth, 6, 3);
     ctx.fill();
 
-    // Value label on top
+    // Value label on top - handle both field names
+    const duration = dayData.total_time || dayData.total_duration || 0;
     ctx.fillStyle = '#66c0f4';
     ctx.font = 'bold 24px "Motiva Sans", Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
-    ctx.fillText(formatTime(dayData.total_time), centerX, barY - 20);
+    ctx.fillText(formatTime(duration), centerX, barY - 20);
 
     // Date label at bottom
     const date = new Date(dayData.date);
@@ -69,7 +70,9 @@ function renderSingleDayCanvasChart(ctx, canvas, dayData) {
 
 function updateDailyUsageChart(dailyBreakdown) {
     const canvas = document.getElementById('daily-usage-canvas');
-    if (!canvas) return;
+    if (!canvas) {
+        return;
+    }
 
     const ctx = canvas.getContext('2d');
 
@@ -91,10 +94,11 @@ function updateDailyUsageChart(dailyBreakdown) {
         return;
     }
 
-    // Prepare data points
+
+    // Prepare data points - handle both total_time and total_duration field names
     const dataPoints = dailyBreakdown.map(item => ({
         date: item.date,
-        duration: item.total_time || 0,
+        duration: item.total_time || item.total_duration || 0,
         label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     }));
 
