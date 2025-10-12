@@ -747,6 +747,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, '*');
                 }
             }
-        } 
+        } else if (event.data.type === 'SHOW_EDIT_CATEGORY_MODAL') {
+            // Handle edit category modal request from category insights iframe
+            const { categoryName } = event.data;
+
+            try {
+                // Get all categories
+                const categories = await window.electronAPI.getCategories();
+                const currentCategory = categories.find(cat => cat.name === categoryName);
+
+                if (!currentCategory) {
+                    console.error('Category not found:', categoryName);
+                    return;
+                }
+
+                // Show the edit modal using the existing function
+                const success = await showEditCollectionModal(currentCategory);
+
+                if (success) {
+                    // Get the updated category (name might have changed)
+                    const updatedCategories = await window.electronAPI.getCategories();
+                    const updatedCategory = updatedCategories.find(cat => cat.id === currentCategory.id);
+
+                    // Reload app data to refresh navigation (this hides all views)
+                    await loadAppData();
+
+                    // Re-show the category insights page with the updated category
+                    if (updatedCategory) {
+                        // Need to use showCategoryInsights to re-display the page
+                        if (typeof showCategoryInsights === 'function') {
+                            await showCategoryInsights(updatedCategory.name);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error showing edit category modal:', error);
+            }
+        }
     });
 });

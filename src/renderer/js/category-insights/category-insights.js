@@ -17,6 +17,13 @@ window.addEventListener('message', (event) => {
         loadCategoryInsights();
     } else if (event.data.type === 'CATEGORIES_COMPARISON_RESPONSE') {
         updateCategoryComparison(categoryData, event.data.categories);
+    } else if (event.data.type === 'CATEGORY_UPDATED') {
+        // Reload the current category data after it was updated
+        // Update the category name if it changed
+        if (event.data.newCategoryName) {
+            currentCategoryName = event.data.newCategoryName;
+        }
+        loadCategoryData(currentPeriod);
     }
 });
 
@@ -137,14 +144,8 @@ function updateHeroSection(category) {
         }
     }
 
-    setTimeout(() => {
-        const dropdown = document.querySelector('.productivity-dropdown');
-        if (dropdown && category.productivity_level) {
-            dropdown.value = category.productivity_level;
-        }
-    }, 0);
-    // Setup productivity dropdown change handler
-    setupProductivityDropdown(category);
+    // Setup edit button
+    setupEditButton(category);
 }
 
 // Helper function to convert hex to RGB
@@ -339,24 +340,21 @@ function requestCategoryComparison() {
     }, '*');
 }
 
-// Setup productivity dropdown change handler
-function setupProductivityDropdown(category) {
-    const productivityDropdown = document.getElementById('productivity-level');
-    if (!productivityDropdown) return;
+// Setup edit button click handler
+function setupEditButton(category) {
+    const editBtn = document.querySelector('.btn-edit-category');
+    if (!editBtn) return;
 
     // Remove any existing listeners
-    const newDropdown = productivityDropdown.cloneNode(true);
-    productivityDropdown.parentNode.replaceChild(newDropdown, productivityDropdown);
+    const newBtn = editBtn.cloneNode(true);
+    editBtn.parentNode.replaceChild(newBtn, editBtn);
 
-    // Add change listener
-    newDropdown.addEventListener('change', async () => {
-        const newLevel = newDropdown.value;
-
-        // Request update through parent window
+    // Add click listener
+    newBtn.addEventListener('click', () => {
+        // Send message to parent window to show edit modal
         window.parent.postMessage({
-            type: 'UPDATE_CATEGORY_PRODUCTIVITY',
-            categoryId: category.id,
-            productivityLevel: newLevel
+            type: 'SHOW_EDIT_CATEGORY_MODAL',
+            categoryName: category.name
         }, '*');
     });
 }
