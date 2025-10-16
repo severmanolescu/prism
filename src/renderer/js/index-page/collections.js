@@ -241,12 +241,15 @@ class CollectionContextMenu {
     }
 
     updateMenuItems() {
+        const editItem = this.menu.querySelector('[data-action="edit"]');
         const deleteItem = this.menu.querySelector('[data-action="delete"]');
         
-        // Disable delete for default categories like Uncategorized
+        // Disable edit and delete for default categories like Uncategorized
         if (this.currentCollection && this.currentCollection.name === 'Uncategorized') {
+            editItem.classList.add('disabled');
             deleteItem.classList.add('disabled');
         } else {
+            editItem.classList.remove('disabled');
             deleteItem.classList.remove('disabled');
         }
     }
@@ -258,7 +261,9 @@ class CollectionContextMenu {
 
         switch (action) {
             case 'edit':
-                await this.editCollection(collectionName);
+                if (collectionName !== 'Uncategorized') {
+                    await this.editCollection(collectionName);
+                }
                 break;
             case 'delete':
                 if (collectionName !== 'Uncategorized') {

@@ -87,7 +87,7 @@ function updateHourlyHeatmap(hourlyAppBreakdown, topApps) {
       r: parseInt(rgbMatch[1], 16),
       g: parseInt(rgbMatch[2], 16),
       b: parseInt(rgbMatch[3], 16)
-    } : { r: 102, g: 192, b: 244 }; // Default Steam blue
+    } : { r: 102, g: 192, b: 244 };
 
     // Add hourly cells
     for (let hour = 0; hour < 24; hour++) {

@@ -947,8 +947,6 @@ function backfillMissingProgress() {
   try {
     const db = getDb();
 
-    console.log('\n=== Backfilling missing goal progress ===');
-
     // Find the most recent saved progress date
     const lastSaved = db.prepare(`
       SELECT MAX(date) as last_date FROM goal_progress
@@ -957,7 +955,6 @@ function backfillMissingProgress() {
     const today = getLocalDateString(new Date());
 
     if (!lastSaved || !lastSaved.last_date) {
-      console.log('No previous progress found. Saving yesterday only.');
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayString = getLocalDateString(yesterday);
@@ -968,18 +965,12 @@ function backfillMissingProgress() {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
 
-    console.log(`Last saved progress: ${lastSaved.last_date}`);
-    console.log(`Today: ${today}`);
-
     // Calculate days between last save and yesterday
     const daysBetween = Math.floor((yesterday - lastSavedDate) / (24 * 60 * 60 * 1000));
 
     if (daysBetween <= 0) {
-      console.log('Progress is up to date. No backfill needed.');
       return { success: true, backfilledDays: 0 };
     }
-
-    console.log(`Need to backfill ${daysBetween} days of progress`);
 
     // Get all active goals to check their frequencies
     const goals = db.prepare(`
@@ -1009,7 +1000,6 @@ function backfillMissingProgress() {
     // 2. Find completed weekly/monthly periods and add their end dates
     if (hasWeeklyGoals || hasMonthlyGoals) {
       const completedPeriods = findCompletedPeriods(goals, lastSaved.last_date, yesterday.toISOString().split('T')[0]);
-      console.log(`Found ${completedPeriods.length} completed weekly/monthly periods to save`);
 
       completedPeriods.forEach(period => {
         datesToSaveSet.add(period.endDate);
@@ -1017,18 +1007,14 @@ function backfillMissingProgress() {
     }
 
     const datesToSave = Array.from(datesToSaveSet).sort();
-    console.log(`Will save progress for ${datesToSave.length} dates`);
 
     // Save progress for each unique date
     datesToSave.forEach(dateString => {
-      console.log(`Backfilling progress for ${dateString}...`);
       const result = saveProgressForDate(dateString);
       if (result.success) {
         totalSaved += result.savedCount || 0;
       }
     });
-
-    console.log(`✅ Backfill complete. Saved progress for ${totalSaved} goal-days`);
 
     // Clean up orphaned progress data from deleted goals
     cleanupOrphanedProgress();

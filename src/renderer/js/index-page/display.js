@@ -1,17 +1,21 @@
 // Display all apps
 async function displayAllApps(apps) {
     const appsContainer = document.querySelector('.apps-grid');
+    const contentArea = document.querySelector('.content-area');
     const sectionHeader = document.querySelector('.all-apps-section .section-header');
     const allAppsSection = document.querySelector('.all-apps-section');
     const recentSection = document.querySelector('.recent-section');
     const categoryOverview = document.querySelector('.category-overview');
     const detailsIframe = document.querySelector('.app-details-iframe-wrapper');
+    const categoryInsightsContainer = document.querySelector('.category-insights-iframe-wrapper');
 
     // Show all apps section and recent section, hide others
     if (allAppsSection) allAppsSection.style.display = 'block';
+    if (contentArea) contentArea.style.display = 'block';
     if (recentSection) recentSection.style.display = 'block';
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (detailsIframe) detailsIframe.style.display = 'none';
+    if (categoryInsightsContainer) categoryInsightsContainer.style.display = 'none';
 
     if (!appsContainer) {
         console.error('Apps container not found!');
@@ -50,10 +54,11 @@ async function displayAllApps(apps) {
                 // Get sort preference from category data or default to name-asc
                 const sortPreference = categoryApps.sortPreference || 'name-asc';
 
-                // Determine if we should show the category productivity dropdown
-                // Only show when viewing a specific category (not when viewing "All Apps")
-                const showProductivityDropdown = currentCategory !== 'All Apps';
-                const categoryProductivity = categoryApps.productivity_level || 'neutral';
+                // Determine if we should show the category action buttons
+                // Show for all custom categories (not for Favorites, Hidden, or Uncategorized)
+                const showCategoryActions = categoryName !== 'Favorites' &&
+                                           categoryName !== 'Hidden' &&
+                                           categoryName !== 'Uncategorized';
 
                 // Create category header with collapse toggle and sort dropdown
                 const categoryHeader = document.createElement('div');
@@ -63,14 +68,16 @@ async function displayAllApps(apps) {
                         <div class="category-title">
                             <span class="category-icon">${getCategoryIcon(categoryName)}</span>
                             <h3>${categoryName} <span class="category-app-count">(${categoryApps.apps.length})</span></h3>
-                            ${showProductivityDropdown ? `
-                                <div class="category-productivity-dropdown" data-category="${escapeHtml(categoryName)}">
-                                    <label class="productivity-label">Productivity:</label>
-                                    <select class="category-productivity-select">
-                                        <option value="productive" ${categoryProductivity === 'productive' ? 'selected' : ''}>✅ Productive</option>
-                                        <option value="neutral" ${categoryProductivity === 'neutral' ? 'selected' : ''}>⚪ Neutral</option>
-                                        <option value="unproductive" ${categoryProductivity === 'unproductive' ? 'selected' : ''}>❌ Unproductive</option>
-                                    </select>
+                            ${showCategoryActions ? `
+                                <div class="category-action-buttons">
+                                    <button class="btn-category-insights" data-category="${escapeHtml(categoryName)}" title="View Category Insights">
+                                        <span>📊</span>
+                                        <span>Insights</span>
+                                    </button>
+                                    <button class="btn-category-edit" data-category="${escapeHtml(categoryName)}" title="Edit Category">
+                                        <span>✏️</span>
+                                        <span>Edit</span>
+                                    </button>
                                 </div>
                             ` : ''}
                         </div>
@@ -309,41 +316,60 @@ document.addEventListener('change', (e) => {
         // Re-sort only this category without full refresh
         resortCategory(categoryName, sortType);
     }
-
-    // Handle category productivity change
-    if (e.target.classList.contains('category-productivity-select')) {
-        const select = e.target;
-        const productivityLevel = select.value;
-        const dropdown = select.closest('.category-productivity-dropdown');
-        const categoryName = dropdown.dataset.category;
-
-        // Update category productivity
-        updateCategoryProductivityLevel(categoryName, productivityLevel);
-    }
 });
 
-// Update category productivity level
-async function updateCategoryProductivityLevel(categoryName, productivityLevel) {
-    try {
-        const categories = await window.electronAPI.getCategories();
-        const category = categories.find(c => c.name === categoryName);
+// Handle category action buttons (Edit and Insights)
+document.addEventListener('click', async (e) => {
+    // Handle Insights button
+    if (e.target.closest('.btn-category-insights')) {
+        const btn = e.target.closest('.btn-category-insights');
+        const categoryName = btn.dataset.category;
 
-        if (category) {
-            await window.electronAPI.editCollection(category.id, {
-                productivityLevel: productivityLevel
-            });
-
-            // Force reload all apps to refresh the cache
-            if (typeof loadAllApps === 'function') {
-                await loadAllApps();
-            }
-
-            // Reload the current view to reflect changes
-            if (typeof loadAppsByCategory === 'function' && currentCategory) {
-                await loadAppsByCategory(currentCategory, false);
-            }
+        if (typeof showCategoryInsights === 'function') {
+            showCategoryInsights(categoryName);
         }
-    } catch (error) {
-        console.error('Error updating category productivity:', error);
     }
-}
+
+    // Handle Edit button
+    if (e.target.closest('.btn-category-edit')) {
+        const btn = e.target.closest('.btn-category-edit');
+        const categoryName = btn.dataset.category;
+
+        try {
+            const categories = await window.electronAPI.getCategories();
+            const category = categories.find(c => c.name === categoryName);
+
+            if (category && typeof showEditCollectionModal === 'function') {
+                const success = await showEditCollectionModal(category);
+
+                if (success) {
+                    // Remember if we were in home view
+                    const wasInHomeView = currentCategory === 'All Apps';
+
+                    // Get updated category in case name changed
+                    const updatedCategories = await window.electronAPI.getCategories();
+                    const updatedCategory = updatedCategories.find(cat => cat.id === category.id);
+
+                    // Reload all apps to refresh the cache (this updates app.category fields)
+                    const allApps = await window.electronAPI.getAllApps();
+                    allAppsCache = allApps;
+
+                    // Recreate navigation with updated data
+                    await createCategoryNavigation(allApps);
+
+                    // Reload the current view
+                    if (wasInHomeView) {
+                        // If we were in home view, reload all apps
+                        await displayAllApps(allApps);
+                    } else if (updatedCategory && typeof loadAppsByCategory === 'function') {
+                        // If we were in a specific category view, update currentCategory and reload
+                        currentCategory = updatedCategory.name;
+                        await loadAppsByCategory(updatedCategory.name, false);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error editing category:', error);
+        }
+    }
+});

@@ -202,7 +202,7 @@ function createCategoryCard(categoryName, apps, color = '#4a90e2') {
             <button class="collection-action-btn insights-btn" title="View Insights" data-action="insights">
                 <span>📊</span>
             </button>
-            <button class="collection-action-btn edit-btn" title="Edit Collection" data-action="edit">
+            <button class="collection-action-btn edit-btn" title="Edit Collection" data-action="edit" ${categoryName === 'Uncategorized' || categoryName === 'Favorites' ? 'disabled' : '' }>
                 <span>✏️</span>
             </button>
             <button class="collection-action-btn delete-btn" title="Delete Collection" data-action="delete" ${categoryName === 'Uncategorized' || categoryName === 'Favorites' ? 'disabled' : ''}>
@@ -650,9 +650,6 @@ async function showCategoryInsights(categoryName) {
     console.log('Opening category insights for:', categoryName);
 
     try {
-        // Fetch category insights data (placeholder - will need backend support)
-        const categoryData = await fetchCategoryInsights(categoryName);
-
         // Hide current content
         const recentSection = document.querySelector('.recent-section');
         const allAppsSection = document.querySelector('.all-apps-section');
@@ -700,12 +697,11 @@ async function showCategoryInsights(categoryName) {
             iframe.style.display = 'block';
             iframe.src = 'category-insights.html';
 
-            // Send data to iframe when it loads
+            // Send category name to iframe when it loads
             iframe.onload = () => {
                 iframe.contentWindow.postMessage({
                     type: 'CATEGORY_INSIGHTS',
-                    categoryName: categoryName,
-                    data: categoryData
+                    categoryName: categoryName
                 }, '*');
             };
 
@@ -717,11 +713,10 @@ async function showCategoryInsights(categoryName) {
         } else {
             const iframe = insightsContainer.querySelector('iframe');
             if (iframe) {
-                // If iframe already exists, just send new data
+                // If iframe already exists, just send category name
                 iframe.contentWindow.postMessage({
                     type: 'CATEGORY_INSIGHTS',
-                    categoryName: categoryName,
-                    data: categoryData
+                    categoryName: categoryName
                 }, '*');
             }
             insightsContainer.style.display = 'block';
@@ -749,40 +744,6 @@ async function showCategoryInsights(categoryName) {
         console.error('Error showing category insights:', error);
         showFeedback('Failed to load category insights', false);
     }
-}
-
-async function fetchCategoryInsights(categoryName) {
-    // Placeholder function - will need to implement IPC handler in backend
-    // For now, return mock data structure
-    console.log('Fetching category insights for:', categoryName);
-
-    // Get category color
-    const categories = await window.electronAPI.getCategories();
-    const category = categories.find(cat => cat.name === categoryName);
-
-    return {
-        category: {
-            name: categoryName,
-            color: category?.color || '#4a90e2',
-            icon: getCategoryIcon(categoryName)
-        },
-        stats: {
-            totalTime: 0,
-            appCount: 0,
-            avgDaily: 0,
-            thisWeek: 0,
-            lastWeek: 0,
-            sessionCount: 0,
-            avgSession: 0,
-            usagePercentage: 0,
-            peakDay: 0
-        },
-        weeklyUsage: [],
-        monthlyUsage: [],
-        topApps: [],
-        dayOfWeekUsage: [],
-        heatmapData: []
-    };
 }
 
 async function showAppDetails(appName) {

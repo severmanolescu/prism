@@ -157,7 +157,7 @@ async function saveApp(appInfo) {
     };
   } else {
     // Update the name in case we got a better title
-    if (cleanName && cleanName !== executable && !cleanName.startsWith('Steam Time Tracker')) {
+    if (cleanName && cleanName !== executable && !cleanName.startsWith('Time Tracker')) {
       dataStorage.appData[appId].name = cleanName;
     }
     

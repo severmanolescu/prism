@@ -82,4 +82,58 @@
   font-weight: 300;
   margin: 0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.library-title-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.library-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+  margin-right: 24px;
+  padding-right: 24px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-category-insights,
+.btn-category-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(102, 192, 244, 0.15);
+  border: 1px solid rgba(102, 192, 244, 0.3);
+  border-radius: 4px;
+  color: #66c0f4;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-category-insights:hover,
+.btn-category-edit:hover {
+  background: rgba(102, 192, 244, 0.25);
+  border-color: rgba(102, 192, 244, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-category-insights:active,
+.btn-category-edit:active {
+  transform: translateY(0);
 }

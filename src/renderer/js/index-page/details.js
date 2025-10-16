@@ -1,6 +1,17 @@
 // Listen for messages from app-details iframe
 window.addEventListener('message', async (event) => {
     const appDetailsIframe = document.querySelector('.app-details-iframe-wrapper iframe');
+    const categoryInsightsIframe = document.querySelector('.category-insights-iframe-wrapper iframe');
+
+    // Handle messages from category insights iframe
+    if (categoryInsightsIframe && event.source === categoryInsightsIframe.contentWindow) {
+        if (event.data.type === 'SHOW_APP_DETAILS') {
+            showAppDetails(event.data.appName);
+        }
+        return;
+    }
+
+    // Handle messages from app details iframe
     if (!appDetailsIframe || event.source !== appDetailsIframe.contentWindow) {
         return;
     }

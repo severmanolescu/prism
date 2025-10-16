@@ -1,5 +1,3 @@
-// Steam Time Tracker - Frontend Logic
-
 let currentCategory = 'All Apps';
 let allAppsCache = []; // Cache all apps for filtering
 let currentSearchTerm = ''; // Track current search term
@@ -473,13 +471,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initialize the app
-    console.log('Steam Time Tracker initialized!');
-    displayCurrentTime();
-
-    // Update time every second
-    setInterval(displayCurrentTime, 1000);
-
     window.contextMenu = new ContextMenu();
 
     window.collectionContextMenu = new CollectionContextMenu();
@@ -529,16 +520,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Verify message comes from our analytics, productivity, or goals iframe
+        // Verify message comes from our iframes
         const analyticsIframe = document.querySelector('.analytics-iframe-wrapper iframe');
         const productivityIframe = document.querySelector('.productivity-iframe-wrapper iframe');
         const goalsIframe = document.querySelector('.goals-iframe-wrapper iframe');
+        const categoryInsightsIframe = document.querySelector('.category-insights-iframe-wrapper iframe');
 
         const isAnalyticsSource = analyticsIframe && event.source === analyticsIframe.contentWindow;
         const isProductivitySource = productivityIframe && event.source === productivityIframe.contentWindow;
         const isGoalsSource = goalsIframe && event.source === goalsIframe.contentWindow;
+        const isCategoryInsightsSource = categoryInsightsIframe && event.source === categoryInsightsIframe.contentWindow;
 
-        if (!isAnalyticsSource && !isProductivitySource && !isGoalsSource) {
+        if (!isAnalyticsSource && !isProductivitySource && !isGoalsSource && !isCategoryInsightsSource) {
             return;
         }
 
@@ -546,7 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const { startDate, endDate } = event.data;
 
             try {
-                // Fetch productivity data (placeholder - you'll need to implement this)
+                // Fetch productivity data
                 const data = await window.electronAPI.getProductivityStats(startDate, endDate);
 
                 // Send response back to productivity iframe
@@ -558,6 +551,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (error) {
                 console.error('Error fetching productivity data:', error);
+            }
+        } else if (event.data.type === 'REQUEST_CATEGORY_DATA') {
+            const { categoryName, startDate, endDate } = event.data;
+
+            try {
+                // Fetch category insights data with date range
+                const data = await window.electronAPI.getCategoryDetails(categoryName, startDate, endDate);
+
+                // Send response back to category insights iframe
+                if (categoryInsightsIframe && categoryInsightsIframe.contentWindow) {
+                    categoryInsightsIframe.contentWindow.postMessage({
+                        type: 'CATEGORY_DATA_RESPONSE',
+                        data: data
+                    }, '*');
+                }
+            } catch (error) {
+                console.error('Error fetching category data:', error);
             }
         } else if (event.data.type === 'REQUEST_ANALYTICS_DATA') {
             const { startDate, endDate } = event.data;
@@ -576,6 +586,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (error) {
                 console.error('Error fetching analytics data:', error);
+            }
+        } else if (event.data.type === 'UPDATE_CATEGORY_PRODUCTIVITY') {
+            const { categoryId, productivityLevel } = event.data;
+
+            try {
+                // Update category productivity level
+                const result = await window.electronAPI.editCollection(categoryId, {
+                    productivityLevel: productivityLevel
+                });
+
+                if (result.success) {
+                    console.log('Category productivity level updated successfully');
+                } else {
+                    console.error('Failed to update category productivity level:', result.error);
+                }
+            } catch (error) {
+                console.error('Error updating category productivity level:', error);
+            }
+        } else if (event.data.type === 'REQUEST_CATEGORIES_COMPARISON') {
+            const { startDate, endDate } = event.data;
+
+            try {
+                // Fetch categories comparison data
+                const categories = await window.electronAPI.getCategoriesComparison(startDate, endDate);
+
+                // Send response back to category insights iframe
+                if (categoryInsightsIframe && categoryInsightsIframe.contentWindow) {
+                    categoryInsightsIframe.contentWindow.postMessage({
+                        type: 'CATEGORIES_COMPARISON_RESPONSE',
+                        categories: categories
+                    }, '*');
+                }
+            } catch (error) {
+                console.error('Error fetching categories comparison:', error);
             }
         } else if (event.data.type === 'REQUEST_HEATMAP_DATA') {
             const { startDate, endDate } = event.data;
@@ -694,6 +738,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, '*');
                 }
             }
-        } 
+        } else if (event.data.type === 'SHOW_EDIT_CATEGORY_MODAL') {
+            // Handle edit category modal request from category insights iframe
+            const { categoryName } = event.data;
+
+            try {
+                // Get all categories
+                const categories = await window.electronAPI.getCategories();
+                const currentCategory = categories.find(cat => cat.name === categoryName);
+
+                if (!currentCategory) {
+                    console.error('Category not found:', categoryName);
+                    return;
+                }
+
+                // Show the edit modal using the existing function
+                const success = await showEditCollectionModal(currentCategory);
+
+                if (success) {
+                    // Get the updated category (name might have changed)
+                    const updatedCategories = await window.electronAPI.getCategories();
+                    const updatedCategory = updatedCategories.find(cat => cat.id === currentCategory.id);
+
+                    // Reload app data to refresh navigation (this hides all views)
+                    await loadAppData();
+
+                    // Re-show the category insights page with the updated category
+                    if (updatedCategory) {
+                        // Need to use showCategoryInsights to re-display the page
+                        if (typeof showCategoryInsights === 'function') {
+                            await showCategoryInsights(updatedCategory.name);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error showing edit category modal:', error);
+            }
+        }
     });
 });

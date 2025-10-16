@@ -150,12 +150,6 @@ function getRelativeTime(timestamp) {
   }
 }
 
-function displayCurrentTime() {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString();
-    document.title = `Steam Time Tracker - ${timeString}`;
-}
-
 // Helper function to adjust color brightness
 function adjustBrightness(hex, percent) {
     const num = parseInt(hex.replace("#", ""), 16),

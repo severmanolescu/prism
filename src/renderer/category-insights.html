@@ -3,20 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Category Insights - Time Tracker</title>
+  <title>Category Insights - Prism</title>
 
   <!-- Shared Styles -->
   <link rel="stylesheet" href="styles/shared/base.css">
   <link rel="stylesheet" href="styles/shared/section-headers.css">
   <link rel="stylesheet" href="styles/shared/buttons.css">
   <link rel="stylesheet" href="styles/shared/date-controls.css">
+  <link rel="stylesheet" href="styles/shared/stats.css">
 
   <!-- Page-Specific Styles -->
-  <link rel="stylesheet" href="styles/category-insights/category-insights.css">
   <link rel="stylesheet" href="styles/app-details/calendar.css">
   <link rel="stylesheet" href="styles/app-details/chart.css">
   <link rel="stylesheet" href="styles/app-details/quick-stats.css">
+  <link rel="stylesheet" href="styles/index-page/apps.css">
+  <link rel="stylesheet" href="styles/productivity/pie_chart.css">
+  <link rel="stylesheet" href="styles/analytics/hourly-activity-heatmap.css">
   <link rel="stylesheet" href="styles/global/scrollbar.css">
+
+  <!-- Load category-insights.css LAST to override other styles -->
+  <link rel="stylesheet" href="styles/category-insights/category-insights.css">
 </head>
 <body>
   <div class="details-container">
@@ -27,7 +33,13 @@
       </div>
       <div class="category-hero-content">
         <div class="category-title">Category Name</div>
-        <div class="category-subtitle">Collection</div>
+        <div class="category-subtitle-row">
+          <div class="category-subtitle">Collection</div>
+          <button class="btn-edit-category" title="Edit Category">
+            <span>✏️</span>
+            <span>Edit</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -35,9 +47,9 @@
     <div class="category-header">
       <div class="date-range-controls">
         <div class="time-range-selector">
-          <button class="time-range-btn">Today</button>
+          <button class="time-range-btn active">Today</button>
           <button class="time-range-btn">Week</button>
-          <button class="time-range-btn active">Month</button>
+          <button class="time-range-btn">Month</button>
           <button class="time-range-btn">Year</button>
           <button class="time-range-btn">All Time</button>
         </div>
@@ -56,93 +68,57 @@
     </div>
 
     <!-- Quick Stats -->
-    <div class="section-title">Overview</div>
-    <div class="quick-stats">
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">⏱️</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Total Time</div>
-          <div class="quick-stat-value">0h</div>
-        </div>
+    <h3 class="section-header">Overview</h3>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Time</div>
+        <div class="stat-value">0h</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">📱</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Apps in Category</div>
-          <div class="quick-stat-value">0</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">Apps in Category</div>
+        <div class="stat-value">0</div>
+        <div class="stat-subtitle">0 new this week</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">📊</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Average Daily</div>
-          <div class="quick-stat-value">0h</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">Average Daily</div>
+        <div class="stat-value">0h</div>
+        <div class="stat-subtitle">Across selected days</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">📅</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Total Sessions</div>
-          <div class="quick-stat-value">0</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Sessions</div>
+        <div class="stat-value">0</div>
+        <div class="stat-subtitle">Avg. 0 min</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">⚡</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Avg Session</div>
-          <div class="quick-stat-value">0h</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Session</div>
+        <div class="stat-value">0h</div>
+        <div class="stat-subtitle">Per session</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">📈</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Usage Share</div>
-          <div class="quick-stat-value">0%</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">Usage Share</div>
+        <div class="stat-value">0%</div>
+        <div class="stat-subtitle">Of total time</div>
       </div>
     </div>
 
-    <!-- Usage Over Time & Monthly Calendar -->
-    <div class="content-grid">
-      <div class="content-section">
-        <div class="section-header-with-tabs">
-          <div class="section-title">Usage Over Time</div>
-          <div class="chart-tabs">
-            <button class="chart-tab active" data-period="daily">Daily</button>
-            <button class="chart-tab" data-period="weekly">Weekly</button>
-            <button class="chart-tab" data-period="monthly">Monthly</button>
-          </div>
-        </div>
-        <div class="usage-chart-container">
-          <canvas id="usage-line-chart"></canvas>
+    <!-- Usage Over Time & App Distribution -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3 class="section-header">Daily Usage</h3>
+        <div class="daily-usage-chart">
+          <canvas id="daily-usage-canvas" width="800" height="350"></canvas>
         </div>
       </div>
 
-      <div class="content-section">
-        <div class="section-title">Usage Calendar</div>
-        <div class="trends-container">
-          <div class="monthly-calendar"></div>
-          <div class="trend-stats">
-            <div class="trend-stat">
-              <div class="trend-label">This Week</div>
-              <div class="trend-value">0h</div>
-              <div class="trend-change positive">+0%</div>
-            </div>
-            <div class="trend-stat">
-              <div class="trend-label">Last Week</div>
-              <div class="trend-value">0h</div>
-              <div class="trend-change">previous</div>
-            </div>
-            <div class="trend-stat">
-              <div class="trend-label">Peak Day</div>
-              <div class="trend-value">0h</div>
-              <div class="trend-change">highest</div>
-            </div>
-            <div class="trend-stat">
-              <div class="trend-label">All Categories</div>
-              <div class="trend-value">0%</div>
-              <div class="trend-change">of total</div>
-            </div>
+      <div class="chart-card">
+        <h3 class="section-header">App Distribution</h3>
+        <div class="pie-chart" style="position: relative;">
+          <svg viewBox="-10 -10 220 220" style="width: 100%; max-width: 200px; margin: 0 auto; display: block; overflow: visible;">
+          </svg>
+          <div id="pie-tooltip" class="pie-tooltip" style="display: none;">
+            <div class="pie-tooltip-text"></div>
+          </div>
+          <div class="pie-legend">
           </div>
         </div>
       </div>
@@ -151,7 +127,7 @@
     <!-- Top Apps in Category -->
     <div class="full-width-section">
       <div class="section-title">Top Apps in this Category</div>
-      <div class="top-apps-grid"></div>
+      <div class="top-apps-grid apps-grid"></div>
     </div>
 
     <!-- Usage Insights & Category Comparison -->
@@ -186,11 +162,11 @@
             <div class="time-of-day-breakdown"></div>
           </div>
 
-          <!-- Productivity Breakdown -->
+          <!-- Usage Patterns -->
           <div class="insight-box">
             <div class="insight-header">
-              <span class="insight-icon">✅</span>
-              <span class="insight-title">Productivity Level</span>
+              <span class="insight-icon">📊</span>
+              <span class="insight-title">Usage Patterns</span>
             </div>
             <div class="productivity-breakdown"></div>
           </div>
@@ -203,17 +179,10 @@
       </div>
     </div>
 
-    <!-- Time Patterns -->
-    <div class="content-grid">
-      <div class="content-section">
-        <div class="section-title">Usage by Day of Week</div>
-        <div class="day-of-week-chart"></div>
-      </div>
-
-      <div class="content-section">
-        <div class="section-title">Time of Day Heatmap</div>
-        <div class="heatmap-container"></div>
-      </div>
+    <!-- Time of Day Heatmap -->
+    <div class="full-width-section">
+      <div class="section-title">Time of Day Heatmap</div>
+      <div class="heatmap-container"></div>
     </div>
 
   </div>
@@ -222,7 +191,7 @@
   <script src="./js/shared/date-range.js"></script>
   <script src="./js/category-insights/category-insights.js"></script>
   <script src="./js/category-insights/usage-chart.js"></script>
-  <script src="./js/category-insights/day-of-week-chart.js"></script>
+  <script src="./js/category-insights/pie-chart.js"></script>
   <script src="./js/category-insights/heatmap.js"></script>
   <script src="./js/category-insights/top-apps.js"></script>
   <script src="./js/category-insights/insights.js"></script>
