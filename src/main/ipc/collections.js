@@ -129,14 +129,28 @@ function initializeCollectionHandlers() {
     const db = getDb();
 
     try {
+      let category;
+
       // Get category info by name (since frontend passes category name)
-      const category = db.prepare(`
+      if(categoryName !== "Uncategorized"){
+        category = db.prepare(`
         SELECT * FROM categories WHERE name = ?
       `).get([categoryName]);
 
-      if (!category) {
-        throw new Error('Category not found');
+        if (!category) {
+          throw new Error('Category not found');
+        }
       }
+      else{
+        category = {
+          id: "Uncategorized",
+          name: "Uncategorized",
+          color: '#092442',
+          icon: '📁',
+          productivity_level: 'neutral'
+        }
+      }
+      
 
       // startDate and endDate are REQUIRED
       if (!startDate || !endDate) {

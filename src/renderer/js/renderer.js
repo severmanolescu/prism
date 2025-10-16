@@ -1,5 +1,3 @@
-// Steam Time Tracker - Frontend Logic
-
 let currentCategory = 'All Apps';
 let allAppsCache = []; // Cache all apps for filtering
 let currentSearchTerm = ''; // Track current search term
@@ -472,13 +470,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
         }
     });
-
-    // Initialize the app
-    console.log('Steam Time Tracker initialized!');
-    displayCurrentTime();
-
-    // Update time every second
-    setInterval(displayCurrentTime, 1000);
 
     window.contextMenu = new ContextMenu();
 

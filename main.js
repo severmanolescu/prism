@@ -28,7 +28,7 @@ const appTracking = require('./src/main/services/app-tracking');
 const { initializeIpcHandlers } = require('./src/main/ipc');
 
 const autoLauncher = new AutoLaunch({
-  name: 'Time Tracker',
+  name: 'Prism',
   path: app.getPath('exe'),
   options: ['--hidden']
 });
@@ -268,7 +268,7 @@ function createTray() {
   ]);
   
   tray.setContextMenu(contextMenu);
-  tray.setToolTip('Time Tracker - Running');
+  tray.setToolTip('Prism - Running');
   
   // Double-click to show/hide window
   tray.on('double-click', () => {

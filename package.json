@@ -1,7 +1,7 @@
 {
   "name": "prism",
   "version": "0.1.0",
-  "description": "Modern application usage time tracker with analytics",
+  "description": "Prism",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
