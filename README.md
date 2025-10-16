@@ -4,6 +4,16 @@
   <img src="./assets/banner.svg" alt="Prism Banner" width="99%">
 </div>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Electron-Latest-47848F?style=for-the-badge&logo=electron&logoColor=white" alt="Electron">
+  <img src="https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5">
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
+  <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
+  <img src="https://img.shields.io/badge/Status-In%20Development-yellow?style=for-the-badge" alt="Status">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
+</p>
+
 A modern desktop application for tracking application usage time, built with Electron and inspired by Steam's UI design.
 
 ## Why "Prism"?
@@ -121,31 +131,33 @@ npm run build
 prism/
 ├── scripts/                    # Useful scripts
 ├── src/
-│   ├── main/                    # Main process (Electron/Node.js)
-│   │   ├── ipc/                 # IPC handlers organized by domain
-│   │   │   └── exporters/       # IPC handlers for exporting PDF files
-│   │   ├── services/            # Business logic (tracking, database, storage)
-│   │   │   └── data_access/     # Data base access handlers
-│   │   └── utils/               # Helper functions
-│   ├── preload/                 # Preload script for IPC bridge
-│   └── renderer/                # Renderer process (UI)
-│       ├── styles/              # Modular CSS files
-│       │   ├── analytics/       # Analytics page styles
-│       │   ├── app-details/     # App details page styles
-│       │   ├── global/          # Global page styles
-│       │   ├── goals/           # Goals page styles
-│       │   ├── index-page/      # Main page styles
-│       │   ├── productivity/    # Productivity page styles
-│       │   └── shared/          # Shared page styles
-│       └── js/                  # Frontend JavaScript modules
-│           ├── analytics/       # Analytics page logic
-│           ├── app-details/     # App details page logic
-│           ├── goals/           # Goals page logic
-│           ├── index-page/      # Main page logic
-│           ├── productivity/    # Productivity page Logic
-│           └── shared/          # Shared src 
-├── assets/                      # Images and icons
-└── main.js                      # Main Electron entry point
+│   ├── main/                      # Main process (Electron/Node.js)
+│   │   ├── ipc/                   # IPC handlers organized by domain
+│   │   │   └── exporters/         # IPC handlers for exporting PDF files
+│   │   ├── services/              # Business logic (tracking, database, storage)
+│   │   │   └── data_access/       # Database access handlers
+│   │   └── utils/                 # Helper functions
+│   ├── preload/                   # Preload script for IPC bridge
+│   └── renderer/                  # Renderer process (UI)
+│       ├── styles/                # Modular CSS files
+│       │   ├── analytics/         # Analytics page styles
+│       │   ├── app-details/       # App details page styles
+│       │   ├── category-insights/ # Category Insights page styles
+│       │   ├── global/            # Global page styles
+│       │   ├── goals/             # Goals page styles
+│       │   ├── index-page/        # Main page styles
+│       │   ├── productivity/      # Productivity page styles
+│       │   └── shared/            # Shared page styles
+│       └── js/                    # Frontend JavaScript modules
+│           ├── analytics/         # Analytics page logic
+│           ├── app-details/       # App details page logic
+│           ├── category-insights/ # Category Insights page logic
+│           ├── goals/             # Goals page logic
+│           ├── index-page/        # Main page logic
+│           ├── productivity/      # Productivity page Logic
+│           └── shared/            # Shared src 
+├── assets/                        # Images and icons
+└── main.js                        # Main Electron entry point
 ```
 
 ## Usage
