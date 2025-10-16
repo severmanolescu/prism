@@ -163,10 +163,6 @@ function updateQuickStats(stats) {
 
     if (statCards[0]) {
         statCards[0].querySelector('.stat-value').textContent = formatTime(stats.totalTime || 0);
-        // Calculate weekly change
-        const weeklyChange = stats.lastWeek > 0 ? Math.round(((stats.thisWeek - stats.lastWeek) / stats.lastWeek) * 100) : 0;
-        const arrow = weeklyChange >= 0 ? '↑' : '↓';
-        statCards[0].querySelector('.stat-subtitle').textContent = `${arrow} ${Math.abs(weeklyChange)}% from last week`;
     }
 
     if (statCards[1]) {
