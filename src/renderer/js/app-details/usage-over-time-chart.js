@@ -1,142 +1,125 @@
-function setupChartTabs(details) {
-  const tabs = document.querySelectorAll('.chart-tab');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      // Remove active class from all tabs
-      tabs.forEach(t => t.classList.remove('active'));
-      // Add active class to clicked tab
-      tab.classList.add('active');
-      // Update chart
-      currentChartPeriod = tab.dataset.period;
-      updateUsageChart(details, currentChartPeriod);
-    });
-  });
+// Render a single-day chart using Canvas
+function renderSingleDayCanvasChart(ctx, canvas, dayData) {
+  const width = canvas.width;
+  const height = canvas.height;
+
+  // Clear canvas
+  ctx.clearRect(0, 0, width, height);
+
+  // Draw background
+  ctx.fillStyle = '#16202d';
+  ctx.fillRect(0, 0, width, height);
+
+  const padding = { top: 40, right: 50, bottom: 60, left: 50 };
+  const barWidth = 100;
+  const centerX = width / 2;
+  const duration = dayData.duration || 0;
+
+  // Calculate bar height (max 70% of available height)
+  const maxBarHeight = height - padding.top - padding.bottom;
+  const barHeight = maxBarHeight * 0.7;
+  const barY = padding.top + (maxBarHeight - barHeight);
+
+  // Create gradient for bar
+  const gradient = ctx.createLinearGradient(centerX, barY, centerX, barY + barHeight);
+  gradient.addColorStop(0, '#66c0f4');
+  gradient.addColorStop(1, '#417a9b');
+
+  // Draw the bar
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.roundRect(centerX - barWidth / 2, barY, barWidth, barHeight, 4);
+  ctx.fill();
+
+  // Draw top cap
+  ctx.fillStyle = '#66c0f4';
+  ctx.beginPath();
+  ctx.roundRect(centerX - barWidth / 2, barY - 3, barWidth, 6, 3);
+  ctx.fill();
+
+  // Value label on top
+  ctx.fillStyle = '#66c0f4';
+  ctx.font = 'bold 24px "Motiva Sans", Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(formatTime(duration), centerX, barY - 20);
+
+  // Date label at bottom
+  const date = new Date(dayData.date);
+  ctx.fillStyle = '#8f98a0';
+  ctx.font = '14px "Motiva Sans", Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillText(date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  }), centerX, height - padding.bottom + 10);
+
+  // Session count label
+  ctx.fillStyle = '#66c0f4';
+  ctx.font = '12px "Motiva Sans", Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${dayData.session_count || 0} sessions`, centerX, height - padding.bottom + 30);
+
+  // Remove any existing event listeners
+  canvas.onmousemove = null;
+  canvas.onmouseleave = null;
 }
 
 function updateUsageChart(details, period) {
-  let data, labelFormat;
+  // Use the weeklyUsage data which now contains data based on the selected date range
+  const data = details.weeklyUsage || [];
 
-  switch(period) {
-    case 'daily':
-      // Last 7 days
-      data = getLast7DaysData(details.weeklyUsage);
-      labelFormat = (date) => {
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const d = new Date(date);
-        return `${days[d.getDay()]} ${d.getDate()}`;
-      };
-      break;
-    case 'weekly':
-      // Last 12 weeks
-      data = getLast12WeeksData(details);
-      labelFormat = (date) => {
-        const d = new Date(date);
-        return `Week ${getWeekNumber(d)}`;
-      };
-      break;
-    case 'monthly':
-      // Last 12 months
-      data = getLast12MonthsData(details);
-      labelFormat = (date) => {
-        const d = new Date(date);
-        return d.toLocaleDateString('en-US', { month: 'short' });
-      };
-      break;
-  }
-
-  drawChart(data, labelFormat);
-}
-
-function getLast7DaysData(weeklyData) {
-  const last7Days = [];
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    // Format date in local time (YYYY-MM-DD) to match SQL 'localtime'
-    const dateStr = date.getFullYear() + '-' +
-      String(date.getMonth() + 1).padStart(2, '0') + '-' +
-      String(date.getDate()).padStart(2, '0');
-    const dayData = weeklyData.find(d => d.date === dateStr);
-    last7Days.push({
-      date: dateStr,
-      duration: dayData?.total_duration || 0
-    });
-  }
-  return last7Days;
-}
-
-function getLast12WeeksData(details) {
-  const weeks = [];
-  for (let i = 11; i >= 0; i--) {
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() - (i * 7));
-    const startDate = new Date(endDate);
-    startDate.setDate(startDate.getDate() - 6);
-
-    // Sum up the week's data from monthlyUsage
-    let weekDuration = 0;
-    if (details.monthlyUsage) {
-      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-        // Format date in local time (YYYY-MM-DD) to match SQL 'localtime'
-        const dateStr = d.getFullYear() + '-' +
-          String(d.getMonth() + 1).padStart(2, '0') + '-' +
-          String(d.getDate()).padStart(2, '0');
-        const dayData = details.monthlyUsage.find(m => m.date === dateStr);
-        if (dayData) weekDuration += dayData.total_duration;
-      }
+  // Auto-detect label format based on date range size
+  const labelFormat = (date) => {
+    if (data.length <= 7) {
+      // Short range: show day of week + date
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const d = new Date(date);
+      return `${days[d.getDay()]} ${d.getDate()}`;
+    } else if (data.length <= 31) {
+      // Medium range: show month + date
+      const d = new Date(date);
+      return `${d.getMonth() + 1}/${d.getDate()}`;
+    } else {
+      // Long range: show month/day
+      const d = new Date(date);
+      return `${d.getMonth() + 1}/${d.getDate()}`;
     }
+  };
 
-    // Format end date in local time
-    const endDateStr = endDate.getFullYear() + '-' +
-      String(endDate.getMonth() + 1).padStart(2, '0') + '-' +
-      String(endDate.getDate()).padStart(2, '0');
-    weeks.push({
-      date: endDateStr,
-      duration: weekDuration
-    });
+  const chartData = data.map(item => ({
+    date: item.date,
+    duration: item.total_duration || 0
+  }));
+
+  // Special handling for single day
+  const canvas = document.getElementById('usage-line-chart');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+
+  // Check if we have no data
+  if (!chartData || chartData.length === 0) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#16202d';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#8f98a0';
+    ctx.font = '14px "Motiva Sans", Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('No data available for this period', canvas.width / 2, canvas.height / 2);
+    return;
   }
-  return weeks;
-}
 
-function getLast12MonthsData(details) {
-  const months = [];
-  for (let i = 11; i >= 0; i--) {
-    const date = new Date();
-    date.setMonth(date.getMonth() - i);
-    date.setDate(1);
-
-    const year = date.getFullYear();
-    const month = date.getMonth();
-
-    // Sum up the month's data from monthlyUsage
-    let monthDuration = 0;
-    if (details.monthlyUsage) {
-      details.monthlyUsage.forEach(dayData => {
-        // Parse the date string (YYYY-MM-DD) correctly in local time
-        const dateParts = dayData.date.split('-');
-        const dayDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-        if (dayDate.getFullYear() === year && dayDate.getMonth() === month) {
-          monthDuration += dayData.total_duration;
-        }
-      });
-    }
-
-    // Format date in local time (YYYY-MM-DD)
-    const dateStr = date.getFullYear() + '-' +
-      String(date.getMonth() + 1).padStart(2, '0') + '-' +
-      String(date.getDate()).padStart(2, '0');
-    months.push({
-      date: dateStr,
-      duration: monthDuration
-    });
+  // Render single day as bar chart
+  if (chartData.length === 1) {
+    renderSingleDayCanvasChart(ctx, canvas, chartData[0]);
+    return;
   }
-  return months;
-}
 
-function getWeekNumber(date) {
-  const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-  const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
-  return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+  drawChart(chartData, labelFormat);
 }
 
 
@@ -186,7 +169,7 @@ function drawChart(chartData, labelFormat) {
 
   // Draw Y-axis labels
   ctx.fillStyle = '#8f98a0';
-  ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+  ctx.font = '12px "Motiva Sans", Arial';
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
   for (let i = 0; i <= 5; i++) {
@@ -242,7 +225,7 @@ function drawChart(chartData, labelFormat) {
 
     // Draw X-axis label
     ctx.fillStyle = '#8f98a0';
-    ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+    ctx.font = '11px "Motiva Sans", Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     ctx.fillText(point.label, point.x, height - padding.bottom + 10);
@@ -295,7 +278,7 @@ function drawChart(chartData, labelFormat) {
 
       // Draw Y-axis labels
       ctx.fillStyle = '#8f98a0';
-      ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+      ctx.font = '12px "Motiva Sans", Arial';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
       for (let i = 0; i <= 5; i++) {
@@ -354,7 +337,7 @@ function drawChart(chartData, labelFormat) {
 
         // Draw X-axis label (highlight if hovered)
         ctx.fillStyle = isHovered ? '#ffffff' : '#8f98a0';
-        ctx.font = isHovered ? 'bold 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' : '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+        ctx.font = isHovered ? 'bold 12px "Motiva Sans", Arial' : '11px "Motiva Sans", Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         ctx.fillText(point.label, point.x, height - padding.bottom + 10);
@@ -363,7 +346,7 @@ function drawChart(chartData, labelFormat) {
       // Draw tooltip if hovering over a point
       if (closestPoint) {
         const tooltipText = formatTime(closestPoint.duration);
-        ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+        ctx.font = 'bold 14px "Motiva Sans", Arial';
         const tooltipWidth = ctx.measureText(tooltipText).width + 24;
         const tooltipHeight = 36;
         const tooltipPadding = 12;
