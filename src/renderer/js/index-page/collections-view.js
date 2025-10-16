@@ -31,7 +31,7 @@ async function showCategoryOverview() {
     
     const header = document.createElement('div');
     header.className = 'collections-header';
-    header.innerHTML = `<h2>YOUR COLLECTIONS</h2>`;
+    header.innerHTML = `<h2>CATEGORIES</h2>`;
     categoryOverview.appendChild(header);
     
     // Group apps by categories from categories.json

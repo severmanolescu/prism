@@ -202,7 +202,7 @@ function createCategoryCard(categoryName, apps, color = '#4a90e2') {
             <button class="collection-action-btn insights-btn" title="View Insights" data-action="insights">
                 <span>📊</span>
             </button>
-            <button class="collection-action-btn edit-btn" title="Edit Collection" data-action="edit">
+            <button class="collection-action-btn edit-btn" title="Edit Collection" data-action="edit" ${categoryName === 'Uncategorized' || categoryName === 'Favorites' ? 'disabled' : '' }>
                 <span>✏️</span>
             </button>
             <button class="collection-action-btn delete-btn" title="Delete Collection" data-action="delete" ${categoryName === 'Uncategorized' || categoryName === 'Favorites' ? 'disabled' : ''}>

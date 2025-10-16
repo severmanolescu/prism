@@ -34,7 +34,6 @@ async function loadAppsByCategory(category, preserveScroll = false) {
     try {        
         // If "All Apps" is selected, show all cached apps
         if (category === 'All Apps') {
-            console.log('Showing all apps from cache:', allAppsCache.length);
             await displayAllApps(allAppsCache);
             return;
         }

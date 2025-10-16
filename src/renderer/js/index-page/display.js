@@ -1,6 +1,7 @@
 // Display all apps
 async function displayAllApps(apps) {
     const appsContainer = document.querySelector('.apps-grid');
+    const contentArea = document.querySelector('.content-area');
     const sectionHeader = document.querySelector('.all-apps-section .section-header');
     const allAppsSection = document.querySelector('.all-apps-section');
     const recentSection = document.querySelector('.recent-section');
@@ -10,6 +11,7 @@ async function displayAllApps(apps) {
 
     // Show all apps section and recent section, hide others
     if (allAppsSection) allAppsSection.style.display = 'block';
+    if (contentArea) contentArea.style.display = 'block';
     if (recentSection) recentSection.style.display = 'block';
     if (categoryOverview) categoryOverview.style.display = 'none';
     if (detailsIframe) detailsIframe.style.display = 'none';
