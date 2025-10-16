@@ -148,7 +148,7 @@ function initializeCollectionHandlers() {
           color: '#092442',
           icon: '📁',
           productivity_level: 'neutral'
-        }
+        };
       }
       
 
