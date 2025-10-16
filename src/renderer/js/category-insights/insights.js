@@ -134,7 +134,6 @@ function updateProductivityBreakdown(categoryData) {
   if (!container) return;
 
   const dailyData = categoryData.dailyUsage || [];
-  const stats = categoryData.stats || {};
 
   if (dailyData.length === 0) {
     container.innerHTML = '<div style="text-align: center; color: #8f98a0; padding: 10px; font-size: 11px;">No data</div>';
