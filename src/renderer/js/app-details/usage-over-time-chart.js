@@ -1,5 +1,3 @@
-let resizeTimeout;
-
 function setupChartTabs(details) {
   const tabs = document.querySelectorAll('.chart-tab');
   tabs.forEach(tab => {
@@ -12,14 +10,6 @@ function setupChartTabs(details) {
       currentChartPeriod = tab.dataset.period;
       updateUsageChart(details, currentChartPeriod);
     });
-  });
-
-  // Add resize listener to redraw chart on window resize
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-      updateUsageChart(details, currentChartPeriod);
-    }, 100);
   });
 }
 
@@ -62,7 +52,10 @@ function getLast7DaysData(weeklyData) {
   for (let i = 6; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
+    // Format date in local time (YYYY-MM-DD) to match SQL 'localtime'
+    const dateStr = date.getFullYear() + '-' +
+      String(date.getMonth() + 1).padStart(2, '0') + '-' +
+      String(date.getDate()).padStart(2, '0');
     const dayData = weeklyData.find(d => d.date === dateStr);
     last7Days.push({
       date: dateStr,
@@ -84,14 +77,21 @@ function getLast12WeeksData(details) {
     let weekDuration = 0;
     if (details.monthlyUsage) {
       for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-        const dateStr = d.toISOString().split('T')[0];
+        // Format date in local time (YYYY-MM-DD) to match SQL 'localtime'
+        const dateStr = d.getFullYear() + '-' +
+          String(d.getMonth() + 1).padStart(2, '0') + '-' +
+          String(d.getDate()).padStart(2, '0');
         const dayData = details.monthlyUsage.find(m => m.date === dateStr);
         if (dayData) weekDuration += dayData.total_duration;
       }
     }
 
+    // Format end date in local time
+    const endDateStr = endDate.getFullYear() + '-' +
+      String(endDate.getMonth() + 1).padStart(2, '0') + '-' +
+      String(endDate.getDate()).padStart(2, '0');
     weeks.push({
-      date: endDate.toISOString().split('T')[0],
+      date: endDateStr,
       duration: weekDuration
     });
   }
@@ -112,15 +112,21 @@ function getLast12MonthsData(details) {
     let monthDuration = 0;
     if (details.monthlyUsage) {
       details.monthlyUsage.forEach(dayData => {
-        const dayDate = new Date(dayData.date);
+        // Parse the date string (YYYY-MM-DD) correctly in local time
+        const dateParts = dayData.date.split('-');
+        const dayDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
         if (dayDate.getFullYear() === year && dayDate.getMonth() === month) {
           monthDuration += dayData.total_duration;
         }
       });
     }
 
+    // Format date in local time (YYYY-MM-DD)
+    const dateStr = date.getFullYear() + '-' +
+      String(date.getMonth() + 1).padStart(2, '0') + '-' +
+      String(date.getDate()).padStart(2, '0');
     months.push({
-      date: date.toISOString().split('T')[0],
+      date: dateStr,
       duration: monthDuration
     });
   }
@@ -140,11 +146,9 @@ function drawChart(chartData, labelFormat) {
 
   const ctx = canvas.getContext('2d');
 
-  // Set canvas size to match container
-  const container = canvas.parentElement;
-  const containerWidth = container.clientWidth;
-  canvas.width = containerWidth;
-  canvas.height = containerWidth * 0.4; // Maintain 2.5:1 aspect ratio
+  // Use fixed dimensions like analytics chart for consistent appearance
+  canvas.width = 800;
+  canvas.height = 350;
 
   // Prepare data points
   const dataPoints = chartData.map(item => ({
@@ -158,15 +162,15 @@ function drawChart(chartData, labelFormat) {
   // Canvas dimensions
   const width = canvas.width;
   const height = canvas.height;
-  const padding = { top: 30, right: 20, bottom: 40, left: 50 };
+  const padding = { top: 30, right: 20, bottom: 40, left: 70 };
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
 
   // Clear canvas
   ctx.clearRect(0, 0, width, height);
 
-  // Draw background
-  ctx.fillStyle = '#0a1e2f';
+  // Draw background (match analytics chart color)
+  ctx.fillStyle = '#16202d';
   ctx.fillRect(0, 0, width, height);
 
   // Draw grid lines
@@ -222,23 +226,23 @@ function drawChart(chartData, labelFormat) {
   points.forEach(point => ctx.lineTo(point.x, point.y));
   ctx.stroke();
 
-  // Draw points and hover areas
+  // Draw points (match analytics chart sizes)
   points.forEach((point, index) => {
     // Draw point
     ctx.fillStyle = '#66c0f4';
     ctx.beginPath();
-    ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, 7, 0, Math.PI * 2);
     ctx.fill();
 
     // Draw inner dot
-    ctx.fillStyle = '#0a1e2f';
+    ctx.fillStyle = '#16202d';
     ctx.beginPath();
-    ctx.arc(point.x, point.y, 2, 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
     ctx.fill();
 
     // Draw X-axis label
     ctx.fillStyle = '#8f98a0';
-    ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+    ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     ctx.fillText(point.label, point.x, height - padding.bottom + 10);
@@ -275,7 +279,7 @@ function drawChart(chartData, labelFormat) {
       ctx.clearRect(0, 0, width, height);
 
       // Draw background
-      ctx.fillStyle = '#0a1e2f';
+      ctx.fillStyle = '#16202d';
       ctx.fillRect(0, 0, width, height);
 
       // Draw grid lines
@@ -331,10 +335,10 @@ function drawChart(chartData, labelFormat) {
       points.forEach(point => ctx.lineTo(point.x, point.y));
       ctx.stroke();
 
-      // Draw points
+      // Draw points (match analytics chart)
       points.forEach((point) => {
         const isHovered = point === closestPoint;
-        const radius = isHovered ? 7 : 5;
+        const radius = isHovered ? 9 : 7;
 
         // Outer circle
         ctx.fillStyle = isHovered ? '#ffffff' : '#66c0f4';
@@ -343,14 +347,14 @@ function drawChart(chartData, labelFormat) {
         ctx.fill();
 
         // Inner dot
-        ctx.fillStyle = isHovered ? '#66c0f4' : '#0a1e2f';
+        ctx.fillStyle = isHovered ? '#66c0f4' : '#16202d';
         ctx.beginPath();
-        ctx.arc(point.x, point.y, isHovered ? 3 : 2, 0, Math.PI * 2);
+        ctx.arc(point.x, point.y, isHovered ? 4 : 3, 0, Math.PI * 2);
         ctx.fill();
 
         // Draw X-axis label (highlight if hovered)
         ctx.fillStyle = isHovered ? '#ffffff' : '#8f98a0';
-        ctx.font = isHovered ? 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' : '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+        ctx.font = isHovered ? 'bold 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' : '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         ctx.fillText(point.label, point.x, height - padding.bottom + 10);

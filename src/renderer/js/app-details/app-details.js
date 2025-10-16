@@ -46,19 +46,32 @@ async function loadAppDetails() {
         style="width: 120px; height: 120px; object-fit: contain;">`;
     }
 
-    // Update quick stats
-    document.querySelectorAll('.quick-stat-value')[0].textContent = formatTime(details.stats.totalTime);
-    document.querySelectorAll('.quick-stat-value')[1].textContent = formatTime(details.stats.thisWeek);
-    document.querySelectorAll('.quick-stat-value')[2].textContent = `${details.stats.streak} days`;
-    document.querySelectorAll('.quick-stat-value')[3].textContent = details.stats.sessionCount;
-    document.querySelectorAll('.quick-stat-value')[4].textContent =
-      details.stats.firstUsed ? new Date(details.stats.firstUsed).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unknown';
+    // Get all stat elements once
+    const statValues = document.querySelectorAll('.stat-value');
+    const { stats, weeklyUsage } = details;
 
-    // Find peak day from weekly usage
-    const peakDay = details.weeklyUsage.reduce((max, day) =>
-      day.total_duration > (max?.total_duration || 0) ? day : max, null);
-    document.querySelectorAll('.quick-stat-value')[5].textContent =
-      peakDay ? formatTime(peakDay.total_duration) : '0m';
+    if (statValues.length === 6){
+      // Update quick stats
+      statValues[0].textContent = formatTime(stats.totalTime);
+      statValues[1].textContent = formatTime(stats.thisWeek);
+      statValues[2].textContent = `${stats.streak} days`;
+      statValues[3].textContent = stats.sessionCount;
+      statValues[4].textContent = stats.firstUsed
+        ? new Date(stats.firstUsed).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        })
+        : 'Unknown';
+
+      // Find and update peak day
+      const peakDay = weeklyUsage.reduce(
+        (max, day) => (day.total_duration > (max?.total_duration || 0) ? day : max),
+        null
+      );
+      statValues[5].textContent = peakDay ? formatTime(peakDay.total_duration) : '0m';
+    }
+
 
     // Update usage chart
     updateUsageChart(details, currentChartPeriod);
@@ -244,7 +257,11 @@ function updateMonthlyCalendar(details) {
   for (let i = 29; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
-    days.push(date.toISOString().split('T')[0]);
+    // Format date in local time (YYYY-MM-DD) to match SQL 'localtime'
+    const dateStr = date.getFullYear() + '-' +
+      String(date.getMonth() + 1).padStart(2, '0') + '-' +
+      String(date.getDate()).padStart(2, '0');
+    days.push(dateStr);
   }
 
   // Build HTML array

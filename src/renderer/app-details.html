@@ -9,7 +9,9 @@
   <link rel="stylesheet" href="styles/shared/base.css">
   <link rel="stylesheet" href="styles/shared/section-headers.css">
   <link rel="stylesheet" href="styles/shared/buttons.css">
+  <link rel="stylesheet" href="styles/shared/date-controls.css">
   <link rel="stylesheet" href="styles/shared/properties-modal.css">
+  <link rel="stylesheet" href="styles/shared/stats.css">
 
   <!-- Page-Specific Styles -->
   <link rel="stylesheet" href="styles/app-details/app-details.css">
@@ -79,50 +81,56 @@
       </button>
     </div>
 
+    <!-- Date Range Controls -->
+    <div class="app-details-header">
+      <div class="date-range-controls">
+        <div class="time-range-selector">
+          <button class="time-range-btn active">Today</button>
+          <button class="time-range-btn">Week</button>
+          <button class="time-range-btn">Month</button>
+          <button class="time-range-btn">Year</button>
+          <button class="time-range-btn">All Time</button>
+        </div>
+    
+        <div class="custom-date-picker">
+          <span>Custom:</span>
+          <input type="date" id="start-date">
+          <span>to</span>
+          <input type="date" id="end-date">
+        </div>
+    
+        <div class="date-info">
+          30 days of data available
+        </div>
+      </div>
+    </div>
+
     <!-- Quick Stats -->
-    <div class="section-title">Overview</div>
-    <div class="quick-stats">
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">⏱️</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Total Time</div>
-          <div class="quick-stat-value">0h</div>
-        </div>
+    <div class="section-header">Overview</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Time</div>
+        <div class="stat-value">0h</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">📊</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">This Week</div>
-          <div class="quick-stat-value">0h</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">This Week</div>
+        <div class="stat-value">0h</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">🔥</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Current Streak</div>
-          <div class="quick-stat-value">0 days</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">Current Streak</div>
+        <div class="stat-value">0h</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">📅</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Total Sessions</div>
-          <div class="quick-stat-value">0</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Sessions</div>
+        <div class="stat-value">0h</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">📆</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">First Used</div>
-          <div class="quick-stat-value">-</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">First Used</div>
+        <div class="stat-value">0h</div>
       </div>
-      <div class="quick-stat-card">
-        <div class="quick-stat-icon">📈</div>
-        <div class="quick-stat-content">
-          <div class="quick-stat-label">Peak Day</div>
-          <div class="quick-stat-value">0h</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-label">Peak Day</div>
+        <div class="stat-value">0h</div>
       </div>
       <div class="quick-stat-card productivity-stat-card" id="productivity-stat-card">
         <div class="quick-stat-icon" id="productivity-stat-icon">⚪</div>

@@ -3,15 +3,16 @@
 
 /* Override body for app-details (different background) */
 body {
-  background: #171d25;
+  background: linear-gradient(to bottom, #1b2838 0%, #171d25 100%);
+  background-attachment: fixed;
   padding: 0px;
 }
 
 .details-container {
-  max-width: 100%;
-  margin: 0;
+  max-width: 1400px;
+  margin: 0 auto;
   padding: 10px 20px 20px 20px;
-  background: linear-gradient(to bottom, #1b2838 0%, #171d25 100%);
+  background: transparent;
 }
 
 /* Hero Section */
@@ -23,6 +24,10 @@ body {
   overflow: hidden;
   margin-bottom: 16px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  /* Break out of container to span full width */
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  width: 100vw;
 }
 
 .app-hero-bg {
@@ -239,3 +244,13 @@ body {
 .export-btn span {
   font-size: 14px;
 }
+
+.app-details-header {
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 0 rgba(102, 192, 244, 0.3);
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+

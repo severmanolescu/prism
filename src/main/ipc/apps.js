@@ -320,7 +320,10 @@ function initializeAppHandlers() {
       `).all([appId]);
 
       // Get today's activity by hour
-      const todayStart = new Date().setHours(0, 0, 0, 0);
+      // Create a Date object for today at midnight in local time
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0);
+      const todayStart = todayDate.getTime(); // Convert to milliseconds timestamp
       const todayActivity = db.prepare(`
         SELECT
           CAST(strftime('%H', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as hour,
@@ -449,8 +452,16 @@ function calculateStreak(db, appId) {
   if (sessions.length === 0) return 0;
 
   let streak = 0;
-  const today = new Date().toISOString().split('T')[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  // Get today's date in local time (YYYY-MM-DD format) to match SQL 'localtime'
+  const todayDate = new Date();
+  const today = todayDate.getFullYear() + '-' +
+    String(todayDate.getMonth() + 1).padStart(2, '0') + '-' +
+    String(todayDate.getDate()).padStart(2, '0');
+
+  const yesterdayDate = new Date(Date.now() - 86400000);
+  const yesterday = yesterdayDate.getFullYear() + '-' +
+    String(yesterdayDate.getMonth() + 1).padStart(2, '0') + '-' +
+    String(yesterdayDate.getDate()).padStart(2, '0');
 
   // Check if there's activity today or yesterday
   if (sessions[0].date !== today && sessions[0].date !== yesterday) {
