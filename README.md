@@ -102,6 +102,18 @@ Just like a prism breaks white light into a beautiful spectrum of colors, **Pris
 - **Keyboard Shortcuts** 
   – Press ? anytime in the app to view all available shortcuts
 
+### Images
+- **Home View:**\
+<img src="./assets/photos/Home-View.png" alt="Logo" width="1000" />
+- **Category Insights:** \
+<img src="./assets/photos/Category-Insights.png" alt="Logo" width="1000" />
+- **Analytics Page:** \
+<img src="./assets/photos/Analytics-Page.png" alt="Logo" width="1000" />
+- **Productivity Page:** \
+<img src="./assets/photos/Productivity-Page.png" alt="Logo" width="1000" />
+- **Goals Page:** \
+<img src="./assets/photos/Goals-Page.png" alt="Logo" width="1000" />
+
 ## Installation
 ### Prerequisites
 - Node.js 16 or higher
