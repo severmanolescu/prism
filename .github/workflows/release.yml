@@ -42,7 +42,7 @@ jobs:
 
     - name: Upload Windows artifacts
       if: matrix.os == 'windows-latest'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: prism-windows-installer
         path: |
@@ -52,7 +52,7 @@ jobs:
 
     - name: Upload Linux artifacts
       if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: prism-linux-installer
         path: |
@@ -62,7 +62,7 @@ jobs:
 
     - name: Upload macOS artifacts
       if: matrix.os == 'macos-latest'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: prism-macos-installer
         path: |
