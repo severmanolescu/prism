@@ -1,4 +1,3 @@
-const activeWin = require('active-win');
 const fs = require('fs');
 const { getDb } = require('./database');
 
@@ -7,6 +6,7 @@ let startTime = null;
 let currentSessionId = null;
 let trackingInterval = null;
 let mainWindow = null;
+let activeWinModule = null;
 
 const logFile = 'tracking-log.txt';
 
@@ -240,11 +240,17 @@ function endSession(session) {
 // Get currently active window/app
 async function getCurrentApp() {
   try {
-    const activeWindow = await activeWin();
+    if (!activeWinModule) {
+      activeWinModule = await import('active-win');
+    }
+
+    // Use the named export 'activeWindow'
+    const activeWindow = await activeWinModule.activeWindow();
+
     if (activeWindow) {
       let executable = '';
       let execPath = '';
-      
+
       if (process.platform === 'win32') {
         executable = activeWindow.owner.name || 'unknown.exe';
         execPath = activeWindow.owner.path || '';
@@ -255,7 +261,7 @@ async function getCurrentApp() {
         executable = activeWindow.owner.name || 'unknown';
         execPath = '';
       }
-      
+
       return {
         name: activeWindow.title || 'Unknown',
         executable: executable,
