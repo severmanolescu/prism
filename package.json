@@ -23,7 +23,7 @@
   "devDependencies": {
     "electron": "^38.4.0",
     "electron-builder": "^26.0.12",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.11"
   },
   "dependencies": {
     "active-win": "^9.0.0",
