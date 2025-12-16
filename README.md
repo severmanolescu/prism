@@ -103,15 +103,15 @@ Just like a prism breaks white light into a beautiful spectrum of colors, **Pris
   – Press ? anytime in the app to view all available shortcuts
 
 ### Images
-- **Home View:**\
+- **Home View:** <br>
 <img src="./assets/photos/Home-View.png" alt="Logo" width="1000" />
-- **Category Insights:** \
+- **Category Insights:** <br>
 <img src="./assets/photos/Category-Insights.png" alt="Logo" width="1000" />
-- **Analytics Page:** \
+- **Analytics Page:** <br>
 <img src="./assets/photos/Analytics-Page.png" alt="Logo" width="1000" />
-- **Productivity Page:** \
+- **Productivity Page:** <br>
 <img src="./assets/photos/Productivity-Page.png" alt="Logo" width="1000" />
-- **Goals Page:** \
+- **Goals Page:** <br>
 <img src="./assets/photos/Goals-Page.png" alt="Logo" width="1000" />
 
 ## Installation
