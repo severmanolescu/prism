@@ -28,7 +28,7 @@
   "dependencies": {
     "active-win": "^9.0.0",
     "auto-launch": "^5.0.6",
-    "better-sqlite3": "^12.4.6"
+    "better-sqlite3": "^12.5.0"
   },
   "build": {
     "appId": "prism",
