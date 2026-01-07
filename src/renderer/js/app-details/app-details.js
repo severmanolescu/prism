@@ -1,5 +1,118 @@
 let appDetails = null;
 let currentChartPeriod = 'daily';
+let currentPeriod = 'today';
+let currentAppId = null;
+let currentStartDate = null;
+let currentEndDate = null;
+
+// Initialize date range controls
+function initializeDateRangeControls() {
+  setupDateRangeControls({
+    onPeriodChange: (period, startDate, endDate) => {
+      currentPeriod = period;
+      if (currentAppId) {
+        loadAppData(currentAppId, period, startDate, endDate);
+      }
+    },
+    onCustomDateChange: (startDate, endDate) => {
+      currentPeriod = 'custom';
+      if (currentAppId) {
+        loadAppData(currentAppId, 'custom', startDate, endDate);
+      }
+    }
+  });
+}
+
+// Helper function to get period display text
+function getPeriodDisplayText(period, startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  switch(period) {
+    case 'today':
+      return 'Today';
+    case 'week':
+      return 'This Week';
+    case 'month':
+      return 'This Month';
+    case 'year':
+      return 'This Year';
+    case 'all':
+      return 'All Time';
+    case 'custom':
+      const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+      if (days === 1) {
+        return start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+      return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    default:
+      return '';
+  }
+}
+
+// Load app data for the selected period
+async function loadAppData(appId, period, customStartDate, customEndDate) {
+  currentAppId = appId;
+
+  let startDate, endDate;
+
+  if (period === 'custom' && customStartDate && customEndDate) {
+    startDate = customStartDate;
+    endDate = customEndDate;
+  } else {
+    const range = calculateDateRange(period);
+    startDate = range.startDate;
+    endDate = range.endDate;
+  }
+
+  // Store current date range
+  currentStartDate = startDate;
+  currentEndDate = endDate;
+
+  // Calculate days for date info
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+  // Update date info
+  const dateInfo = document.querySelector('.date-info');
+  if (dateInfo) {
+    dateInfo.textContent = `${days} day${days !== 1 ? 's' : ''} of data available`;
+  }
+
+  // Request data from parent window with date range
+  window.parent.postMessage({
+    type: 'REQUEST_APP_DETAILS',
+    appId: appId,
+    startDate: startDate,
+    endDate: endDate
+  }, '*');
+}
+
+// Update section headers based on selected period
+function updateSectionHeaders() {
+  const periodText = getPeriodDisplayText(currentPeriod, currentStartDate, currentEndDate);
+
+  // Update main sections
+  const headers = {
+    'Activity Timeline': currentPeriod === 'today' ? "Today's Activity Timeline" : `Activity Timeline - ${periodText}`,
+    'Recent Sessions': currentPeriod === 'all' ? 'All Sessions' : `Sessions in ${periodText}`,
+  };
+
+  // Find and update section headers
+  document.querySelectorAll('.section-header').forEach(header => {
+    const text = header.textContent.trim();
+
+    // Activity Timeline
+    if (text.includes('Activity Timeline')) {
+      header.textContent = headers['Activity Timeline'];
+    }
+    // Recent Sessions
+    else if (text.includes('Sessions') && text.includes('Recent')) {
+      header.textContent = headers['Recent Sessions'];
+    }
+  });
+}
 
 // Load app details
 async function loadAppDetails() {
@@ -10,6 +123,9 @@ async function loadAppDetails() {
 
   try {
     const details = appDetails;
+
+    // Update section headers based on period
+    updateSectionHeaders();
 
     // Update title and category
     document.querySelector('.app-title').textContent = details.app.name;
@@ -46,25 +162,35 @@ async function loadAppDetails() {
         style="width: 120px; height: 120px; object-fit: contain;">`;
     }
 
-    // Update quick stats
-    document.querySelectorAll('.quick-stat-value')[0].textContent = formatTime(details.stats.totalTime);
-    document.querySelectorAll('.quick-stat-value')[1].textContent = formatTime(details.stats.thisWeek);
-    document.querySelectorAll('.quick-stat-value')[2].textContent = `${details.stats.streak} days`;
-    document.querySelectorAll('.quick-stat-value')[3].textContent = details.stats.sessionCount;
-    document.querySelectorAll('.quick-stat-value')[4].textContent =
-      details.stats.firstUsed ? new Date(details.stats.firstUsed).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unknown';
+    // Get all stat elements once
+    const statValues = document.querySelectorAll('.stat-value');
+    const { stats, weeklyUsage } = details;
 
-    // Find peak day from weekly usage
-    const peakDay = details.weeklyUsage.reduce((max, day) =>
-      day.total_duration > (max?.total_duration || 0) ? day : max, null);
-    document.querySelectorAll('.quick-stat-value')[5].textContent =
-      peakDay ? formatTime(peakDay.total_duration) : '0m';
+    if (statValues.length === 6){
+      // Update quick stats
+      statValues[0].textContent = formatTime(stats.totalTime);
+      statValues[1].textContent = formatTime(stats.thisWeek);
+      statValues[2].textContent = `${stats.streak} days`;
+      statValues[3].textContent = stats.sessionCount;
+      statValues[4].textContent = stats.firstUsed
+        ? new Date(stats.firstUsed).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        })
+        : 'Unknown';
 
-    // Update usage chart
-    updateUsageChart(details, currentChartPeriod);
+      // Find and update peak day
+      const peakDay = weeklyUsage.reduce(
+        (max, day) => (day.total_duration > (max?.total_duration || 0) ? day : max),
+        null
+      );
+      statValues[5].textContent = peakDay ? formatTime(peakDay.total_duration) : '0m';
+    }
 
-    // Setup chart tab listeners
-    setupChartTabs(details);
+
+    // Update usage chart (now always uses daily view based on date range)
+    updateUsageChart(details, 'daily');
 
     // Update time distribution
     updateTimeDistribution(details.stats);
@@ -80,9 +206,9 @@ async function loadAppDetails() {
 
     // Update all sections with error handling
     try {
-      updateUsageTrends(details);
+      updateSessionPatterns(details);
     } catch (error) {
-      console.error('Error updating usage trends:', error);
+      console.error('Error updating session patterns:', error);
     }
 
     try {
@@ -187,39 +313,63 @@ function updateRecentSessions(sessions) {
   `).join('');
 }
 
-// Usage Trends
-function updateUsageTrends(details) {
-  const trendStats = document.querySelectorAll('.trend-stat');
-  if (trendStats.length < 4) return;
-
+// Session Patterns
+function updateSessionPatterns(details) {
   const stats = details.stats || {};
-  const thisWeek = stats.thisWeek || 0;
-  const lastWeek = stats.lastWeek || 0;
+  const sessions = details.recentSessions || [];
+  const heatmapData = details.heatmapData || [];
+  const weeklyUsage = details.weeklyUsage || [];
 
-  const weeklyChange = lastWeek > 0
-    ? ((thisWeek - lastWeek) / lastWeek) * 100
-    : (thisWeek > 0 ? 100 : 0);
+  // Calculate session frequency (sessions per day)
+  const start = new Date(currentStartDate);
+  const end = new Date(currentEndDate);
+  const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+  const activeDays = weeklyUsage.filter(d => d.total_duration > 0).length;
+  const frequency = activeDays > 0 ? (stats.sessionCount / activeDays).toFixed(1) : 0;
 
-  // This Week
-  trendStats[0].querySelector('.trend-value').textContent = formatTime(thisWeek);
-  const changeEl = trendStats[0].querySelector('.trend-change');
-  changeEl.textContent = `${weeklyChange >= 0 ? '+' : ''}${Math.round(weeklyChange)}%`;
-  changeEl.className = `trend-change ${weeklyChange >= 0 ? 'positive' : 'negative'}`;
+  // Average session length
+  document.getElementById('pattern-avg-length').textContent = formatTime(stats.avgSession || 0);
 
-  // Last Week
-  trendStats[1].querySelector('.trend-value').textContent = formatTime(lastWeek);
-  trendStats[1].querySelector('.trend-change').textContent = 'previous';
+  // Session frequency
+  document.getElementById('pattern-frequency').textContent = `${frequency}/day`;
 
-  // Category Rank
-  const categoryRank = stats.categoryRank || 1;
-  const totalInCategory = stats.totalInCategory || 1;
-  trendStats[2].querySelector('.trend-value').textContent = `#${categoryRank}`;
-  trendStats[2].querySelector('.trend-change').textContent = `of ${totalInCategory}`;
+  // Find longest and shortest sessions
+  if (sessions.length > 0) {
+    const durations = sessions.map(s => s.duration);
+    const longest = Math.max(...durations);
+    const shortest = Math.min(...durations);
 
-  // Total Usage %
-  const usagePercent = stats.usagePercentage || 0;
-  trendStats[3].querySelector('.trend-value').textContent = `${usagePercent.toFixed(1)}%`;
-  trendStats[3].querySelector('.trend-change').textContent = 'of all apps';
+    document.getElementById('pattern-longest').textContent = formatTime(longest);
+    document.getElementById('pattern-shortest').textContent = formatTime(shortest);
+  } else {
+    document.getElementById('pattern-longest').textContent = '0m';
+    document.getElementById('pattern-shortest').textContent = '0m';
+  }
+
+  // Most common time (hour with most sessions)
+  if (heatmapData.length > 0) {
+    const hourCounts = {};
+    heatmapData.forEach(item => {
+      const hour = item.hour;
+      if (!hourCounts[hour]) {
+        hourCounts[hour] = 0;
+      }
+      hourCounts[hour] += item.total_duration || 0;
+    });
+
+    const mostCommonHour = Object.entries(hourCounts)
+      .sort((a, b) => b[1] - a[1])[0][0];
+
+    const nextHour = (parseInt(mostCommonHour) + 1) % 24;
+    document.getElementById('pattern-common-time').textContent =
+      `${mostCommonHour.toString().padStart(2, '0')}:00-${nextHour.toString().padStart(2, '0')}:00`;
+  } else {
+    document.getElementById('pattern-common-time').textContent = '--:--';
+  }
+
+  // Active days
+  document.getElementById('pattern-active-days').textContent =
+    `${activeDays} of ${totalDays}`;
 }
 
 // Monthly Calendar
@@ -244,7 +394,11 @@ function updateMonthlyCalendar(details) {
   for (let i = 29; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
-    days.push(date.toISOString().split('T')[0]);
+    // Format date in local time (YYYY-MM-DD) to match SQL 'localtime'
+    const dateStr = date.getFullYear() + '-' +
+      String(date.getMonth() + 1).padStart(2, '0') + '-' +
+      String(date.getDate()).padStart(2, '0');
+    days.push(dateStr);
   }
 
   // Build HTML array
@@ -467,37 +621,7 @@ function hideInheritedInfo() {
   inheritedInfo.style.display = 'none';
 }
 
-// Setup keyboard shortcuts for chart period switching
+// Initialize date range controls on page load
 document.addEventListener('DOMContentLoaded', () => {
-  document.addEventListener('keydown', (e) => {
-    // Skip if typing in input field
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
-      return;
-    }
-
-    const key = e.key.toLowerCase();
-    let period = null;
-
-    switch(key) {
-      case 'd':
-        period = 'daily';
-        break;
-      case 'w':
-        period = 'weekly';
-        break;
-      case 'm':
-        period = 'monthly';
-        break;
-    }
-
-    if (period) {
-      e.preventDefault();
-      // Find and click the corresponding chart tab
-      const tabs = document.querySelectorAll('.chart-tab');
-      const tab = Array.from(tabs).find(t => t.dataset.period === period);
-      if (tab) {
-        tab.click();
-      }
-    }
-  });
+  initializeDateRangeControls();
 });

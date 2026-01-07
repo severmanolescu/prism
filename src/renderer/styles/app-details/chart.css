@@ -28,18 +28,16 @@
   border-color: rgba(102, 192, 244, 0.3);
 }
 
-/* Usage Chart */
 .usage-chart-container {
-  padding: 10px 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 350px;
+  position: relative;
+  margin-top: 20px;
 }
 
 #usage-line-chart {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
 }
 
 .chart-bar {
@@ -79,3 +77,44 @@
   font-weight: 500;
   white-space: nowrap;
 }
+ .chart-card {
+   background: transparent;
+   border: none;
+   padding: 0;
+ }
+
+ .chart-card .section-header {
+   margin-bottom: 16px;
+ }
+
+ .daily-usage-chart {
+   height: 350px;
+   position: relative;
+   padding: 20px 10px 30px 10px;
+ }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  /* Responsive layout for charts */
+  @media (max-width: 1400px) {
+    .charts-grid {
+      grid-template-columns: 1.5fr 1fr;
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .charts-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 800px) {
+    .charts-grid {
+      grid-template-columns: 1fr;
+    }
+  }

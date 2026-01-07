@@ -1,136 +1,125 @@
-let resizeTimeout;
+// Render a single-day chart using Canvas
+function renderSingleDayCanvasChart(ctx, canvas, dayData) {
+  const width = canvas.width;
+  const height = canvas.height;
 
-function setupChartTabs(details) {
-  const tabs = document.querySelectorAll('.chart-tab');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      // Remove active class from all tabs
-      tabs.forEach(t => t.classList.remove('active'));
-      // Add active class to clicked tab
-      tab.classList.add('active');
-      // Update chart
-      currentChartPeriod = tab.dataset.period;
-      updateUsageChart(details, currentChartPeriod);
-    });
-  });
+  // Clear canvas
+  ctx.clearRect(0, 0, width, height);
 
-  // Add resize listener to redraw chart on window resize
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-      updateUsageChart(details, currentChartPeriod);
-    }, 100);
-  });
+  // Draw background
+  ctx.fillStyle = '#16202d';
+  ctx.fillRect(0, 0, width, height);
+
+  const padding = { top: 40, right: 50, bottom: 60, left: 50 };
+  const barWidth = 100;
+  const centerX = width / 2;
+  const duration = dayData.duration || 0;
+
+  // Calculate bar height (max 70% of available height)
+  const maxBarHeight = height - padding.top - padding.bottom;
+  const barHeight = maxBarHeight * 0.7;
+  const barY = padding.top + (maxBarHeight - barHeight);
+
+  // Create gradient for bar
+  const gradient = ctx.createLinearGradient(centerX, barY, centerX, barY + barHeight);
+  gradient.addColorStop(0, '#66c0f4');
+  gradient.addColorStop(1, '#417a9b');
+
+  // Draw the bar
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.roundRect(centerX - barWidth / 2, barY, barWidth, barHeight, 4);
+  ctx.fill();
+
+  // Draw top cap
+  ctx.fillStyle = '#66c0f4';
+  ctx.beginPath();
+  ctx.roundRect(centerX - barWidth / 2, barY - 3, barWidth, 6, 3);
+  ctx.fill();
+
+  // Value label on top
+  ctx.fillStyle = '#66c0f4';
+  ctx.font = 'bold 24px "Motiva Sans", Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(formatTime(duration), centerX, barY - 20);
+
+  // Date label at bottom
+  const date = new Date(dayData.date);
+  ctx.fillStyle = '#8f98a0';
+  ctx.font = '14px "Motiva Sans", Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillText(date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  }), centerX, height - padding.bottom + 10);
+
+  // Session count label
+  ctx.fillStyle = '#66c0f4';
+  ctx.font = '12px "Motiva Sans", Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${dayData.session_count || 0} sessions`, centerX, height - padding.bottom + 30);
+
+  // Remove any existing event listeners
+  canvas.onmousemove = null;
+  canvas.onmouseleave = null;
 }
 
 function updateUsageChart(details, period) {
-  let data, labelFormat;
+  // Use the weeklyUsage data which now contains data based on the selected date range
+  const data = details.weeklyUsage || [];
 
-  switch(period) {
-    case 'daily':
-      // Last 7 days
-      data = getLast7DaysData(details.weeklyUsage);
-      labelFormat = (date) => {
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const d = new Date(date);
-        return `${days[d.getDay()]} ${d.getDate()}`;
-      };
-      break;
-    case 'weekly':
-      // Last 12 weeks
-      data = getLast12WeeksData(details);
-      labelFormat = (date) => {
-        const d = new Date(date);
-        return `Week ${getWeekNumber(d)}`;
-      };
-      break;
-    case 'monthly':
-      // Last 12 months
-      data = getLast12MonthsData(details);
-      labelFormat = (date) => {
-        const d = new Date(date);
-        return d.toLocaleDateString('en-US', { month: 'short' });
-      };
-      break;
-  }
-
-  drawChart(data, labelFormat);
-}
-
-function getLast7DaysData(weeklyData) {
-  const last7Days = [];
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
-    const dayData = weeklyData.find(d => d.date === dateStr);
-    last7Days.push({
-      date: dateStr,
-      duration: dayData?.total_duration || 0
-    });
-  }
-  return last7Days;
-}
-
-function getLast12WeeksData(details) {
-  const weeks = [];
-  for (let i = 11; i >= 0; i--) {
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() - (i * 7));
-    const startDate = new Date(endDate);
-    startDate.setDate(startDate.getDate() - 6);
-
-    // Sum up the week's data from monthlyUsage
-    let weekDuration = 0;
-    if (details.monthlyUsage) {
-      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-        const dateStr = d.toISOString().split('T')[0];
-        const dayData = details.monthlyUsage.find(m => m.date === dateStr);
-        if (dayData) weekDuration += dayData.total_duration;
-      }
+  // Auto-detect label format based on date range size
+  const labelFormat = (date) => {
+    if (data.length <= 7) {
+      // Short range: show day of week + date
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const d = new Date(date);
+      return `${days[d.getDay()]} ${d.getDate()}`;
+    } else if (data.length <= 31) {
+      // Medium range: show month + date
+      const d = new Date(date);
+      return `${d.getMonth() + 1}/${d.getDate()}`;
+    } else {
+      // Long range: show month/day
+      const d = new Date(date);
+      return `${d.getMonth() + 1}/${d.getDate()}`;
     }
+  };
 
-    weeks.push({
-      date: endDate.toISOString().split('T')[0],
-      duration: weekDuration
-    });
+  const chartData = data.map(item => ({
+    date: item.date,
+    duration: item.total_duration || 0
+  }));
+
+  // Special handling for single day
+  const canvas = document.getElementById('usage-line-chart');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+
+  // Check if we have no data
+  if (!chartData || chartData.length === 0) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#16202d';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#8f98a0';
+    ctx.font = '14px "Motiva Sans", Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('No data available for this period', canvas.width / 2, canvas.height / 2);
+    return;
   }
-  return weeks;
-}
 
-function getLast12MonthsData(details) {
-  const months = [];
-  for (let i = 11; i >= 0; i--) {
-    const date = new Date();
-    date.setMonth(date.getMonth() - i);
-    date.setDate(1);
-
-    const year = date.getFullYear();
-    const month = date.getMonth();
-
-    // Sum up the month's data from monthlyUsage
-    let monthDuration = 0;
-    if (details.monthlyUsage) {
-      details.monthlyUsage.forEach(dayData => {
-        const dayDate = new Date(dayData.date);
-        if (dayDate.getFullYear() === year && dayDate.getMonth() === month) {
-          monthDuration += dayData.total_duration;
-        }
-      });
-    }
-
-    months.push({
-      date: date.toISOString().split('T')[0],
-      duration: monthDuration
-    });
+  // Render single day as bar chart
+  if (chartData.length === 1) {
+    renderSingleDayCanvasChart(ctx, canvas, chartData[0]);
+    return;
   }
-  return months;
-}
 
-function getWeekNumber(date) {
-  const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-  const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
-  return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+  drawChart(chartData, labelFormat);
 }
 
 
@@ -140,11 +129,9 @@ function drawChart(chartData, labelFormat) {
 
   const ctx = canvas.getContext('2d');
 
-  // Set canvas size to match container
-  const container = canvas.parentElement;
-  const containerWidth = container.clientWidth;
-  canvas.width = containerWidth;
-  canvas.height = containerWidth * 0.4; // Maintain 2.5:1 aspect ratio
+  // Use fixed dimensions like analytics chart for consistent appearance
+  canvas.width = 800;
+  canvas.height = 350;
 
   // Prepare data points
   const dataPoints = chartData.map(item => ({
@@ -158,15 +145,15 @@ function drawChart(chartData, labelFormat) {
   // Canvas dimensions
   const width = canvas.width;
   const height = canvas.height;
-  const padding = { top: 30, right: 20, bottom: 40, left: 50 };
+  const padding = { top: 30, right: 20, bottom: 40, left: 70 };
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
 
   // Clear canvas
   ctx.clearRect(0, 0, width, height);
 
-  // Draw background
-  ctx.fillStyle = '#0a1e2f';
+  // Draw background (match analytics chart color)
+  ctx.fillStyle = '#16202d';
   ctx.fillRect(0, 0, width, height);
 
   // Draw grid lines
@@ -182,7 +169,7 @@ function drawChart(chartData, labelFormat) {
 
   // Draw Y-axis labels
   ctx.fillStyle = '#8f98a0';
-  ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+  ctx.font = '12px "Motiva Sans", Arial';
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
   for (let i = 0; i <= 5; i++) {
@@ -222,23 +209,23 @@ function drawChart(chartData, labelFormat) {
   points.forEach(point => ctx.lineTo(point.x, point.y));
   ctx.stroke();
 
-  // Draw points and hover areas
+  // Draw points (match analytics chart sizes)
   points.forEach((point, index) => {
     // Draw point
     ctx.fillStyle = '#66c0f4';
     ctx.beginPath();
-    ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, 7, 0, Math.PI * 2);
     ctx.fill();
 
     // Draw inner dot
-    ctx.fillStyle = '#0a1e2f';
+    ctx.fillStyle = '#16202d';
     ctx.beginPath();
-    ctx.arc(point.x, point.y, 2, 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
     ctx.fill();
 
     // Draw X-axis label
     ctx.fillStyle = '#8f98a0';
-    ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+    ctx.font = '11px "Motiva Sans", Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     ctx.fillText(point.label, point.x, height - padding.bottom + 10);
@@ -275,7 +262,7 @@ function drawChart(chartData, labelFormat) {
       ctx.clearRect(0, 0, width, height);
 
       // Draw background
-      ctx.fillStyle = '#0a1e2f';
+      ctx.fillStyle = '#16202d';
       ctx.fillRect(0, 0, width, height);
 
       // Draw grid lines
@@ -291,7 +278,7 @@ function drawChart(chartData, labelFormat) {
 
       // Draw Y-axis labels
       ctx.fillStyle = '#8f98a0';
-      ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+      ctx.font = '12px "Motiva Sans", Arial';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
       for (let i = 0; i <= 5; i++) {
@@ -331,10 +318,10 @@ function drawChart(chartData, labelFormat) {
       points.forEach(point => ctx.lineTo(point.x, point.y));
       ctx.stroke();
 
-      // Draw points
+      // Draw points (match analytics chart)
       points.forEach((point) => {
         const isHovered = point === closestPoint;
-        const radius = isHovered ? 7 : 5;
+        const radius = isHovered ? 9 : 7;
 
         // Outer circle
         ctx.fillStyle = isHovered ? '#ffffff' : '#66c0f4';
@@ -343,14 +330,14 @@ function drawChart(chartData, labelFormat) {
         ctx.fill();
 
         // Inner dot
-        ctx.fillStyle = isHovered ? '#66c0f4' : '#0a1e2f';
+        ctx.fillStyle = isHovered ? '#66c0f4' : '#16202d';
         ctx.beginPath();
-        ctx.arc(point.x, point.y, isHovered ? 3 : 2, 0, Math.PI * 2);
+        ctx.arc(point.x, point.y, isHovered ? 4 : 3, 0, Math.PI * 2);
         ctx.fill();
 
         // Draw X-axis label (highlight if hovered)
         ctx.fillStyle = isHovered ? '#ffffff' : '#8f98a0';
-        ctx.font = isHovered ? 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' : '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+        ctx.font = isHovered ? 'bold 12px "Motiva Sans", Arial' : '11px "Motiva Sans", Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         ctx.fillText(point.label, point.x, height - padding.bottom + 10);
@@ -359,7 +346,7 @@ function drawChart(chartData, labelFormat) {
       // Draw tooltip if hovering over a point
       if (closestPoint) {
         const tooltipText = formatTime(closestPoint.duration);
-        ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+        ctx.font = 'bold 14px "Motiva Sans", Arial';
         const tooltipWidth = ctx.measureText(tooltipText).width + 24;
         const tooltipHeight = 36;
         const tooltipPadding = 12;

@@ -262,6 +262,194 @@ function initializeAppHandlers() {
     }
   });
 
+  ipcMain.handle('get-app-details-by-date-range', async (event, appId, startDate, endDate) => {
+    const db = getDb();
+
+    try {
+      // Get app info
+      const app = db.prepare(`
+        SELECT * FROM apps WHERE id = ?
+      `).get([appId]);
+
+      if (!app) {
+        throw new Error('App not found');
+      }
+
+      // Convert date strings to timestamps
+      const startTimestamp = new Date(startDate).setHours(0, 0, 0, 0);
+      const endTimestamp = new Date(endDate).setHours(23, 59, 59, 999);
+
+      // Get total sessions count for the date range
+      const sessionCount = db.prepare(`
+        SELECT COUNT(*) as count FROM sessions
+        WHERE app_id = ? AND start_time >= ? AND start_time <= ?
+      `).get([appId, startTimestamp, endTimestamp]);
+
+      // Get usage data for the date range (this replaces weeklyUsage)
+      const weeklyUsage = db.prepare(`
+        SELECT
+          DATE(start_time / 1000, 'unixepoch', 'localtime') as date,
+          SUM(duration) as total_duration
+        FROM sessions
+        WHERE app_id = ? AND start_time >= ? AND start_time <= ?
+        GROUP BY date
+        ORDER BY date ASC
+      `).all([appId, startTimestamp, endTimestamp]);
+
+      // Get this week's total time (last 7 days from end date)
+      const sevenDaysBeforeEnd = new Date(endDate);
+      sevenDaysBeforeEnd.setDate(sevenDaysBeforeEnd.getDate() - 6);
+      const sevenDaysBeforeEndTimestamp = sevenDaysBeforeEnd.setHours(0, 0, 0, 0);
+
+      const thisWeek = db.prepare(`
+        SELECT SUM(duration) as total FROM sessions
+        WHERE app_id = ? AND start_time >= ? AND start_time <= ?
+      `).get([appId, sevenDaysBeforeEndTimestamp, endTimestamp]);
+
+      // Get longest session in date range
+      const longestSession = db.prepare(`
+        SELECT MAX(duration) as longest FROM sessions
+        WHERE app_id = ? AND start_time >= ? AND start_time <= ?
+      `).get([appId, startTimestamp, endTimestamp]);
+
+      // Get average session in date range
+      const avgSession = db.prepare(`
+        SELECT AVG(duration) as average FROM sessions
+        WHERE app_id = ? AND start_time >= ? AND start_time <= ?
+      `).get([appId, startTimestamp, endTimestamp]);
+
+      // Get current streak (consecutive days)
+      const streak = calculateStreak(db, appId);
+
+      // Get recent sessions (last 10 in date range)
+      const recentSessions = db.prepare(`
+        SELECT * FROM sessions
+        WHERE app_id = ? AND start_time >= ? AND start_time <= ?
+        ORDER BY start_time DESC
+        LIMIT 10
+      `).all([appId, startTimestamp, endTimestamp]);
+
+      // Get today's activity by hour (or end date's activity)
+      const todayDate = new Date(endDate);
+      todayDate.setHours(0, 0, 0, 0);
+      const todayStart = todayDate.getTime();
+      const todayEnd = new Date(endDate).setHours(23, 59, 59, 999);
+
+      const todayActivity = db.prepare(`
+        SELECT
+          CAST(strftime('%H', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as hour,
+          SUM(duration) as total_duration
+        FROM sessions
+        WHERE app_id = ? AND start_time >= ? AND start_time <= ?
+        GROUP BY hour
+        ORDER BY hour
+      `).all([appId, todayStart, todayEnd]);
+
+      // Get monthly usage (30 days worth within the date range)
+      const monthlyUsage = db.prepare(`
+        SELECT
+          DATE(start_time / 1000, 'unixepoch', 'localtime') as date,
+          SUM(duration) as total_duration,
+          COUNT(*) as session_count
+        FROM sessions
+        WHERE app_id = ? AND start_time >= ? AND start_time <= ?
+        GROUP BY date
+        ORDER BY date ASC
+      `).all([appId, startTimestamp, endTimestamp]);
+
+      // Get usage by day of week (filtered by date range)
+      const dayOfWeekUsage = db.prepare(`
+        SELECT
+          CAST(strftime('%w', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as day_of_week,
+          SUM(duration) as total_duration,
+          COUNT(*) as session_count
+        FROM sessions
+        WHERE app_id = ? AND start_time >= ? AND start_time <= ?
+        GROUP BY day_of_week
+        ORDER BY day_of_week
+      `).all([appId, startTimestamp, endTimestamp]);
+
+      // Get session duration distribution (filtered by date range)
+      const sessionDurations = db.prepare(`
+        SELECT duration FROM sessions
+        WHERE app_id = ? AND start_time >= ? AND start_time <= ?
+      `).all([appId, startTimestamp, endTimestamp]);
+
+      // Get all sessions for heatmap (within date range, max 90 days)
+      const heatmapData = db.prepare(`
+        SELECT
+          CAST(strftime('%w', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as day_of_week,
+          CAST(strftime('%H', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as hour,
+          SUM(duration) as total_duration
+        FROM sessions
+        WHERE app_id = ? AND start_time >= ? AND start_time <= ?
+        GROUP BY day_of_week, hour
+      `).all([appId, startTimestamp, endTimestamp]);
+
+      // Get category ranking
+      const categoryRanking = db.prepare(`
+        SELECT id, name, total_time
+        FROM apps
+        WHERE category = ? AND hidden = 0
+        ORDER BY total_time DESC
+      `).all([app.category]);
+
+      const appRankInCategory = categoryRanking.findIndex(a => a.id === appId) + 1;
+
+      // Get total time for all apps
+      const totalAllApps = db.prepare(`
+        SELECT SUM(total_time) as total FROM apps WHERE hidden = 0
+      `).get();
+
+      const usagePercentage = totalAllApps?.total > 0
+        ? (app.total_time / totalAllApps.total) * 100
+        : 0;
+
+      // Get last week's time for comparison (7 days before the selected range)
+      const fourteenDaysBeforeEnd = new Date(endDate);
+      fourteenDaysBeforeEnd.setDate(fourteenDaysBeforeEnd.getDate() - 13);
+      const fourteenDaysBeforeEndTimestamp = fourteenDaysBeforeEnd.setHours(0, 0, 0, 0);
+
+      const lastWeek = db.prepare(`
+        SELECT SUM(duration) as total FROM sessions
+        WHERE app_id = ? AND start_time >= ? AND start_time < ?
+      `).get([appId, fourteenDaysBeforeEndTimestamp, sevenDaysBeforeEndTimestamp]);
+
+      // Get streak history (all streaks)
+      const streakHistory = calculateStreakHistory(db, appId);
+
+      const result = {
+        app,
+        stats: {
+          totalTime: app.total_time || 0,
+          thisWeek: thisWeek?.total || 0,
+          lastWeek: lastWeek?.total || 0,
+          sessionCount: sessionCount?.count || 0,
+          streak: streak,
+          longestSession: longestSession?.longest || 0,
+          avgSession: avgSession?.average || 0,
+          firstUsed: app.first_used,
+          categoryRank: appRankInCategory,
+          totalInCategory: categoryRanking.length,
+          usagePercentage: usagePercentage
+        },
+        weeklyUsage,
+        monthlyUsage,
+        dayOfWeekUsage,
+        sessionDurations: sessionDurations ? sessionDurations.map(s => s.duration) : [],
+        heatmapData,
+        streakHistory,
+        recentSessions,
+        todayActivity
+      };
+
+      return result;
+    } catch (error) {
+      console.error('Error fetching app details by date range:', error);
+      throw error;
+    }
+  });
+
   ipcMain.handle('get-app-details', async (event, appId) => {
     const db = getDb();
 
@@ -320,7 +508,10 @@ function initializeAppHandlers() {
       `).all([appId]);
 
       // Get today's activity by hour
-      const todayStart = new Date().setHours(0, 0, 0, 0);
+      // Create a Date object for today at midnight in local time
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0);
+      const todayStart = todayDate.getTime(); // Convert to milliseconds timestamp
       const todayActivity = db.prepare(`
         SELECT
           CAST(strftime('%H', start_time / 1000, 'unixepoch', 'localtime') AS INTEGER) as hour,
@@ -449,8 +640,16 @@ function calculateStreak(db, appId) {
   if (sessions.length === 0) return 0;
 
   let streak = 0;
-  const today = new Date().toISOString().split('T')[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  // Get today's date in local time (YYYY-MM-DD format) to match SQL 'localtime'
+  const todayDate = new Date();
+  const today = todayDate.getFullYear() + '-' +
+    String(todayDate.getMonth() + 1).padStart(2, '0') + '-' +
+    String(todayDate.getDate()).padStart(2, '0');
+
+  const yesterdayDate = new Date(Date.now() - 86400000);
+  const yesterday = yesterdayDate.getFullYear() + '-' +
+    String(yesterdayDate.getMonth() + 1).padStart(2, '0') + '-' +
+    String(yesterdayDate.getDate()).padStart(2, '0');
 
   // Check if there's activity today or yesterday
   if (sessions[0].date !== today && sessions[0].date !== yesterday) {
