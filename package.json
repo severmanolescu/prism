@@ -22,8 +22,8 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "^39.2.7",
-    "electron-builder": "^26.0.12",
-    "nodemon": "^3.1.11"
+    "electron-builder": "^26.8.1",
+    "nodemon": "^3.1.14"
   },
   "dependencies": {
     "active-win": "^9.0.0",
