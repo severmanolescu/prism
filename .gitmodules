@@ -1,0 +1,4 @@
+[submodule "PrismDockExtension"]
+	path = PrismDockExtension
+	url = https://github.com/severmanolescu/PrismDockExtension
+	branch = master
