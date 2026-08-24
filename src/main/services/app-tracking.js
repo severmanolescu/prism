@@ -1,4 +1,8 @@
 const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const { app } = require('electron');
+
 const { getDb } = require('./database');
 
 let currentApp = null;
@@ -8,16 +12,25 @@ let trackingInterval = null;
 let mainWindow = null;
 let activeWinModule = null;
 
-const logFile = 'tracking-log.txt';
+function getLogFilePath() {
+  try {
+    return path.join(app.getPath('userData'), 'tracking-log.txt');
+  } catch {
+    return path.join(os.tmpdir(), 'tracking-log.txt');
+  }
+}
 
 function log(message) {
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] ${message}\n`;
+
   console.log(message);
+
   try {
+    const logFile = getLogFilePath();
     fs.appendFileSync(logFile, logMessage);
   } catch (error) {
-    // Ignore log errors
+    console.error('Failed to write log:', error);
   }
 }
 

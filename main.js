@@ -21,7 +21,13 @@ if (!gotTheLock) {
   });
 }
 
-fs.appendFileSync('log.txt', 'App started\n');
+function getLogPath() {
+  try {
+    return path.join(app.getPath('userData'), 'log.txt');
+  } catch {
+    return path.join(require('os').tmpdir(), 'log.txt');
+  }
+}
 
 const dataStorage = require('./src/main/services/data-storage');
 const appTracking = require('./src/main/services/app-tracking');
@@ -78,7 +84,7 @@ app.whenReady().then(async () => {
     const db = getDb();
     if (!db) {
       console.error('ERROR: Database not initialized properly!');
-      fs.appendFileSync('log.txt', 'ERROR: Database is null\n');
+      fs.appendFileSync(getLogPath(), 'ERROR: Database is null\n');
       throw new Error('Database initialization failed');
     }
     
@@ -88,7 +94,7 @@ app.whenReady().then(async () => {
       console.log('Database connection verified');
     } catch (dbError) {
       console.error('Database connection test failed:', dbError);
-      fs.appendFileSync('log.txt', `Database test failed: ${dbError.message}\n`);
+      fs.appendFileSync(getLogPath(), `Database test failed: ${dbError.message}\n`);
       throw dbError;
     }
 
@@ -110,17 +116,10 @@ app.whenReady().then(async () => {
 
     initAutoLaunch();
 
-    createTray();
-
-    const shouldStartHidden = process.argv.includes('--hidden');
-    
-    if (!shouldStartHidden) {
-      window.show();
-    }
-    
+    createTray();    
   } catch (error) {
     console.error('Error during app initialization:', error);
-    fs.appendFileSync('log.txt', `Initialization error: ${error.message}\n${error.stack}\n`);
+    fs.appendFileSync(getLogPath(), `Initialization error: ${error.message}\n${error.stack}\n`);
     // Show error dialog to user
     const { dialog } = require('electron');
     dialog.showErrorBox('Initialization Error', 
@@ -179,8 +178,10 @@ function createWindow() {
   mainWindow.loadFile('src/renderer/index.html');
   
   mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
-    // Start tracking when window is ready
+    const shouldStartHidden = process.argv.includes('--hidden');
+    if (!shouldStartHidden) {
+      mainWindow.show();
+    }
     setTimeout(() => {
       startTrackingSystem();
     }, 1000);
