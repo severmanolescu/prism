@@ -813,11 +813,11 @@ async function showAppDetails(appName) {
         iframe.style.display = 'block';
         iframe.src = 'app-details.html';
 
-        // Send data to iframe when it loads
+        // Send appId to iframe when it loads (it will request data with date range)
         iframe.onload = () => {
             iframe.contentWindow.postMessage({
                 type: 'APP_DETAILS',
-                data: details
+                appId: appData.id
             }, '*');
         };
 
@@ -829,10 +829,10 @@ async function showAppDetails(appName) {
     } else {
         const iframe = detailsContainer.querySelector('iframe');
         if (iframe) {
-            // If iframe already exists, just send new data
+            // If iframe already exists, just send new appId (it will request data with date range)
             iframe.contentWindow.postMessage({
                 type: 'APP_DETAILS',
-                data: details
+                appId: appData.id
             }, '*');
         }
         detailsContainer.style.display = 'block';

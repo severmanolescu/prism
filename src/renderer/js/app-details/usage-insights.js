@@ -1,10 +1,39 @@
 // Usage Insights
 function updateUsageInsights(details) {
+  // Update insight box titles to be period-aware
+  updateInsightTitles();
+
   updateBestWorstDays(details);
   updateStreakHistory(details);
   updateAverageSession(details);
   updatePeakUsageTimes(details);
   updateTimeOfDay(details);
+}
+
+// Update insight box titles based on current period
+function updateInsightTitles() {
+  const insightBoxes = document.querySelectorAll('.insight-box');
+
+  insightBoxes.forEach(box => {
+    const titleEl = box.querySelector('.insight-title');
+    if (!titleEl) return;
+
+    const originalTitle = titleEl.getAttribute('data-original-title') || titleEl.textContent;
+    if (!titleEl.getAttribute('data-original-title')) {
+      titleEl.setAttribute('data-original-title', originalTitle);
+    }
+
+    // Update titles based on period
+    if (originalTitle === 'Best Days' || originalTitle.includes('Best Days')) {
+      titleEl.textContent = currentPeriod === 'all' ? 'Best Days' : 'Best Days in Period';
+    } else if (originalTitle === 'Least Active Days' || originalTitle.includes('Least Active')) {
+      titleEl.textContent = currentPeriod === 'all' ? 'Least Active Days' : 'Least Active in Period';
+    } else if (originalTitle === 'Average Session' || originalTitle.includes('Average Session')) {
+      titleEl.textContent = currentPeriod === 'all' ? 'Average Session' : 'Avg Session in Period';
+    } else if (originalTitle === 'Peak Usage Times' || originalTitle.includes('Peak Usage')) {
+      titleEl.textContent = currentPeriod === 'all' ? 'Peak Usage Times' : 'Peak Times in Period';
+    }
+  });
 }
 
 // Best & Worst Days
@@ -82,10 +111,21 @@ function updateStreakHistory(details) {
 // Average Session
 function updateAverageSession(details) {
   const valueEl = document.querySelector('.avg-session-value');
+  const subtitleEl = document.querySelector('.avg-session-subtitle');
   if (!valueEl) return;
 
   const avgSession = details.stats?.avgSession || 0;
+  const sessionCount = details.stats?.sessionCount || 0;
+
   valueEl.textContent = formatTime(avgSession);
+
+  if (subtitleEl) {
+    if (currentPeriod === 'all') {
+      subtitleEl.textContent = 'across all sessions';
+    } else {
+      subtitleEl.textContent = `across ${sessionCount} session${sessionCount !== 1 ? 's' : ''}`;
+    }
+  }
 }
 
 // Peak Usage Times

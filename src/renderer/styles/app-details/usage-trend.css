@@ -1,60 +1,57 @@
-/* Usage Trends */
-.trends-container {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.trend-stats {
+/* Session Patterns */
+.session-patterns-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 12px;
+  padding: 12px 0;
 }
 
-.trend-stat {
+.pattern-stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   background: linear-gradient(135deg, rgba(42, 71, 94, 0.4) 0%, rgba(27, 40, 56, 0.6) 100%);
   border: 1px solid rgba(0, 0, 0, 0.4);
   border-top: 1px solid rgba(103, 193, 245, 0.2);
-  border-radius: 3px;
-  padding: 10px 12px;
-  text-align: center;
+  border-radius: 6px;
+  padding: 14px 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   transition: all 0.2s ease;
 }
 
-.trend-stat:hover {
+.pattern-stat:hover {
   background: linear-gradient(135deg, rgba(52, 81, 104, 0.5) 0%, rgba(37, 50, 66, 0.7) 100%);
   border-top-color: rgba(103, 193, 245, 0.4);
   transform: translateY(-2px);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
 }
 
-.trend-label {
-  color: #8f98a0;
-  font-size: 9px;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-  letter-spacing: 0.5px;
+.pattern-icon {
+  font-size: 28px;
+  line-height: 1;
+  opacity: 0.9;
 }
 
-.trend-value {
+.pattern-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pattern-label {
+  color: #8f98a0;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.pattern-value {
   color: #66c0f4;
   font-size: 18px;
-  font-weight: 500;
-  margin-bottom: 3px;
-}
-
-.trend-change {
-  font-size: 10px;
-  color: #8f98a0;
-}
-
-.trend-change.positive {
-  color: #a4d007;
-}
-
-.trend-change.negative {
-  color: #d95d5d;
+  font-weight: 600;
+  line-height: 1;
 }
 
 /* Day of Week Chart */

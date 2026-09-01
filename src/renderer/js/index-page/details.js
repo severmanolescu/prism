@@ -291,5 +291,32 @@ window.addEventListener('message', async (event) => {
         } catch (error) {
             console.error('Error sending favorites:', error);
         }
+    } else if (event.data.type === 'REQUEST_APP_DETAILS') {
+        // Request app details with date range
+        try {
+            const appDetails = await window.electronAPI.getAppDetailsByDateRange(
+                event.data.appId,
+                event.data.startDate,
+                event.data.endDate
+            );
+            const categories = await window.electronAPI.getCategories();
+            const app = allAppsCache.find(a => a.id === event.data.appId);
+            const categoryData = categories.find(cat => cat.name === app?.category);
+
+            // Add category color to the app details
+            if (categoryData && categoryData.color) {
+                appDetails.categoryColor = categoryData.color;
+            }
+
+            const iframe = document.querySelector('#app-details-iframe');
+            if (iframe) {
+                iframe.contentWindow.postMessage({
+                    type: 'APP_DETAILS_RESPONSE',
+                    data: appDetails
+                }, '*');
+            }
+        } catch (error) {
+            console.error('Error getting app details by date range:', error);
+        }
     }
 });

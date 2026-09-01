@@ -6,6 +6,13 @@ window.addEventListener('message', (event) => {
   }
 
   if (event.data.type === 'APP_DETAILS') {
+    // Initial load - store the app ID and load data for default period
+    currentAppId = event.data.appId;
+    if (currentAppId) {
+      loadAppData(currentAppId, currentPeriod);
+    }
+  } else if (event.data.type === 'APP_DETAILS_RESPONSE') {
+    // Response from REQUEST_APP_DETAILS with filtered data
     appDetails = event.data.data;
     loadAppDetails().then(() => {
       // Initialize productivity selector after app details are loaded
