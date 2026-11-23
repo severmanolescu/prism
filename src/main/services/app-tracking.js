@@ -235,6 +235,9 @@ function endSession(session) {
       WHERE id = ?
     `).run([duration, now, session.appId]);
 
+    // Push the finished session to InfluxDB (no-op if disabled)
+    require('./influx-sync').requestSync();
+
     // Notify renderer
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('stats-updated');

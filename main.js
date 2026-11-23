@@ -116,7 +116,14 @@ app.whenReady().then(async () => {
 
     initAutoLaunch();
 
-    createTray();    
+    // Background sync of sessions to InfluxDB (configured via data/influx.json)
+    try {
+      require('./src/main/services/influx-sync').startInfluxSync();
+    } catch (syncError) {
+      console.error('InfluxDB sync failed to start:', syncError);
+    }
+
+    createTray();
   } catch (error) {
     console.error('Error during app initialization:', error);
     fs.appendFileSync(getLogPath(), `Initialization error: ${error.message}\n${error.stack}\n`);
