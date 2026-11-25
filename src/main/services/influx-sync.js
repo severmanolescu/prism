@@ -11,6 +11,10 @@
  * `app_meta` (one series per app, string fields), whenever it changes. Session points keep the category
  * they had when they were synced; readers (the Pi dashboard) use the latest app_meta instead, so
  * recategorising an app in Prism also applies to its history.
+ *
+ * App icons: if `dashboardUrl` is set in influx.json (e.g. "http://100.121.130.49:8080"), every icon Prism
+ * extracted (<userData>/icons/*.png) is uploaded once to the dashboard (PUT /api/icons/<file>), and again
+ * only if the file changes. Uploaded files are remembered in `sync_state`.
  */
 const fs = require('fs');
 const os = require('os');
@@ -22,6 +26,9 @@ const BATCH = 5000;
 const DEBOUNCE_MS = 2000;
 const STATE_KEY = 'influx_last_session_id';
 const META_KEY = 'influx_app_meta_signature';
+const ICONS_KEY = 'dashboard_icons_uploaded';
+const ICONS_PER_RUN = 100;
+const ICON_FILE = /^[A-Za-z0-9_]{1,150}\.png$/;
 
 const DEFAULT_CONFIG = {
   enabled: false,
@@ -31,6 +38,7 @@ const DEFAULT_CONFIG = {
   bucket: 'prism',
   host: os.hostname(),
   intervalSeconds: 60,
+  dashboardUrl: '',
 };
 
 let config = null;
@@ -39,6 +47,7 @@ let debounce = null;
 let running = false;
 let pending = false;
 let lastError = null;
+let lastIconError = null;
 
 function getConfigPath() {
   const dataDir = app.isPackaged
@@ -141,6 +150,58 @@ async function syncAppMeta(db) {
   log(`Synced app metadata (${rows.length} apps)`);
 }
 
+// Same folder app-management.js extracts icons into
+function getIconDir() {
+  return app.isPackaged
+    ? path.join(app.getPath('userData'), 'icons')
+    : path.join(__dirname, '../../../icons');
+}
+
+// Upload icons the dashboard doesn't have yet (new or changed files), a batch per run
+async function syncIcons(db) {
+  if (!config.dashboardUrl) return;
+  const dir = getIconDir();
+  if (!fs.existsSync(dir)) return;
+  const row = db.prepare('SELECT value FROM sync_state WHERE key = ?').get(ICONS_KEY);
+  let done = {};
+  try { done = row ? JSON.parse(row.value) : {}; } catch { done = {}; }
+  const save = () => db.prepare(`
+    INSERT INTO sync_state (key, value) VALUES (?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+  `).run(ICONS_KEY, JSON.stringify(done));
+
+  const todo = fs.readdirSync(dir)
+    .filter((f) => ICON_FILE.test(f))
+    .map((f) => { const st = fs.statSync(path.join(dir, f)); return { f, sig: `${st.size}:${Math.round(st.mtimeMs)}`, size: st.size }; })
+    .filter((x) => done[x.f] !== x.sig && x.size > 0 && x.size <= 256 * 1024)
+    .slice(0, ICONS_PER_RUN);
+  if (!todo.length) return;
+
+  const base = config.dashboardUrl.replace(/\/$/, '');
+  let sent = 0;
+  try {
+    for (const x of todo) {
+      const res = await fetch(`${base}/api/icons/${encodeURIComponent(x.f)}`, {
+        method: 'PUT',
+        headers: { 'X-Dashboard': '1', 'Content-Type': 'image/png' },
+        body: fs.readFileSync(path.join(dir, x.f)),
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status} for ${x.f}: ${(await res.text()).slice(0, 120)}`);
+      done[x.f] = x.sig;
+      sent++;
+    }
+    if (lastIconError) log('Icon upload restored');
+    lastIconError = null;
+  } catch (e) {
+    const msg = e.cause?.message || e.message;
+    if (msg !== lastIconError) log(`Icon upload failed, will retry: ${msg}`);
+    lastIconError = msg;
+  } finally {
+    if (sent) { save(); log(`Uploaded ${sent} icon(s) to the dashboard`); }
+  }
+}
+
 async function syncNow() {
   if (!config || !config.enabled) return;
   if (running) { pending = true; return; }
@@ -179,6 +240,7 @@ async function syncNow() {
     if (lastError) log('Connection restored');
     lastError = null;
     if (total > 1) log(`Synced ${total} sessions (last id ${lastId})`);
+    await syncIcons(db);  // after the data; failures here are logged inside and never block the session sync
   } catch (e) {
     const msg = e.cause?.message || e.message;
     if (msg !== lastError) log(`Sync failed, will retry: ${msg}`); // log each distinct error once
