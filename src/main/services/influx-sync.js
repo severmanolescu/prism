@@ -6,6 +6,15 @@
  * - On startup and every `intervalSeconds`, any sessions not yet synced are pushed
  *   (covers the Pi / Tailscale being offline, or the app closing before a push finished).
  * Progress is stored in the `sync_state` table, so nothing is sent twice or skipped.
+ *
+ * App metadata: every app's CURRENT category, productivity level and category colour is also sent as
+ * `app_meta` (one series per app, string fields), whenever it changes. Session points keep the category
+ * they had when they were synced; readers (the Pi dashboard) use the latest app_meta instead, so
+ * recategorising an app in Prism also applies to its history.
+ *
+ * App icons: if `dashboardUrl` is set in influx.json (e.g. "http://100.121.130.49:8080"), every icon Prism
+ * extracted (<userData>/icons/*.png) is uploaded once to the dashboard (PUT /api/icons/<file>), and again
+ * only if the file changes. Uploaded files are remembered in `sync_state`.
  */
 const fs = require('fs');
 const os = require('os');
@@ -16,6 +25,10 @@ const { getDb } = require('./database');
 const BATCH = 5000;
 const DEBOUNCE_MS = 2000;
 const STATE_KEY = 'influx_last_session_id';
+const META_KEY = 'influx_app_meta_signature';
+const ICONS_KEY = 'dashboard_icons_uploaded';
+const ICONS_PER_RUN = 100;
+const ICON_FILE = /^[A-Za-z0-9_]{1,150}\.png$/;
 
 const DEFAULT_CONFIG = {
   enabled: false,
@@ -25,6 +38,7 @@ const DEFAULT_CONFIG = {
   bucket: 'prism',
   host: os.hostname(),
   intervalSeconds: 60,
+  dashboardUrl: '',
 };
 
 let config = null;
@@ -33,6 +47,7 @@ let debounce = null;
 let running = false;
 let pending = false;
 let lastError = null;
+let lastIconError = null;
 
 function getConfigPath() {
   const dataDir = app.isPackaged
@@ -74,6 +89,11 @@ function tag(v) {
   return (s || 'unknown').replace(/[,= \\]/g, (c) => '\\' + c);
 }
 
+// Line protocol string field value
+function str(v) {
+  return '"' + String(v ?? '').replace(/[\\"]/g, (c) => '\\' + c) + '"';
+}
+
 function getLastId(db) {
   const row = db.prepare('SELECT value FROM sync_state WHERE key = ?').get(STATE_KEY);
   return row ? Number(row.value) : 0;
@@ -103,6 +123,85 @@ async function writeLines(lines) {
   }
 }
 
+// Push every app's current category / productivity / colour when anything changed since the last push
+async function syncAppMeta(db) {
+  const rows = db.prepare(`
+    SELECT a.name AS app, a.category AS category,
+           COALESCE(a.productivity_level_override, c.productivity_level, 'neutral') AS productivity,
+           COALESCE(c.color, '') AS color
+    FROM apps a
+    LEFT JOIN categories c ON c.name = a.category OR c.id = a.category
+    ORDER BY a.name
+  `).all();
+  if (!rows.length) return;
+  const signature = JSON.stringify(rows);
+  const prev = db.prepare('SELECT value FROM sync_state WHERE key = ?').get(META_KEY);
+  if (prev && prev.value === signature) return;
+  const now = Date.now();
+  const lines = rows.map((r) =>
+    `app_meta,host=${tag(config.host)},app=${tag(r.app)}` +
+    ` category=${str(r.category || 'Uncategorized')},productivity=${str(r.productivity)},color=${str(r.color)} ${now}`
+  );
+  for (let i = 0; i < lines.length; i += BATCH) await writeLines(lines.slice(i, i + BATCH));
+  db.prepare(`
+    INSERT INTO sync_state (key, value) VALUES (?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+  `).run(META_KEY, signature);
+  log(`Synced app metadata (${rows.length} apps)`);
+}
+
+// Same folder app-management.js extracts icons into
+function getIconDir() {
+  return app.isPackaged
+    ? path.join(app.getPath('userData'), 'icons')
+    : path.join(__dirname, '../../../icons');
+}
+
+// Upload icons the dashboard doesn't have yet (new or changed files), a batch per run
+async function syncIcons(db) {
+  if (!config.dashboardUrl) return;
+  const dir = getIconDir();
+  if (!fs.existsSync(dir)) return;
+  const row = db.prepare('SELECT value FROM sync_state WHERE key = ?').get(ICONS_KEY);
+  let done = {};
+  try { done = row ? JSON.parse(row.value) : {}; } catch { done = {}; }
+  const save = () => db.prepare(`
+    INSERT INTO sync_state (key, value) VALUES (?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+  `).run(ICONS_KEY, JSON.stringify(done));
+
+  const todo = fs.readdirSync(dir)
+    .filter((f) => ICON_FILE.test(f))
+    .map((f) => { const st = fs.statSync(path.join(dir, f)); return { f, sig: `${st.size}:${Math.round(st.mtimeMs)}`, size: st.size }; })
+    .filter((x) => done[x.f] !== x.sig && x.size > 0 && x.size <= 256 * 1024)
+    .slice(0, ICONS_PER_RUN);
+  if (!todo.length) return;
+
+  const base = config.dashboardUrl.replace(/\/$/, '');
+  let sent = 0;
+  try {
+    for (const x of todo) {
+      const res = await fetch(`${base}/api/icons/${encodeURIComponent(x.f)}`, {
+        method: 'PUT',
+        headers: { 'X-Dashboard': '1', 'Content-Type': 'image/png' },
+        body: fs.readFileSync(path.join(dir, x.f)),
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status} for ${x.f}: ${(await res.text()).slice(0, 120)}`);
+      done[x.f] = x.sig;
+      sent++;
+    }
+    if (lastIconError) log('Icon upload restored');
+    lastIconError = null;
+  } catch (e) {
+    const msg = e.cause?.message || e.message;
+    if (msg !== lastIconError) log(`Icon upload failed, will retry: ${msg}`);
+    lastIconError = msg;
+  } finally {
+    if (sent) { save(); log(`Uploaded ${sent} icon(s) to the dashboard`); }
+  }
+}
+
 async function syncNow() {
   if (!config || !config.enabled) return;
   if (running) { pending = true; return; }
@@ -111,6 +210,7 @@ async function syncNow() {
 
   running = true;
   try {
+    await syncAppMeta(db);
     const stmt = db.prepare(`
       SELECT s.id, s.start_time, s.duration,
              a.name AS app, a.category AS category,
@@ -140,6 +240,7 @@ async function syncNow() {
     if (lastError) log('Connection restored');
     lastError = null;
     if (total > 1) log(`Synced ${total} sessions (last id ${lastId})`);
+    await syncIcons(db);  // after the data; failures here are logged inside and never block the session sync
   } catch (e) {
     const msg = e.cause?.message || e.message;
     if (msg !== lastError) log(`Sync failed, will retry: ${msg}`); // log each distinct error once
