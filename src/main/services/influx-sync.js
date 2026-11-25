@@ -6,6 +6,11 @@
  * - On startup and every `intervalSeconds`, any sessions not yet synced are pushed
  *   (covers the Pi / Tailscale being offline, or the app closing before a push finished).
  * Progress is stored in the `sync_state` table, so nothing is sent twice or skipped.
+ *
+ * App metadata: every app's CURRENT category, productivity level and category colour is also sent as
+ * `app_meta` (one series per app, string fields), whenever it changes. Session points keep the category
+ * they had when they were synced; readers (the Pi dashboard) use the latest app_meta instead, so
+ * recategorising an app in Prism also applies to its history.
  */
 const fs = require('fs');
 const os = require('os');
@@ -16,6 +21,7 @@ const { getDb } = require('./database');
 const BATCH = 5000;
 const DEBOUNCE_MS = 2000;
 const STATE_KEY = 'influx_last_session_id';
+const META_KEY = 'influx_app_meta_signature';
 
 const DEFAULT_CONFIG = {
   enabled: false,
@@ -74,6 +80,11 @@ function tag(v) {
   return (s || 'unknown').replace(/[,= \\]/g, (c) => '\\' + c);
 }
 
+// Line protocol string field value
+function str(v) {
+  return '"' + String(v ?? '').replace(/[\\"]/g, (c) => '\\' + c) + '"';
+}
+
 function getLastId(db) {
   const row = db.prepare('SELECT value FROM sync_state WHERE key = ?').get(STATE_KEY);
   return row ? Number(row.value) : 0;
@@ -103,6 +114,33 @@ async function writeLines(lines) {
   }
 }
 
+// Push every app's current category / productivity / colour when anything changed since the last push
+async function syncAppMeta(db) {
+  const rows = db.prepare(`
+    SELECT a.name AS app, a.category AS category,
+           COALESCE(a.productivity_level_override, c.productivity_level, 'neutral') AS productivity,
+           COALESCE(c.color, '') AS color
+    FROM apps a
+    LEFT JOIN categories c ON c.name = a.category OR c.id = a.category
+    ORDER BY a.name
+  `).all();
+  if (!rows.length) return;
+  const signature = JSON.stringify(rows);
+  const prev = db.prepare('SELECT value FROM sync_state WHERE key = ?').get(META_KEY);
+  if (prev && prev.value === signature) return;
+  const now = Date.now();
+  const lines = rows.map((r) =>
+    `app_meta,host=${tag(config.host)},app=${tag(r.app)}` +
+    ` category=${str(r.category || 'Uncategorized')},productivity=${str(r.productivity)},color=${str(r.color)} ${now}`
+  );
+  for (let i = 0; i < lines.length; i += BATCH) await writeLines(lines.slice(i, i + BATCH));
+  db.prepare(`
+    INSERT INTO sync_state (key, value) VALUES (?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+  `).run(META_KEY, signature);
+  log(`Synced app metadata (${rows.length} apps)`);
+}
+
 async function syncNow() {
   if (!config || !config.enabled) return;
   if (running) { pending = true; return; }
@@ -111,6 +149,7 @@ async function syncNow() {
 
   running = true;
   try {
+    await syncAppMeta(db);
     const stmt = db.prepare(`
       SELECT s.id, s.start_time, s.duration,
              a.name AS app, a.category AS category,
